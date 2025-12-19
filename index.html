@@ -274,7 +274,7 @@ document.getElementById('backToTop').addEventListener('click', ()=>{
 <header class="site-header">
   <div class="header-left">AiFangKids</div>
   <div class="header-center">
-    <img id="site-logo" src="https://raw.githubusercontent.com/你的GitHub連結/LOGO.png" alt="Logo">
+    <img src="https://raw.githubusercontent.com/aifangkids/aifang-studio/7d26aec250ffc4de7c4778de3aa00af18e0429a6/images/LOGO.png">
   </div>
   <div class="header-right">
     <a href="cart.html"><img src="https://cdn-icons-png.flaticon.com/512/34/34568.png" alt="Cart" class="cart-icon"></a>
@@ -326,6 +326,50 @@ document.getElementById('backToTop').addEventListener('click', ()=>{
     height:28px;
   }
 }
+/* ===== Skeleton Loading（櫻花粉嫩＋流沙感） ===== */
+.skeleton-card{
+  background:#fff;
+  border-radius:22px;
+  padding:14px;
+  box-shadow:0 6px 18px rgba(0,0,0,.05);
+}
+
+.skeleton-card::before{
+  content:"";
+  display:block;
+  width:100%;
+  aspect-ratio:1/1.2;
+  border-radius:18px;
+  margin-bottom:12px;
+  background:linear-gradient(
+    110deg,
+    #f6dcdc 25%,
+    #fdecec 37%,
+    #f6dcdc 63%
+  );
+  background-size:200% 100%;
+  animation:sakuraShimmer 1.6s ease-in-out infinite;
+}
+
+.skeleton-card::after{
+  content:"";
+  display:block;
+  height:48px;
+  border-radius:12px;
+  background:linear-gradient(
+    110deg,
+    #f6dcdc 25%,
+    #fdecec 37%,
+    #f6dcdc 63%
+  );
+  background-size:200% 100%;
+  animation:sakuraShimmer 1.6s ease-in-out infinite;
+}
+
+@keyframes sakuraShimmer{
+  to{ background-position-x:-200%; }
+}
+
 </style>
 
 <div class="wrapper">
@@ -345,7 +389,18 @@ document.getElementById('backToTop').addEventListener('click', ()=>{
 
     <!-- 商品主區 -->
     <main class="product-main">
-      <div id="productGrid" class="product-grid"></div>
+<div id="productGrid" class="product-grid">
+
+  <!-- Skeleton Loading -->
+  <div id="skeletonContainer" class="product-grid">
+    <div class="skeleton-card"></div>
+    <div class="skeleton-card"></div>
+    <div class="skeleton-card"></div>
+    <div class="skeleton-card"></div>
+  </div>
+
+</div>
+
     </main>
 
   </div>
@@ -504,10 +559,16 @@ document.querySelector('.filter-toggle').addEventListener('click',()=>{
 fetch(API_URL)
 .then(r=>r.json())
 .then(data=>{
-  allProducts=data.products;
+  allProducts = data.products;
+
+  // ✅ 移除 Skeleton
+  const skeleton = document.getElementById('skeletonContainer');
+  if(skeleton) skeleton.remove();
+
   setupFilters(allProducts);
   renderProducts(allProducts);
 });
+
 
 /* 自動填入年份 */
 document.getElementById('year').textContent = new Date().getFullYear();
