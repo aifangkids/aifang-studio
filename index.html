@@ -1,42 +1,206 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="zh-Hant">
 <head>
-  <meta charset="UTF-8">
-  <title>AIFANG Studio</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AiFang Kids Studio</title>
+
+<!-- 粉圓體 -->
+<link href="https://fonts.googleapis.com/css2?family=Huninn&display=swap" rel="stylesheet">
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:'Huninn','Noto Sans TC',sans-serif;
+  background:#FCFBF8;
+  color:#333;
+  font-size:14px;
+}
+a{text-decoration:none;color:inherit}
+
+.wrapper{
+  max-width:1200px;
+  margin:0 auto;
+  padding:40px 20px;
+}
+
+/* 商品列表 */
+.product-grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:30px 20px;
+}
+
+/* 商品卡 */
+.product-card{
+  background:#fff;
+  border-radius:22px;
+  padding:14px;
+  box-shadow:0 6px 18px rgba(0,0,0,.05);
+}
+
+.product-image-box{
+  position:relative;
+  margin-bottom:12px;
+  cursor:pointer;
+}
+
+.product-image{
+  width:100%;
+  aspect-ratio:1/1.2;
+  object-fit:cover;
+  border-radius:18px;
+  background:#f2f2f2;
+}
+
+/* 品牌標籤 */
+.brand-tag{
+  position:absolute;
+  top:10px;
+  left:10px;
+  background:#333;
+  color:#fff;
+  font-size:11px;
+  padding:3px 6px;
+  border-radius:6px;
+}
+
+/* 色票 */
+.product-swatches{
+  position:absolute;
+  bottom:10px;
+  right:10px;
+  display:flex;
+  gap:6px;
+  background:rgba(255,255,255,.85);
+  padding:5px 6px;
+  border-radius:20px;
+}
+
+.swatch{
+  width:16px;
+  height:16px;
+  border-radius:50%;
+  border:1px solid #ddd;
+  overflow:hidden;
+  flex-shrink:0;
+}
+
+.swatch img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+}
+
+/* 商品文字 */
+.product-name{
+  font-size:15px;
+  margin-bottom:6px;
+}
+
+/* 價格 */
+.price-row{
+  font-size:13px;
+  line-height:1.6;
+}
+
+.price-row s{
+  color:#aaa;
+  margin-right:6px;
+}
+
+.price-row span{
+  color:#E38A8A;
+}
+</style>
 </head>
+
 <body>
 
-<script>
-const API_URL = "https://script.google.com/macros/s/AKfycbx-JehSDwzt999IvR0WqCkfutAb5PTv2GaLG8kdhw_4qyEpCI9uJ6dFvGRVcT3N9gNe/exec";
+<div class="wrapper">
+  <div id="productGrid" class="product-grid"></div>
+</div>
 
-function renderPrice(sizes){
+<script>
+const API_URL = "https://script.google.com/macros/s/AKfycbx3Ob8gxHFXxcVwgY9LEUL71DLtuEfLfk0iw1dZ7dPGrmivVIMbUINBCIJUJirmK8AV/exec";
+
+/* 色票渲染（對應 JSON 中的 colors 陣列） */
+function renderColorSwatches(colors){
+  if(!colors || !colors.length) return "";
+  return colors.map(c => {
+    if(c.type === "hex"){
+      return `<span class="swatch" style="background:${c.value}"></span>`;
+    } else if(c.type === "image"){
+      return `<span class="swatch"><img src="${c.value}"></span>`;
+    }
+    return "";
+  }).join("");
+}
+
+/* 價格渲染 */
+function renderPrices(sizes){
   let html = "";
   ["baby","kids","elementary"].forEach(k=>{
     const s = sizes[k];
-    if (s && s.options.length){
+    if(s && s.options.length){
       html += `
-        <div>
+        <div class="price-row">
           ${s.label}：
-          ${s.price ? `<s>$${s.price}</s>` : ""}
-          ${s.salePrice ? `<span>$${s.salePrice}</span>` : ""}
+          <s>$${s.price}</s>
+          <span>$${s.salePrice}</span>
         </div>`;
     }
   });
-  return html || "<div>價格洽詢</div>";
+  return html;
 }
 
 fetch(API_URL)
-.then(res => res.json())
-.then(data => {
-  document.body.innerHTML = data.products.map(p => `
-    <div style="margin-bottom:20px">
-      <img src="${p.mainImage}" style="width:200px">
-      <div>${p.name}</div>
-      ${renderPrice(p.sizes)}
-      <a href="detail.html?code=${p.code}">查看商品</a>
-    </div>
-  `).join("");
+.then(r=>r.json())
+.then(data=>{
+  const grid = document.getElementById("productGrid");
+  data.products.forEach(p=>{
+    const card = document.createElement('div');
+    card.className = 'product-card';
+
+    // 商品主圖
+    const imgBox = document.createElement('div');
+    imgBox.className = 'product-image-box';
+    const img = document.createElement('img');
+    img.className = 'product-image';
+    img.src = p.mainImage;
+    imgBox.appendChild(img);
+
+    // 點擊跳 detail.html
+    imgBox.addEventListener('click',()=>{
+      window.location.href = `detail.html?code=${p.code}`;
+    });
+
+    // 品牌標籤
+    const brandTag = document.createElement('div');
+    brandTag.className = 'brand-tag';
+    brandTag.textContent = p.brand;
+    imgBox.appendChild(brandTag);
+
+    // 色票
+    const swatchesDiv = document.createElement('div');
+    swatchesDiv.className = 'product-swatches';
+    swatchesDiv.innerHTML = renderColorSwatches(p.colors);
+    imgBox.appendChild(swatchesDiv);
+
+    card.appendChild(imgBox);
+
+    // 商品名稱
+    const nameDiv = document.createElement('div');
+    nameDiv.className = 'product-name';
+    nameDiv.textContent = p.name;
+    card.appendChild(nameDiv);
+
+    // 價格
+    card.innerHTML += renderPrices(p.sizes);
+
+    grid.appendChild(card);
+  });
 });
 </script>
 
