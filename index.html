@@ -67,14 +67,9 @@ a{text-decoration:none;color:inherit}
 
 /* 色票 */
 .product-swatches{
-  position:absolute;
-  bottom:10px;
-  right:10px;
   display:flex;
   gap:6px;
-  background:rgba(255,255,255,.85);
-  padding:5px 6px;
-  border-radius:20px;
+  margin-top:6px;
 }
 
 .swatch{
@@ -138,8 +133,8 @@ function renderColorSwatches(colors){
   }).join("");
 }
 
-/* 價格渲染 */
-function renderPrices(sizes){
+/* 價格渲染（含色票放在下方） */
+function renderPricesAndSwatches(sizes, colors){
   let html = "";
   ["baby","kids","elementary"].forEach(k=>{
     const s = sizes[k];
@@ -152,6 +147,8 @@ function renderPrices(sizes){
         </div>`;
     }
   });
+  // 色票放在價格下方
+  html += `<div class="product-swatches">${renderColorSwatches(colors)}</div>`;
   return html;
 }
 
@@ -182,12 +179,6 @@ fetch(API_URL)
     brandTag.textContent = p.brand;
     imgBox.appendChild(brandTag);
 
-    // 色票
-    const swatchesDiv = document.createElement('div');
-    swatchesDiv.className = 'product-swatches';
-    swatchesDiv.innerHTML = renderColorSwatches(p.colors);
-    imgBox.appendChild(swatchesDiv);
-
     card.appendChild(imgBox);
 
     // 商品名稱
@@ -196,8 +187,8 @@ fetch(API_URL)
     nameDiv.textContent = p.name;
     card.appendChild(nameDiv);
 
-    // 價格
-    card.innerHTML += renderPrices(p.sizes);
+    // 價格 + 色票
+    card.innerHTML += renderPricesAndSwatches(p.sizes, p.colors);
 
     grid.appendChild(card);
   });
