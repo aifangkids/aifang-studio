@@ -1,83 +1,32 @@
-<!DOCTYPE html>
-<html lang="zh-TW">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>童裝選品</title>
-<script src="https://cdn.tailwindcss.com"></script>
-</head>
-
-<body class="bg-gray-50">
-
-<header class="p-4 text-center font-bold text-lg bg-white shadow">
-  童裝選品
-</header>
-
-<main id="productList" class="grid grid-cols-2 gap-4 p-4"></main>
-
 <script>
-const API_URL = "https://script.google.com/macros/s/AKfycbytlAF3m4a7aBWOQr1ZRRfaXf2LZyrVRJdq1fG9ABve4avlkVZixVyJadCUyyx5WO9O/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbxI_TqRYEPdANgdW3z5npLGk39hTmMXOd3nS-vcPHrwrClr0viSszMX4KEG288zWCN1/exec";
+
+function renderPrice(sizes){
+  let html = "";
+  ["baby","kids","elementary"].forEach(k=>{
+    const s = sizes[k];
+    if (s && s.options.length){
+      html += `
+        <div class="text-xs">
+          ${s.label}：
+          <s>$${s.price}</s>
+          <span class="text-red-500">$${s.salePrice}</span>
+        </div>`;
+    }
+  });
+  return html || `<div class="text-gray-400 text-xs">價格洽詢</div>`;
+}
 
 fetch(API_URL)
-  .then(res => res.json())
-  .then(data => renderProducts(data.products));
-
-function renderProducts(products) {
-  const list = document.getElementById("productList");
-
-  products.forEach(p => {
-    list.innerHTML += `
-      <div class="bg-white rounded-lg shadow relative">
-
-        <!-- 品牌 -->
-        <div class="absolute top-2 left-2 bg-black text-white text-xs px-2 py-1 rounded">
-          ${p.brand}
-        </div>
-
-        <!-- 商品圖 -->
-        <a href="detail.html?code=${p.code}">
-          <img src="${p.mainImage}" class="w-full aspect-square object-cover rounded-t-lg">
-        </a>
-
-        <!-- 色票 -->
-        <div class="absolute bottom-2 right-2 flex gap-1">
-          ${p.color.swatches.map(c => `
-            <span class="w-3 h-3 rounded-full border"
-              style="background:${c.startsWith('#') ? c : `url(${c})`}">
-            </span>
-          `).join('')}
-        </div>
-
-        <div class="p-2">
-          <p class="text-sm font-medium">${p.name}</p>
-
-          <div class="text-xs">
-            <span class="line-through text-gray-400">
-              $${p.sizes.baby?.price}
-            </span>
-            <span class="text-red-500 ml-1">
-              $${p.sizes.baby?.salePrice}
-            </span>
-          </div>
-
-          <button
-            class="mt-2 w-full bg-black text-white text-xs py-1 rounded"
-            onclick="addToCart('${p.code}','${p.name}')">
-            加入購物車
-          </button>
-        </div>
+.then(r=>r.json())
+.then(data=>{
+  document.getElementById("productList").innerHTML =
+    data.products.map(p=>`
+      <div>
+        <img src="${p.mainImage}">
+        <div>${p.name}</div>
+        ${renderPrice(p.sizes)}
       </div>
-    `;
-  });
-}
-
-function addToCart(code, name) {
-  const cart = JSON.parse(localStorage.getItem("cart") || "[]");
-  cart.push({ code, name, qty: 1 });
-  localStorage.setItem("cart", JSON.stringify(cart));
-  alert("已加入購物車");
-}
+    `).join("");
+});
 </script>
-
-</body>
-</html>

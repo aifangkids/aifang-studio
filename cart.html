@@ -8,32 +8,24 @@
 </head>
 
 <body class="p-4">
-
-<h1 class="text-lg font-bold mb-4">購物車</h1>
-
-<div id="cartList"></div>
-
-<a href="index.html" class="block mt-6 text-blue-500 underline">
-  ← 回商品頁
-</a>
+<h1 class="font-bold text-lg mb-4">購物車</h1>
+<div id="cart"></div>
 
 <script>
-const cart = JSON.parse(localStorage.getItem("cart") || "[]");
-const list = document.getElementById("cartList");
+const cart=JSON.parse(localStorage.getItem("cart")||"[]");
+const el=document.getElementById("cart");
 
-if (cart.length === 0) {
-  list.innerHTML = "<p>購物車是空的</p>";
-} else {
-  cart.forEach((item, i) => {
-    list.innerHTML += `
-      <div class="border-b py-2 text-sm">
-        <p>${item.name}</p>
-        <p>尺寸：${item.size}｜顏色：${item.color}</p>
-      </div>
-    `;
-  });
+if(!cart.length){
+  el.innerHTML="購物車是空的";
+}else{
+  el.innerHTML=cart.map(i=>`
+    <div class="border-b py-2 text-sm">
+      <div>${i.name}</div>
+      <div>${i.group}｜${i.size}</div>
+      <div class="text-red-500">$${i.price}</div>
+    </div>
+  `).join("");
 }
 </script>
-
 </body>
 </html>
