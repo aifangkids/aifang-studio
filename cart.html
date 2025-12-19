@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>購物車</title>
+<script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="p-4">
+
+<h1 class="text-lg font-bold mb-4">購物車</h1>
+
+<div id="cartList"></div>
+
+<a href="index.html" class="block mt-6 text-blue-500 underline">
+  ← 回商品頁
+</a>
+
+<script>
+const cart = JSON.parse(localStorage.getItem("cart") || "[]");
+const list = document.getElementById("cartList");
+
+if (cart.length === 0) {
+  list.innerHTML = "<p>購物車是空的</p>";
+} else {
+  cart.forEach((item, i) => {
+    list.innerHTML += `
+      <div class="border-b py-2 text-sm">
+        <p>${item.name}</p>
+        <p>尺寸：${item.size}｜顏色：${item.color}</p>
+      </div>
+    `;
+  });
+}
+</script>
+
+</body>
+</html>
