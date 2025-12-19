@@ -1,32 +1,44 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>童裝選品</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
 <script>
 const API_URL = "https://script.google.com/macros/s/AKfycbxI_TqRYEPdANgdW3z5npLGk39hTmMXOd3nS-vcPHrwrClr0viSszMX4KEG288zWCN1/exec";
 
+// 根據試算表 JSON 渲染價格
 function renderPrice(sizes){
   let html = "";
   ["baby","kids","elementary"].forEach(k=>{
     const s = sizes[k];
     if (s && s.options.length){
-      html += `
-        <div class="text-xs">
-          ${s.label}：
-          <s>$${s.price}</s>
-          <span class="text-red-500">$${s.salePrice}</span>
-        </div>`;
+      html += `<div class="text-xs">
+        ${s.label}：
+        ${s.price ? `<s>$${s.price}</s>` : ""}
+        ${s.salePrice ? `<span class="text-red-500">$${s.salePrice}</span>` : ""}
+      </div>`;
     }
   });
   return html || `<div class="text-gray-400 text-xs">價格洽詢</div>`;
 }
 
+// 取得 JSON 並渲染
 fetch(API_URL)
-.then(r=>r.json())
-.then(data=>{
-  document.getElementById("productList").innerHTML =
-    data.products.map(p=>`
-      <div>
-        <img src="${p.mainImage}">
-        <div>${p.name}</div>
-        ${renderPrice(p.sizes)}
-      </div>
-    `).join("");
+.then(res => res.json())
+.then(data => {
+  // 渲染所有商品
+  document.body.innerHTML = data.products.map(p => `
+    <div class="mb-4 p-2 border rounded">
+      <img src="${p.mainImage}" class="w-32 h-32 object-cover">
+      <div class="font-medium">${p.name}</div>
+      ${renderPrice(p.sizes)}
+    </div>
+  `).join("");
 });
 </script>
+</body>
+</html>

@@ -1,34 +1,49 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>商品詳情</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
 <script>
 const API_URL = "https://script.google.com/macros/s/AKfycbxI_TqRYEPdANgdW3z5npLGk39hTmMXOd3nS-vcPHrwrClr0viSszMX4KEG288zWCN1/exec";
 const code = new URLSearchParams(location.search).get("code");
 
 fetch(API_URL)
-.then(r=>r.json())
-.then(data=>{
-  const p = data.products.find(x=>x.code===code);
-  render(p);
-});
+.then(res => res.json())
+.then(data => {
+  const p = data.products.find(x => x.code === code);
+  if(!p){
+    document.body.innerHTML = "<div>找不到商品</div>";
+    return;
+  }
 
-function render(p){
   let sizeHTML = "";
   ["baby","kids","elementary"].forEach(k=>{
     const s = p.sizes[k];
     if(s && s.options.length){
-      sizeHTML += `<h3>${s.label}</h3>`;
-      sizeHTML += s.options.map(o=>
-        `<button onclick="selectSize('${s.label}','${o}',${s.salePrice})">${o}</button>`
+      sizeHTML += `<h3 class="font-medium">${s.label}</h3>`;
+      sizeHTML += s.options.map(o =>
+        `<button class="m-1 p-1 border rounded" onclick="selectSize('${s.label}','${o}',${s.salePrice})">${o}</button>`
       ).join("");
     }
   });
 
   document.body.innerHTML = `
-    <img src="${p.mainImage}">
-    <h1>${p.name}</h1>
-    ${sizeHTML}
+    <div class="p-4">
+      <img src="${p.mainImage}" class="w-64 h-64 object-cover mb-2">
+      <h1 class="text-xl font-bold mb-2">${p.name}</h1>
+      ${sizeHTML}
+    </div>
   `;
-}
+});
 
-function selectSize(type,size,price){
-  console.log(type,size,price);
+// 選擇尺寸
+function selectSize(type, size, price){
+  console.log("選擇尺寸:", type, size, "價格:", price);
 }
 </script>
+</body>
+</html>
