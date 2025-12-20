@@ -1,0 +1,68 @@
+/* ----- 色彩變數 ----- */
+:root {
+  --color1: #a7a8a1;
+  --color2: #e2c890;
+  --color3: #ede4d2;
+  --color4: #f9f4f1;
+  --color5: #b9c3cd;
+
+  --font-main: 'Huninn', sans-serif;
+}
+
+/* ----- 全站字體 ----- */
+body {
+  font-family: var(--font-main);
+  background-color: var(--color4);
+  color: #333;
+  margin:0;
+}
+
+/* ----- Header ----- */
+header {
+  display:flex; justify-content:space-between; align-items:center;
+  padding:10px 20px; background-color: var(--color5);
+}
+header .logo { display:flex; align-items:center; }
+header .logo img { height:50px; cursor:pointer; }
+header .cart-icon img { height:30px; cursor:pointer; }
+
+/* ----- Footer ----- */
+footer {
+  display:flex; flex-wrap:wrap; justify-content:space-between;
+  padding:20px; background-color: var(--color5); font-size:14px;
+}
+footer .center, footer .left, footer .right { margin:5px; }
+#year { font-weight:bold; }
+
+/* ----- Skeleton Loading ----- */
+.skeleton {
+  background: linear-gradient(90deg, var(--color3) 25%, var(--color4) 50%, var(--color3) 75%);
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.2s infinite;
+}
+@keyframes skeleton-loading { 100%{background-position: -200% 0;} }
+
+/* ----- 按鈕樣式 ----- */
+button, .btn {
+  background-color: var(--color2);
+  border: none;
+  border-radius: 5px;
+  padding:10px 20px;
+  cursor:pointer;
+  transition: all 0.3s;
+}
+button:hover, .btn:hover { background-color: var(--color3); }
+
+/* ----- 回到頂部按鈕 ----- */
+#backToTop {
+  position:fixed; bottom:30px; right:30px;
+  width:50px; height:50px;
+  display:none; justify-content:center; align-items:center;
+  background-color: var(--color2); border-radius:50%;
+  cursor:pointer; z-index:100;
+}
+#backToTop:hover { background-color: var(--color3); }
+
+/* ----- 響應式 ----- */
+@media(max-width:768px){ header, footer{flex-direction:column; text-align:center;} }
+@media(max-width:480px){ header .logo img{height:40px;} }

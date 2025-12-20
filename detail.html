@@ -1,58 +1,333 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="zh-Hant">
 <head>
-  <meta charset="UTF-8">
-  <title>商品詳情</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>商品詳情 | AiFang Kids Studio</title>
+
+<style>
+/* ===== Header ===== */
+.site-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:10px 20px;
+  background:#fff;
+  box-shadow:0 2px 6px rgba(0,0,0,.08);
+  position:sticky;
+  top:0;
+  z-index:200;
+}
+
+.header-left{
+  font-size:18px;
+  font-weight:bold;
+}
+
+.header-center img{
+  height:50px; 
+  width:auto;
+}
+
+.header-right .cart-icon{
+  width:32px;
+  height:32px;
+}
+
+@media screen and (max-width:768px){
+  .site-header{
+    flex-direction:row;
+    justify-content:space-between;
+  }
+  .header-left{ font-size:16px; }
+  .header-center img{ height:40px; }
+  .header-right .cart-icon{ width:28px; height:28px; }
+}
+
+/* ===== Skeleton Loading（櫻花粉嫩＋流沙感） ===== */
+.skeleton-card{
+  background:#fff;
+  border-radius:22px;
+  padding:14px;
+  box-shadow:0 6px 18px rgba(0,0,0,.05);
+  margin-bottom:16px;
+}
+
+.skeleton-card::before{
+  content:"";
+  display:block;
+  width:100%;
+  aspect-ratio:1/1.2;
+  border-radius:18px;
+  margin-bottom:12px;
+  background:linear-gradient(
+    110deg,
+    #f6dcdc 25%,
+    #fdecec 37%,
+    #f6dcdc 63%
+  );
+  background-size:200% 100%;
+  animation:sakuraShimmer 1.6s ease-in-out infinite;
+}
+
+.skeleton-card::after{
+  content:"";
+  display:block;
+  height:48px;
+  border-radius:12px;
+  background:linear-gradient(
+    110deg,
+    #f6dcdc 25%,
+    #fdecec 37%,
+    #f6dcdc 63%
+  );
+  background-size:200% 100%;
+  animation:sakuraShimmer 1.6s ease-in-out infinite;
+}
+
+@keyframes sakuraShimmer{
+  to{ background-position-x:-200%; }
+}
+
+/* ===== 商品區 ===== */
+.product-main{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:24px;
+  margin:24px 0;
+}
+
+.product-image{
+  width:100%;
+  border-radius:18px;
+  aspect-ratio:1/1;
+  background:#eee;
+}
+
+.product-info h1{
+  font-size:1.6rem;
+  margin-bottom:12px;
+}
+
+.product-info .price{
+  font-size:1.4rem;
+  font-weight:bold;
+  margin-bottom:12px;
+}
+
+.swatches span{
+  display:inline-block;
+  width:28px;
+  height:28px;
+  border-radius:50%;
+  margin-right:8px;
+  border:1px solid #ccc;
+  cursor:pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.swatches span.active{
+  box-shadow:0 0 0 3px #333;
+  transform:scale(1.05);
+}
+
+#sizeOptions button{
+  margin-right:8px;
+  margin-bottom:8px;
+  padding:6px 14px;
+  border:1px solid #ccc;
+  background:#fff;
+  cursor:pointer;
+}
+
+#sizeOptions button.active{
+  border-color:#000;
+  background:#000;
+  color:#fff;
+}
+
+/* ===== Footer ===== */
+footer{
+  background:#fff;
+  padding:20px;
+  border-top:1px solid #eee;
+  font-size:0.9rem;
+  color:#555;
+}
+
+.footer-content{
+  display:flex;
+  justify-content:space-between;
+  margin-bottom:12px;
+}
+
+.footer-bottom{
+  text-align:center;
+  font-size:0.8rem;
+  color:#999;
+}
+
+@media screen and (max-width:768px){
+  .product-main{ grid-template-columns:1fr; }
+  .footer-content{ flex-direction:column; }
+}
+</style>
+
 </head>
 <body>
 
-<script>
-const API_URL = "https://script.google.com/macros/s/AKfycbx-JehSDwzt999IvR0WqCkfutAb5PTv2GaLG8kdhw_4qyEpCI9uJ6dFvGRVcT3N9gNe/exec";
-const code = new URLSearchParams(location.search).get("code");
+<!-- ===== Header ===== -->
+<header class="site-header">
+  <div class="header-left">AiFangKids</div>
+  <div class="header-center">
+    <img src="https://raw.githubusercontent.com/aifangkids/aifang-studio/7d26aec250ffc4de7c4778de3aa00af18e0429a6/images/LOGO.png" alt="LOGO">
+  </div>
+  <div class="header-right">
+    <a href="cart.html"><img src="https://cdn-icons-png.flaticon.com/512/34/34568.png" alt="Cart" class="cart-icon"></a>
+  </div>
+</header>
 
+<div class="wrapper">
+  <div class="content-wrapper">
+
+    <!-- Skeleton 先顯示，資料載入後替換 -->
+    <div id="productSkeleton" class="skeleton-card"></div>
+
+    <!-- 商品區 -->
+    <div id="productContainer" class="product-main" style="display:none;">
+      <div class="product-image" id="productImage"></div>
+      <div class="product-info">
+        <h1 id="productName"></h1>
+        <div class="price" id="productPrice"></div>
+        <div class="section">
+          <h3>🎨 顏色</h3>
+          <div class="swatches" id="colorSwatches"></div>
+        </div>
+        <div class="section">
+          <h3>📏 尺寸</h3>
+          <div id="sizeOptions"></div>
+        </div>
+        <div class="section">
+          <button id="addToCartBtn">加入購物車</button>
+        </div>
+        <div class="section">
+          <h3>📝 商品說明</h3>
+          <p id="productDescription"></p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ===== Footer ===== -->
+<footer>
+  <div class="footer-content">
+    <div class="footer-left">
+      <strong>CUSTOMER CENTER</strong><br>
+      MAIL: aifangkids@gmail.com<br>
+      服務時間: AM 10:00 - PM 21:00<br>
+      週末與國定假日休息，訂單及出貨將於工作日為您處理
+    </div>
+    <div class="footer-right">
+      <strong>COMPANY INFO</strong><br>
+      公司名稱: 璦坊童裝<br>
+      統一編號: 95294390
+    </div>
+  </div>
+  <div class="footer-bottom">
+    © Aifang Kids Studio <span id="year"></span> | All rights reserved
+  </div>
+</footer>
+
+<script>
+// 自動更新年份
+document.getElementById('year').textContent = new Date().getFullYear();
+
+// ===== JS 動態載入商品 =====
+const API_URL = 'https://script.google.com/macros/s/AKfycbx3Ob8gxHFXxcVwgY9LEUL71DLtuEfLfk0iw1dZ7dPGrmivVIMbUINBCIJUJirmK8AV/exec'; // <-- 改成你的 JSON URL
+const params = new URLSearchParams(location.search);
+const productId = params.get('id');
+
+const skeleton = document.getElementById('productSkeleton');
+const container = document.getElementById('productContainer');
+const nameEl = document.getElementById('productName');
+const priceEl = document.getElementById('productPrice');
+const imageEl = document.getElementById('productImage');
+const colorEl = document.getElementById('colorSwatches');
+const sizeEl = document.getElementById('sizeOptions');
+const descEl = document.getElementById('productDescription');
+const addBtn = document.getElementById('addToCartBtn');
+
+let selectedColor = null;
+let selectedSize = null;
+
+// 取得商品資料
 fetch(API_URL)
 .then(res => res.json())
-.then(data => {
-  const p = data.products.find(x => x.code === code);
-  if (!p) {
-    document.body.innerHTML = "找不到商品";
-    return;
-  }
+.then(products => {
+  const product = products.find(p => p.id === productId);
+  if (!product) return alert('找不到商品');
 
-  let sizeHTML = "";
-  ["baby","kids","elementary"].forEach(k=>{
-    const s = p.sizes[k];
-    if (s && s.options.length){
-      sizeHTML += `<h3>${s.label}</h3>`;
-      sizeHTML += s.options.map(o =>
-        `<button onclick="selectSize('${s.label}','${o}','${s.salePrice}')">${o}</button>`
-      ).join("");
+  // 隱藏 Skeleton、顯示商品區
+  skeleton.style.display = 'none';
+  container.style.display = 'grid';
+
+  nameEl.textContent = product.name;
+  priceEl.textContent = `$${product.basePrice}`;
+  descEl.textContent = product.description || '';
+
+  // 顏色 swatch
+  colorEl.innerHTML = '';
+  let activeColorSpan = null;
+  (product.colors || []).forEach((c,i)=>{
+    const span = document.createElement('span');
+    if(c.hex) span.style.background = c.hex;
+    span.title = c.name;
+    span.onclick = () => {
+      colorEl.querySelectorAll('span').forEach(s=>s.classList.remove('active'));
+      span.classList.add('active');
+      activeColorSpan = span;
+      selectedColor = c.name;
+      if(c.image) imageEl.innerHTML = `<img src="${c.image}" style="width:100%">`;
+    };
+    colorEl.appendChild(span);
+
+    // 預設第一個 active
+    if(i===0){
+      span.classList.add('active');
+      activeColorSpan = span;
+      selectedColor = c.name;
+      if(c.image) imageEl.innerHTML = `<img src="${c.image}" style="width:100%">`;
     }
   });
 
-  let colorHTML = p.colors.map(c => `
-    <div>
-      <div>${c.name}</div>
-      ${c.swatch ? `<img src="${c.swatch}" width="40">` : ""}
-      <div>
-        ${c.images.map(img => `<img src="${img}" width="100">`).join("")}
-      </div>
-    </div>
-  `).join("");
+  // 尺寸按鈕
+  sizeEl.innerHTML = '';
+  (product.sizes || []).forEach(s=>{
+    const btn = document.createElement('button');
+    btn.textContent = s;
+    btn.onclick = ()=>{
+      sizeEl.querySelectorAll('button').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      selectedSize = s;
+    };
+    sizeEl.appendChild(btn);
+  });
 
-  document.body.innerHTML = `
-    <img src="${p.mainImage}" width="300">
-    <h1>${p.name}</h1>
-    ${sizeHTML}
-    <hr>
-    ${colorHTML}
-  `;
-});
+  // 加入購物車按鈕示範
+  addBtn.onclick = ()=>{
+    if(!selectedSize) return alert('請先選擇尺寸');
+    console.log({
+      id: product.id,
+      color: selectedColor,
+      size: selectedSize
+    });
+    alert('已選擇完成（下一步接購物車）');
+  };
+})
+.catch(err=>{ console.error(err); alert('商品資料載入失敗'); });
 
-function selectSize(type, size, price){
-  console.log(type, size, price);
-}
 </script>
 
 </body>
