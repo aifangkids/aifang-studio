@@ -2,53 +2,30 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>商品詳情｜AiFang Kids Studio</title>
+  <title>商品詳情</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- 全站統一樣式 -->
-  <link rel="stylesheet" href="assets/css/style.css" />
-
-  <!-- Huninn 字體 -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Huninn&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./assets/css/style.css">
 </head>
+
 <body>
+  <div id="header"></div>
 
-  <!-- Header -->
-  <div id="site-header"></div>
+  <div class="layout">
+    <aside id="sidebar"></aside>
 
-  <!-- 主內容 -->
-  <main class="page-layout">
-    <!-- Sidebar -->
-    <aside id="site-sidebar"></aside>
-
-    <!-- 商品詳情 -->
-    <section class="content-area">
+    <main id="main">
       <div id="detail-container">
-        <!-- Skeleton -->
-        <div class="detail-skeleton">
-          <div class="skeleton-img"></div>
-          <div class="skeleton-text"></div>
-          <div class="skeleton-text short"></div>
-        </div>
+        <!-- detail.js 會填 -->
       </div>
-    </section>
-  </main>
+    </main>
+  </div>
 
-  <!-- Footer -->
-  <div id="site-footer"></div>
+  <div id="footer"></div>
 
-  <!-- 回頂按鈕 -->
-  <button id="backToTop">↑</button>
-
-  <!-- 共用模組 -->
-  <script src="assets/js/api.js"></script>
-  <script src="assets/js/load-snippets.js"></script>
-  <script src="assets/js/sidebar.js"></script>
-  <script src="assets/js/cart.js"></script>
-
-  <!-- 頁面專用 -->
-  <script src="assets/js/detail.js"></script>
+  <script src="./assets/js/load-snippets.js"></script>
+  <script src="./assets/js/api.js"></script>
+  <script src="./assets/js/sidebar.js"></script>
+  <script src="./assets/js/detail.js"></script>
 </body>
 </html>
