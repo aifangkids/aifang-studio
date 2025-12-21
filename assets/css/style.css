@@ -345,3 +345,37 @@ img {
     padding: 30px 16px;
   }
 }
+/* =========================
+   補上遺漏的 Skeleton Grid 設定
+========================= */
+
+/* 1. 設定網格排版 (讓它跟未來的商品列表長得一樣) */
+.skeleton-grid {
+  display: grid;
+  /* 這裡設定每個格子最小寬度 160px，會自動適應手機變兩欄，電腦變多欄 */
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); 
+  gap: 20px; /* 卡片之間的間距 */
+  padding: 20px 0;
+  width: 100%;
+}
+
+/* 2. 設定單張骨架卡片的外觀 */
+.skeleton-card {
+  background-color: #fff; /* 或跟你的網站背景對比的顏色 */
+  padding: 10px;
+  border-radius: var(--radius); /* 使用你的變數 */
+  display: flex;
+  flex-direction: column;
+  gap: 10px; /* 圖片跟文字條的間距 */
+}
+
+/* 3. 修正骨架文字條的寬度 */
+/* 你的 style.css 原本有 .skeleton-text，但建議補強這兩行確保寬度 */
+.skeleton-text {
+  width: 90%; 
+  height: 16px; /* 稍微加粗一點看起來比較像標題 */
+}
+
+.skeleton-text.short {
+  width: 60%; /* 模擬價格欄位，比較短 */
+}
