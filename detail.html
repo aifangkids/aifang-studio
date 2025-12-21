@@ -2,27 +2,32 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8" />
-  <title>商品詳情</title>
+  <title>商品詳情 - AiFang Kids Studio</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <link rel="stylesheet" href="./assets/css/style.css">
 </head>
 
 <body>
-  <div id="header"></div>
+  <!-- Header -->
+  <div id="header-container"></div>
 
   <div class="layout">
-    <aside id="sidebar"></aside>
+    <!-- Sidebar -->
+    <aside id="sidebar-container"></aside>
 
+    <!-- Main -->
     <main id="main">
-      <div id="detail-container">
-        <!-- detail.js 會填 -->
+      <div id="product-detail" class="product-detail">
+        <!-- 商品詳情內容由 detail.js 動態生成 -->
       </div>
     </main>
   </div>
 
-  <div id="footer"></div>
+  <!-- Footer -->
+  <div id="footer-container"></div>
 
+  <!-- JS -->
   <script src="./assets/js/load-snippets.js"></script>
   <script src="./assets/js/api.js"></script>
   <script src="./assets/js/sidebar.js"></script>
