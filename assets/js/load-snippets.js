@@ -1,45 +1,45 @@
-/**
- * load-snippets.js
- * --------------------------------------------------
- * 職責（非常單一、非常清楚）：
- * 1. 載入共用 HTML（header / footer / sidebar）
- * 2. 插入到對應容器
- * 3. 載入完成後，讓各元件「自己啟動」
- *
- * ❌ 不碰 API
- * ❌ 不碰商品資料
- * ❌ 不寫任何商業邏輯
- * --------------------------------------------------
- */
+// load-snippets.js
 
-document.addEventListener("DOMContentLoaded", loadAllSnippets);
+async function loadSnippet(fileName, containerId) {
+    const container = document.getElementById(containerId);
+    if (!container) {
+        console.warn(`loadSnippet 防呆：容器 #${containerId} 不存在`);
+        return;
+    }
 
-async function loadAllSnippets() {
-  await Promise.all([
-    loadSnippet("header",  "/assets/snippets/header.html"),
-    loadSnippet("footer",  "/assets/snippets/footer.html"),
-    loadSnippet("sidebar", "/assets/snippets/sidebar.html")
-  ]);
+    const snippetPath = `assets/snippets/${fileName}.html`; // 使用相對路徑
 
-  // snippets 載入完成後，通知全站
-  document.dispatchEvent(new Event("snippets:loaded"));
+    try {
+        const response = await fetch(snippetPath);
+        if (!response.ok) {
+            console.warn(`載入失敗：${snippetPath} (${response.status})`);
+            container.innerHTML = `<p style="color:red;">⚠️ 無法載入 ${fileName}</p>`;
+            return;
+        }
+        const html = await response.text();
+        container.innerHTML = html;
+    } catch (err) {
+        console.error(`載入 ${snippetPath} 時發生錯誤:`, err);
+        container.innerHTML = `<p style="color:red;">⚠️ 載入 ${fileName} 發生錯誤</p>`;
+    }
 }
 
-/* ==================================================
-   共用載入工具
-================================================== */
+// 一次載入多個 snippet
+async function loadAllSnippets(snippets) {
+    if (!Array.isArray(snippets) || snippets.length === 0) return;
 
-async function loadSnippet(id, url) {
-  const container = document.getElementById(id);
-  if (!container) return;
-
-  try {
-    const res = await fetch(url);
-    if (!res.ok) throw new Error(`載入失敗：${url}`);
-
-    const html = await res.text();
-    container.innerHTML = html;
-  } catch (err) {
-    console.error(err);
-  }
+    const promises = snippets.map(s => loadSnippet(s.fileName, s.containerId));
+    await Promise.all(promises);
 }
+
+// 自動在 DOMContentLoaded 後載入
+document.addEventListener('DOMContentLoaded', () => {
+    // 範例：可根據你的網站調整
+    const snippetsToLoad = [
+        { fileName: 'header', containerId: 'header-container' },
+        { fileName: 'footer', containerId: 'footer-container' },
+        { fileName: 'sidebar', containerId: 'sidebar-container' }
+    ];
+
+    loadAllSnippets(snippetsToLoad);
+});
