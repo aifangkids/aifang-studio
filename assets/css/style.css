@@ -3,10 +3,10 @@
 ========================= */
 :root {
   --color-primary: #a7a8a1;
-  --color-accent: #e2c890;
-  --color-bg: #f9f4f1;
-  --color-section: #ede4d2;
-  --color-muted: #b9c3cd;
+  --color-accent: #e2c890;   /* 溫暖的淺黃褐色/米色 */
+  --color-bg: #f9f4f1;       /* 幾乎純白暖調 */
+  --color-section: #ede4d2;  /* 奶油色/淺米色 */
+  --color-muted: #b9c3cd;    /* 偏冷藍灰色 */
   --color-text: #333;
   --color-white: #ffffff;
   --radius: 14px;
@@ -14,11 +14,13 @@
 }
 
 /* =========================
-   🔠 全域重置
+   🔠 全域字體與重置
 ========================= */
 @font-face {
     font-family: 'Huninn';
     src: url('../fonts/jf-openhuninn-2.1.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
 }
 
 * {
@@ -34,10 +36,8 @@ body {
   line-height: 1.6;
 }
 
-/* 移除所有底線 */
 a {
   text-decoration: none !important;
-  color: inherit;
 }
 
 img { max-width: 100%; display: block; }
@@ -59,14 +59,14 @@ img { max-width: 100%; display: block; }
   transition: var(--transition);
 }
 
-/* 需求：品牌框框配色修正 */
+/* 需求1：品牌框框文字用 #ede4d2 (奶油色) */
 .brand-tag {
   position: absolute;
   top: 10px;
   left: 10px;
   z-index: 5;
-  background: #b9c3cd; /* 偏冷的淺藍灰色背景 */
-  color: #f9f4f1;      /* 帶點暖調的近白色文字 */
+  background: #b9c3cd;      /* 背景維持藍灰色 */
+  color: #ede4d2;           /* 文字改為奶油米色 */
   padding: 2px 8px;
   font-size: 11px;
   border-radius: 4px;
@@ -90,7 +90,6 @@ img { max-width: 100%; display: block; }
   font-weight: 600;
 }
 
-/* 顏色色碼樣式 */
 .color-swatches { display: flex; gap: 6px; margin: 8px 0; flex-wrap: wrap; }
 .swatch-dot {
   width: 20px;
@@ -105,11 +104,18 @@ img { max-width: 100%; display: block; }
 /* 價格排版 */
 .price-group { border-top: 1px dashed var(--color-section); padding-top: 10px; }
 .price-row { display: flex; align-items: center; font-size: 13px; margin-bottom: 4px; }
-.size-label { color: var(--color-muted); width: 75px; }
+
+/* 需求2：bebe、kids、elementary 文字用 #e2c890 (黃褐色) */
+.size-label { 
+  color: #e2c890; 
+  width: 75px; 
+  font-weight: bold; /* 稍微加粗讓顏色更清晰 */
+}
+
 .original-price { text-decoration: line-through; color: #bbb; margin-right: 6px; font-size: 11px; }
 .sale-price { color: #d14d4d; font-weight: bold; }
 
-/* 響應式：手機 2 欄 */
+/* 響應式 */
 @media (max-width: 768px) {
   .product-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
 }
