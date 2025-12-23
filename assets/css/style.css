@@ -1,5 +1,5 @@
 /* =========================
-   🎨 核心變數 (所有網頁共用)
+   🎨 核心變數
 ========================= */
 :root {
   --color-primary: #a7a8a1;
@@ -7,21 +7,18 @@
   --color-bg: #f9f4f1;
   --color-section: #ede4d2;
   --color-muted: #b9c3cd;
-  --color-text: #333;
+  --color-text: #333; /* 主要文字顏色 */
   --color-white: #ffffff;
   --radius: 14px;
   --transition: 0.3s ease;
 }
 
 /* =========================
-   🔠 全域重置與字體 (使用本地粉圓體檔案)
+   🔠 全域重置
 ========================= */
 @font-face {
     font-family: 'Huninn';
-    /* 修正為你本地存放的路徑 */
     src: url('../fonts/jf-openhuninn-2.1.ttf') format('truetype');
-    font-weight: normal;
-    font-style: normal;
 }
 
 * {
@@ -31,59 +28,26 @@
 }
 
 body {
-  font-family: "Huninn", "PingFang TC", "Heiti TC", "Microsoft JhengHei", sans-serif;
+  font-family: "Huninn", sans-serif;
   background: var(--color-bg);
-  color: var(--color-text);
+  color: var(--color-text); /* 使用設定的 5 種顏色之一 */
   line-height: 1.6;
 }
 
+/* 需求：移除所有連結底 line */
 a {
-  text-decoration: none;
+  text-decoration: none !important;
   color: inherit;
 }
 
-img {
-  max-width: 100%;
-  display: block;
-}
-
-/* =========================
-   🧱 共用元件 (Header, Footer, Sidebar)
-========================= */
-.site-header {
-  position: sticky;
-  top: 0;
-  z-index: 1000;
-  background: var(--color-white);
-  border-bottom: 1px solid var(--color-section);
-}
-
-.header-inner {
-  max-width: 1200px;
-  margin: auto;
-  padding: 12px 20px;
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  align-items: center;
-}
-
-.site-layout {
-  display: grid;
-  grid-template-columns: 260px 1fr;
-  max-width: 1200px;
-  margin: 40px auto;
-  gap: 30px;
-  padding: 0 20px;
-}
-
-/* ... 保持你原本的 Header/Footer/Sidebar 樣式 ... */
+img { max-width: 100%; display: block; }
 
 /* =========================
    🛍️ 商品卡片設計
 ========================= */
 .product-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr); /* 電腦版 4 欄 */
+  grid-template-columns: repeat(4, 1fr);
   gap: 20px;
 }
 
@@ -93,24 +57,17 @@ img {
   border-radius: var(--radius);
   padding: 12px;
   transition: var(--transition);
-  border: 1px solid transparent;
 }
 
-.product-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 10px 20px rgba(0,0,0,0.05);
-  border-color: var(--color-section);
-}
-
-/* 需求：品牌標籤左上角顯示 */
+/* 需求：品牌顯示左上方框框要有背景顏色 */
 .brand-tag {
   position: absolute;
   top: 10px;
   left: 10px;
   z-index: 5;
-  background: rgba(255, 255, 255, 0.9);
+  background: var(--color-section); /* 使用您的專屬背景色 */
+  color: var(--color-primary); /* 使用您的專屬字體色 */
   border: 1px solid var(--color-primary);
-  color: var(--color-primary);
   padding: 2px 8px;
   font-size: 11px;
   border-radius: 4px;
@@ -125,106 +82,36 @@ img {
   margin-bottom: 12px;
 }
 
-.image-wrapper img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
+.image-wrapper img { width: 100%; height: 100%; object-fit: cover; }
 
+/* 商品名稱顏色 */
 .product-info .name {
   font-size: 16px;
-  margin: 4px 0 8px;
-  color: var(--color-text);
+  margin: 8px 0;
+  color: var(--color-primary); /* 使用專屬色 */
   font-weight: 600;
 }
 
-/* 需求：色碼顯示 (Q 欄圖片) */
-.color-swatches {
-  display: flex;
-  gap: 6px;
-  margin: 8px 0;
-}
-
-.color-swatch-item img {
+/* 需求：顏色色碼支援圖片與純色 */
+.color-swatches { display: flex; gap: 6px; margin: 8px 0; flex-wrap: wrap; }
+.swatch-dot {
   width: 20px;
   height: 20px;
   border-radius: 50%;
   border: 1px solid #eee;
-  object-fit: cover;
+  overflow: hidden;
+  background-size: cover;
+  background-position: center;
 }
 
-/* 需求：價格排版 (bebe, kids, elementary) */
-.price-group {
-  border-top: 1px dashed var(--color-section);
-  padding-top: 10px;
-}
+/* 價格排版 */
+.price-group { border-top: 1px dashed var(--color-section); padding-top: 10px; }
+.price-row { display: flex; align-items: center; font-size: 13px; margin-bottom: 4px; }
+.size-label { color: var(--color-muted); width: 75px; }
+.original-price { text-decoration: line-through; color: #bbb; margin-right: 6px; font-size: 11px; }
+.sale-price { color: #d14d4d; font-weight: bold; }
 
-.price-row {
-  display: flex;
-  align-items: center;
-  font-size: 13px;
-  margin-bottom: 4px;
-}
-
-.size-label {
-  color: #888;
-  width: 75px;
-}
-
-.original-price {
-  text-decoration: line-through;
-  color: #bbb;
-  margin-right: 6px;
-  font-size: 11px;
-}
-
-.sale-price {
-  color: #d14d4d;
-  font-weight: bold;
-}
-
-/* =========================
-   🦴 流沙等待畫面 (Skeleton)
-========================= */
-.skeleton-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 20px;
-}
-
-.skeleton-card {
-  background: var(--color-white);
-  padding: 12px;
-  border-radius: var(--radius);
-}
-
-.skeleton {
-  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-  background-size: 200% 100%;
-  animation: skeleton-loading 1.5s infinite;
-  border-radius: 4px;
-}
-
-@keyframes skeleton-loading {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
-}
-
-.skeleton-img { width: 100%; aspect-ratio: 1/1; margin-bottom: 10px; }
-.skeleton-text { height: 14px; margin-bottom: 8px; width: 80%; }
-.skeleton-text.short { width: 40%; }
-
-/* =========================
-   📱 響應式：手機版強迫 2 欄
-========================= */
-@media (max-width: 1024px) {
-  .site-layout { grid-template-columns: 1fr; }
-  .sidebar { display: none; }
-}
-
+/* 響應式 */
 @media (max-width: 768px) {
-  .product-grid, .skeleton-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
-  }
+  .product-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
 }
