@@ -1,58 +1,52 @@
 // assets/js/api.js
-const API_URL = "https://script.google.com/macros/s/AKfycbxrmloTY4wCo1Sn5tgMQDRwhU8uXWBTA0c6v17ec7M6W5LkufjES1fjJBolMb_552z5/exec";
 
 /**
- * 取得全部商品與詳情 JSON
- * @returns {Promise<{products:Array, details:Array}>}
- */
-async function fetchAllData() {
-  try {
-    const res = await fetch(API_URL);
-    if (!res.ok) throw new Error("無法取得資料");
-    const data = await res.json();
-    return data;
-  } catch (err) {
-    console.error("fetchAllData error:", err);
-    return { products: [], details: [] };
-  }
-}
-
-/**
- * 取得單一商品詳情
- * @param {string} code 商品代碼
- * @returns {Promise<Object|null>}
- */
-async function fetchDetailByCode(code) {
-  const data = await fetchAllData();
-  if (!data.details || data.details.length === 0) return null;
-  const detail = data.details.find(d => d.code === code);
-  return detail || null;
-}
-
-/**
- * 取得產品列表
- * @returns {Promise<Array>}
+ * 從 GAS 取得所有商品資料
  */
 async function fetchProducts() {
-  const data = await fetchAllData();
-  return data.products || [];
+    try {
+        // 請確保 CONFIG.API_URL 已經在 config.js 中定義
+        const response = await fetch(CONFIG.API_URL);
+        if (!response.ok) throw new Error('網路回應不正確');
+        
+        const data = await response.json();
+        
+        // 假設 GAS 回傳的結構是 { status: 'success', data: [...] }
+        return data.data || []; 
+    } catch (error) {
+        console.error("fetchProducts 發生錯誤:", error);
+        return [];
+    }
 }
 
 /**
- * 取得產品顏色對應輪播圖
- * @param {string} code 商品代碼
- * @returns {Promise<Object>} { colors: [], carousel: [] }
+ * 根據商品編號 (Code) 取得單一商品詳情
+ * 這是專門給 detail.js 使用的
  */
-async function fetchColorsAndCarousel(code) {
-  const detail = await fetchDetailByCode(code);
-  if (!detail) return { colors: [], carousel: [] };
-  return {
-    colors: detail.colors || [],
-    carousel: detail.carousel || []
-  };
-}
+async function fetchDetailByCode(code) {
+    try {
+        // 1. 先取得所有商品 (因為 GAS 通常是一次回傳整張表)
+        const allProducts = await fetchProducts();
+        
+        // 2. 尋找 code 符合的商品 (不分大小寫)
+        const product = allProducts.find(p => String(p.code).toLowerCase() === String(code).toLowerCase());
+        
+        if (!product) {
+            console.warn(`找不到編號為 ${code} 的商品`);
+            return null;
+        }
 
-// --- 範例使用 ---
-// fetchProducts().then(p => console.log(p));
-// fetchDetailByCode("vividi01").then(d => console.log(d));
-// fetchColorsAndCarousel("vividi01").then(c => console.log(c));
+        // 3. 可以在這裡確保資料結構完整 (例如輪播圖與詳情圖的預設值)
+        return {
+            ...product,
+            carousel: product.carousel || [product.mainImage], // 若無輪播圖則用主圖
+            detailImages: product.detailImages || [],
+            colorswatch: product.colorswatch || [],
+            colors: product.colors || []
+        };
+
+    } catch (error) {
+        console.error("fetchDetailByCode 發生錯誤:", error);
+        return null;
+    }
+}
