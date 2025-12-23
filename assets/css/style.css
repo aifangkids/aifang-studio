@@ -7,7 +7,7 @@
   --color-bg: #f9f4f1;
   --color-section: #ede4d2;
   --color-muted: #b9c3cd;
-  --color-text: #333; /* 主要文字顏色 */
+  --color-text: #333;
   --color-white: #ffffff;
   --radius: 14px;
   --transition: 0.3s ease;
@@ -30,11 +30,11 @@
 body {
   font-family: "Huninn", sans-serif;
   background: var(--color-bg);
-  color: var(--color-text); /* 使用設定的 5 種顏色之一 */
+  color: var(--color-text);
   line-height: 1.6;
 }
 
-/* 需求：移除所有連結底 line */
+/* 移除所有底線 */
 a {
   text-decoration: none !important;
   color: inherit;
@@ -59,15 +59,14 @@ img { max-width: 100%; display: block; }
   transition: var(--transition);
 }
 
-/* 需求：品牌顯示左上方框框要有背景顏色 */
+/* 需求：品牌框框配色修正 */
 .brand-tag {
   position: absolute;
   top: 10px;
   left: 10px;
   z-index: 5;
-  background: var(--color-section); /* 使用您的專屬背景色 */
-  color: var(--color-primary); /* 使用您的專屬字體色 */
-  border: 1px solid var(--color-primary);
+  background: #b9c3cd; /* 偏冷的淺藍灰色背景 */
+  color: #f9f4f1;      /* 帶點暖調的近白色文字 */
   padding: 2px 8px;
   font-size: 11px;
   border-radius: 4px;
@@ -84,15 +83,14 @@ img { max-width: 100%; display: block; }
 
 .image-wrapper img { width: 100%; height: 100%; object-fit: cover; }
 
-/* 商品名稱顏色 */
 .product-info .name {
   font-size: 16px;
   margin: 8px 0;
-  color: var(--color-primary); /* 使用專屬色 */
+  color: var(--color-primary);
   font-weight: 600;
 }
 
-/* 需求：顏色色碼支援圖片與純色 */
+/* 顏色色碼樣式 */
 .color-swatches { display: flex; gap: 6px; margin: 8px 0; flex-wrap: wrap; }
 .swatch-dot {
   width: 20px;
@@ -111,7 +109,7 @@ img { max-width: 100%; display: block; }
 .original-price { text-decoration: line-through; color: #bbb; margin-right: 6px; font-size: 11px; }
 .sale-price { color: #d14d4d; font-weight: bold; }
 
-/* 響應式 */
+/* 響應式：手機 2 欄 */
 @media (max-width: 768px) {
   .product-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
 }
