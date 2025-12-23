@@ -1,15 +1,12 @@
 // assets/js/render.js
 
-/**
- * 負責渲染商品列表
- */
 function renderProductList(container, products) {
-    if (!container) return;
+    if (!container || !Array.isArray(products)) return;
 
     const html = products.map(p => {
         const s = p.sizes || {};
         
-        // 修正色碼判斷：支援圖片網址與純顏色
+        // 修正色碼邏輯：是 URL 就用背景圖，是色碼就用背景色
         const colorsHTML = p.colors && p.colors.length > 0 ? `
             <div class="color-swatches">
                 ${p.colors.map(c => {
@@ -23,14 +20,6 @@ function renderProductList(container, products) {
             </div>
         ` : '';
 
-        const priceHTML = `
-            <div class="price-group">
-                ${renderPriceRow('bebe', s.baby)}
-                ${renderPriceRow('kids', s.kids)}
-                ${renderPriceRow('elementary', s.elementary)}
-            </div>
-        `;
-
         return `
             <div class="product-card">
                 <div class="brand-tag">${p.brand || 'AiFang'}</div>
@@ -42,7 +31,11 @@ function renderProductList(container, products) {
                     <div class="product-info">
                         <h3 class="name">${p.name}</h3>
                         ${colorsHTML}
-                        ${priceHTML}
+                        <div class="price-group">
+                            ${renderPriceRow('bebe', s.baby)}
+                            ${renderPriceRow('kids', s.kids)}
+                            ${renderPriceRow('elementary', s.elementary)}
+                        </div>
                     </div>
                 </a>
             </div>
