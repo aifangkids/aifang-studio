@@ -1,3 +1,5 @@
+// assets/js/render.js
+
 /**
  * 負責渲染商品列表
  */
@@ -7,21 +9,19 @@ function renderProductList(container, products) {
     const html = products.map(p => {
         const s = p.sizes || {};
         
-// assets/js/render.js 裡面的顏色判斷
-const colorsHTML = p.colors && p.colors.length > 0 ? `
-    <div class="color-swatches">
-        ${p.colors.map(c => {
-            const val = String(c.value).trim();
-            // 判斷：是網址(http)就用圖片，是色碼(#)就用背景色
-            const isUrl = val.toLowerCase().startsWith('http');
-            const style = isUrl 
-                ? `background-image: url('${val}');` 
-                : `background-color: ${val};`;
-            
-            return `<div class="swatch-dot" style="${style}" title="${c.name}"></div>`;
-        }).join('')}
-    </div>
-` : '';
+        // 修正色碼判斷：支援圖片網址與純顏色
+        const colorsHTML = p.colors && p.colors.length > 0 ? `
+            <div class="color-swatches">
+                ${p.colors.map(c => {
+                    const val = String(c.value).trim();
+                    const isUrl = val.toLowerCase().startsWith('http');
+                    const style = isUrl 
+                        ? `background-image: url('${val}');` 
+                        : `background-color: ${val};`;
+                    return `<div class="swatch-dot" style="${style}" title="${c.name}"></div>`;
+                }).join('')}
+            </div>
+        ` : '';
 
         const priceHTML = `
             <div class="price-group">
