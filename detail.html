@@ -4,33 +4,29 @@
   <meta charset="UTF-8" />
   <title>商品詳情 - AiFang Kids Studio</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+  
   <link rel="stylesheet" href="./assets/css/style.css">
 </head>
 
 <body>
-  <!-- Header -->
   <div id="header-container"></div>
 
-  <div class="layout">
-    <!-- Sidebar -->
-    <aside id="sidebar-container"></aside>
+  <div class="site-layout">
+    <aside id="sidebar-container" class="sidebar"></aside>
 
-    <!-- Main -->
-    <main id="main">
-      <div id="product-detail" class="product-detail">
-        <!-- 商品詳情內容由 detail.js 動態生成 -->
+    <main class="site-main">
+      <div class="container">
+        <div id="product-detail-app">
+          </div>
       </div>
     </main>
   </div>
 
-  <!-- Footer -->
   <div id="footer-container"></div>
 
-  <!-- JS -->
   <script src="./assets/js/load-snippets.js"></script>
   <script src="./assets/js/api.js"></script>
-  <script src="./assets/js/sidebar.js"></script>
+  <script src="./assets/js/cart.js"></script> <script src="./assets/js/sidebar.js"></script>
   <script src="./assets/js/detail.js"></script>
 </body>
 </html>
