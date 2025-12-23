@@ -4,7 +4,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const container = document.getElementById("product-list");
     if (!container) return;
 
-    // 顯示流沙卡片 (4張)
+    // 1. 顯示流沙卡片 (佔位符)
     container.innerHTML = `
         <div class="skeleton-grid">
             ${Array(4).fill(0).map(() => `
@@ -18,19 +18,17 @@ document.addEventListener("DOMContentLoaded", async () => {
     `;
 
     try {
-        // 執行抓取
+        // 2. 執行抓取
         const products = await fetchProducts();
         
-        if (!products || products.length === 0) {
-            container.innerHTML = "<p>目前暫無商品，請稍後再來！</p>";
-            return;
-        }
-
-        // 渲染畫面
-        if (typeof renderProductList === "function") {
-            renderProductList(container, products);
+        // 3. 判斷並渲染
+        if (products && Array.isArray(products) && products.length > 0) {
+            if (typeof renderProductList === "function") {
+                // 清除流沙卡片，渲染真實商品
+                renderProductList(container, products);
+            }
         } else {
-            console.error("❌ 找不到 renderProductList 函式，請檢查 render.js 是否載入");
+            container.innerHTML = "<p>目前暫無商品，請稍後再來！</p>";
         }
     } catch (error) {
         console.error("❌ index.js 執行出錯:", error);
