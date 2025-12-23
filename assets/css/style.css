@@ -100,3 +100,47 @@ a { text-decoration: none !important; }
 @media (max-width: 768px) {
   .product-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
 }
+/* 詳情頁佈局 */
+.product-detail-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    margin-bottom: 50px;
+}
+
+/* 輪播圖控制 */
+.carousel-main {
+    position: relative;
+    aspect-ratio: 1/1;
+    background: #fff;
+    border-radius: 12px;
+    overflow: hidden;
+}
+.carousel-main .slide {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    transition: 0.5s;
+}
+.carousel-main .slide.active { opacity: 1; }
+.carousel-main button {
+    position: absolute; top: 50%; transform: translateY(-50%);
+    background: rgba(255,255,255,0.7); border: none; padding: 10px; cursor: pointer;
+}
+.carousel-main .next { right: 10px; } .carousel-main .prev { left: 10px; }
+
+/* 顏色選擇器 */
+.color-dot {
+    width: 30px; height: 30px; border-radius: 50%; display: inline-block;
+    margin-right: 10px; border: 2px solid #ddd; cursor: pointer; background-size: cover;
+}
+
+/* 細節圖 */
+.detail-images-grid { display: flex; flex-direction: column; gap: 20px; }
+.detail-img { width: 100%; border-radius: 8px; }
+
+@media (max-width: 768px) {
+    .product-detail-layout { grid-template-columns: 1fr; }
+}
