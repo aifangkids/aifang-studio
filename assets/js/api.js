@@ -2,24 +2,33 @@
 
 async function fetchProducts() {
     try {
-        // 使用您原本就設定好的 GAS_URL
+        // 使用您原本就定義好的 GAS_URL
         const response = await fetch(GAS_URL);
-        if (!response.ok) throw new Error('連線失敗');
+        if (!response.ok) throw new Error('網路連線異常');
         
         const data = await response.json();
         
-        // 【核心修正】這行會自動判斷：如果 data 直接是陣列就用 data，如果包在 data.data 裡也抓得到
+        // 【核心修正】不論 GAS 回傳的是 [ ... ] 還是 { data: [...] }，這行都能抓到
         const products = Array.isArray(data) ? data : (data.data || []);
         
         console.log("✅ 成功取得資料，數量:", products.length);
         return products;
     } catch (error) {
-        console.error("❌ 抓取錯誤:", error);
+        console.error("❌ API 抓取失敗:", error);
         return [];
     }
 }
 
+/**
+ * 根據商品編號取得單一商品詳情 (給 detail.js 使用)
+ */
 async function fetchDetailByCode(code) {
-    const all = await fetchProducts();
-    return all.find(p => String(p.code) === String(code)) || null;
+    try {
+        const all = await fetchProducts();
+        // 強制轉型為字串比對，避免類型錯誤
+        return all.find(p => String(p.code) === String(code)) || null;
+    } catch (error) {
+        console.error("❌ fetchDetailByCode 錯誤:", error);
+        return null;
+    }
 }
