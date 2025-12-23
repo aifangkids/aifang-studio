@@ -7,19 +7,15 @@ function renderProductList(container, products) {
     const html = products.map(p => {
         const s = p.sizes || {};
         
-        // 修正色碼判斷：支援網址圖片與純顏色
+        // 色碼判斷邏輯：支援 URL 圖片與 # 純顏色碼
         const colorsHTML = p.colors && p.colors.length > 0 ? `
             <div class="color-swatches">
                 ${p.colors.map(c => {
                     const val = c.value.trim();
-                    // 檢查是否為圖片網址 (以 http 開頭)
                     const isUrl = val.toLowerCase().startsWith('http');
-                    
-                    // 如果是網址，使用背景圖；否則使用背景顏色
                     const style = isUrl 
-                        ? `background-image: url('${val}'); background-color: transparent;` 
+                        ? `background-image: url('${val}');` 
                         : `background-color: ${val};`;
-                    
                     return `<div class="swatch-dot" style="${style}" title="${c.name}"></div>`;
                 }).join('')}
             </div>
