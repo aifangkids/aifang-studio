@@ -5,48 +5,44 @@
  */
 async function fetchProducts() {
     try {
-        // 請確保 CONFIG.API_URL 已經在 config.js 中定義
+        // 確保這裡使用的是 CONFIG.API_URL，對應你的 config.js
+        console.log("📡 正在連線至 API:", CONFIG.API_URL);
+        
         const response = await fetch(CONFIG.API_URL);
+        
         if (!response.ok) throw new Error('網路回應不正確');
         
         const data = await response.json();
         
-        // 假設 GAS 回傳的結構是 { status: 'success', data: [...] }
-        return data.data || []; 
+        // 判斷 GAS 回傳格式：如果是 {status: 'success', data: [...]} 則取 data.data
+        const products = data.data || data;
+        
+        console.log("✅ 成功取得資料，數量:", products.length);
+        return products;
     } catch (error) {
-        console.error("fetchProducts 發生錯誤:", error);
+        console.error("❌ fetchProducts 發生錯誤:", error);
         return [];
     }
 }
 
 /**
  * 根據商品編號 (Code) 取得單一商品詳情
- * 這是專門給 detail.js 使用的
  */
 async function fetchDetailByCode(code) {
     try {
-        // 1. 先取得所有商品 (因為 GAS 通常是一次回傳整張表)
         const allProducts = await fetchProducts();
-        
-        // 2. 尋找 code 符合的商品 (不分大小寫)
         const product = allProducts.find(p => String(p.code).toLowerCase() === String(code).toLowerCase());
         
-        if (!product) {
-            console.warn(`找不到編號為 ${code} 的商品`);
-            return null;
-        }
+        if (!product) return null;
 
-        // 3. 可以在這裡確保資料結構完整 (例如輪播圖與詳情圖的預設值)
         return {
             ...product,
-            carousel: product.carousel || [product.mainImage], // 若無輪播圖則用主圖
+            carousel: product.carousel || [product.mainImage],
             detailImages: product.detailImages || [],
-            colorswatch: product.colorswatch || [],
             colors: product.colors || []
         };
-
     } catch (error) {
-        console.error("fetchDetailByCode 發生錯誤:", error);
+        console.error("❌ fetchDetailByCode 發生錯誤:", error);
         return null;
     }
 }
