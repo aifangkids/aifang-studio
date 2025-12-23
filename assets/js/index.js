@@ -2,7 +2,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     const container = document.getElementById("product-list");
     if (!container) return;
 
-    // 顯示流沙卡片 (4張)
     container.innerHTML = `
         <div class="skeleton-grid">
             ${Array(4).fill(0).map(() => `
@@ -18,7 +17,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     try {
         const products = await fetchProducts();
         if (!products || products.length === 0) {
-            container.innerHTML = "<p>目前暫無商品。</p>";
+            container.innerHTML = "<p>目前暫無商品，請稍後再來！</p>";
             return;
         }
 
@@ -27,6 +26,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
     } catch (error) {
         console.error("API Error:", error);
-        container.innerHTML = "<p>讀取失敗，請重新整理。</p>";
+        container.innerHTML = "<p>資料載入錯誤，請稍後再試。</p>";
     }
 });
