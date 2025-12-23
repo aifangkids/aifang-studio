@@ -1,7 +1,5 @@
-// assets/js/render.js
-
 /**
- * 負責將商品資料轉化為 HTML 並放入指定的容器
+ * 負責渲染商品列表
  */
 function renderProductList(container, products) {
     if (!container) return;
@@ -9,18 +7,19 @@ function renderProductList(container, products) {
     const html = products.map(p => {
         const s = p.sizes || {};
         
-        // 3. 處理顏色 (顯示 Q 欄 colorswatch 圖片)
+        // 需求：判斷 colorswatch 是 http 網址還是 # 色碼
         const colorsHTML = p.colors && p.colors.length > 0 ? `
             <div class="color-swatches">
-                ${p.colors.map(c => `
-                    <div class="color-swatch-item">
-                        <img src="${c.value}" title="${c.name}" onerror="this.style.backgroundColor='#ddd'">
-                    </div>
-                `).join('')}
+                ${p.colors.map(c => {
+                    const isUrl = c.value.startsWith('http');
+                    const style = isUrl 
+                        ? `background-image: url('${c.value}')` 
+                        : `background-color: ${c.value}`;
+                    return `<div class="swatch-dot" style="${style}" title="${c.name}"></div>`;
+                }).join('')}
             </div>
         ` : '';
 
-        // 2. 處理三種價格 (修正標籤：bebe, kids, elementary)
         const priceHTML = `
             <div class="price-group">
                 ${renderPriceRow('bebe', s.baby)}
@@ -32,7 +31,6 @@ function renderProductList(container, products) {
         return `
             <div class="product-card">
                 <div class="brand-tag">${p.brand || 'AiFang'}</div>
-                
                 <a href="detail.html?code=${p.code}" class="product-link">
                     <div class="image-wrapper">
                         <img src="${p.mainImage}" alt="${p.name}" loading="lazy" 
@@ -51,13 +49,8 @@ function renderProductList(container, products) {
     container.innerHTML = html;
 }
 
-/**
- * 輔助函式：產生單一尺寸價格 HTML
- */
 function renderPriceRow(label, sizeObj) {
     if (!sizeObj || (!sizeObj.price && !sizeObj.salePrice)) return '';
-    
-    // 確保價格是數字進行比較
     const price = Number(sizeObj.price);
     const salePrice = sizeObj.salePrice ? Number(sizeObj.salePrice) : null;
     const isSale = salePrice && salePrice < price;
