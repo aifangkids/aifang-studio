@@ -3,35 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AiFang Kids - 童裝品牌</title>
-    
-    <link rel="icon" href="images/favicon.ico" type="image/x-icon">
-    <link rel="shortcut icon" href="images/favicon.ico">
-
+    <title>AiFang Studio | Bellot 2.0 Mode</title>
     <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
 
-    <div id="header-container"></div>
+    <div id="header-placeholder"></div>
 
-    <div class="site-layout">
-        <aside id="sidebar-container" class="sidebar"></aside>
+    <main class="home-main">
 
-        <main class="site-main">
-            <div class="container">
-                <div id="product-list" class="product-grid"></div>
+        <section class="hero-section">
+            <div class="hero-inner">
+                <div class="hero-text-box">
+                    <span class="sub-title">2025 SS COLLECTION</span>
+                    <h2 class="main-title">Simply, Purely, AiFangKids.</h2>
+                    <a href="#series-container" class="shop-now-btn">VIEW COLLECTION</a>
+                </div>
             </div>
-        </main>
-    </div>
+        </section>
 
-    <div id="footer-container"></div>
+        <section class="section-new-arrivals">
+            <div class="section-header">
+                <h3 id="home-title">NEW ARRIVALS</h3>
+                <p>探索本季最迷人的 BEBE / KIDS / JUNIOR 系列</p>
+            </div>
+            
+            <div id="new-arrivals-container" class="product-grid-2">
+                <div class="skeleton-card"></div>
+                <div class="skeleton-card"></div>
+            </div>
+        </section>
+
+        <section class="section-series-items">
+            <div class="section-header">
+                <h3>WEEKLY BEST</h3>
+            </div>
+
+            <div id="series-container" class="product-grid-4">
+                </div>
+        </section>
+
+    </main>
+
+    <div id="footer-placeholder"></div>
+
+    <div id="sidebar-placeholder"></div>
+    <div id="quick-tools-placeholder"></div>
 
     <script src="assets/js/config.js"></script>
+    
     <script src="assets/js/api.js"></script>
-    <script src="assets/js/load-snippets.js"></script>
-    <script src="assets/js/render.js"></script>
+    
     <script src="assets/js/cart.js"></script>
     <script src="assets/js/sidebar.js"></script>
-    <script src="assets/js/index.js"></script>
+    
+    <script src="assets/js/index-render.js"></script>
+    
+    <script src="assets/js/load-snippets.js"></script>
 
 </body>
+</html>

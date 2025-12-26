@@ -1,146 +1,178 @@
-/* =========================
-   🎨 核心變數
-========================= */
+/* ============================================================
+   [1.1] 載入 Noto Sans KR：Thin(100), Light(300), Medium(500)
+   ============================================================ */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@100;300;500&display=swap');
+
 :root {
-  --color-primary: #a7a8a1;
-  --color-accent: #e2c890;   /* 溫暖的淺黃褐色/米色 */
-  --color-bg: #f9f4f1;       /* 幾乎純白暖調 */
-  --color-section: #ede4d2;  /* 奶油色/淺米色 */
-  --color-muted: #b9c3cd;    /* 偏冷藍灰色 */
-  --color-text: #333;
-  --color-white: #ffffff;
-  --radius: 14px;
-  --transition: 0.3s ease;
+    /* 顏色定義 */
+    --black: #000000;
+    --white: #ffffff;
+    --light-gray: #f4f4f4;
+    --border-gray: #dddddd;
+    --sale-red: #d9534f;
+    --bellot-beige: #fdf6ec; /* 品牌專屬米色提示框 */
+    
+    /* 字體重量定義 */
+    --font-kr: 'Noto Sans KR', sans-serif;
+    --weight-thin: 100;
+    --weight-light: 300;
+    --weight-medium: 500;
 }
 
-/* =========================
-   🔠 全域字體與重置
-========================= */
-@font-face {
-    font-family: 'Huninn';
-    src: url('../fonts/jf-openhuninn-2.1.ttf') format('truetype');
-}
-
-* { box-sizing: border-box; margin: 0; padding: 0; }
+/* 全域基礎設定 */
+* { box-sizing: border-box; }
 
 body {
-  font-family: "Huninn", sans-serif;
-  background: var(--color-bg);
-  color: var(--color-text);
-  line-height: 1.6;
+    font-family: var(--font-kr);
+    font-weight: var(--weight-light); /* 預設內文使用 Light */
+    margin: 0;
+    color: #333;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased; /* 讓細體字更平滑 */
 }
 
-a { text-decoration: none !important; }
-
-/* =========================
-   🛍️ 商品卡片設計
-========================= */
-.product-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 20px;
+/* ============================================================
+   [2.1] 首頁 & 標題視覺 (Typography)
+   ============================================================ */
+h1, h2, h3, .logo, .main-title {
+    font-weight: var(--weight-medium);
+    letter-spacing: 4px;
+    margin: 0;
+    text-transform: uppercase;
 }
 
-.product-card {
-  position: relative;
-  background: var(--color-white);
-  border-radius: var(--radius);
-  padding: 12px;
+.brand-label, .product-code, .path, .footer-note {
+    font-weight: var(--weight-thin); /* 輔助資訊使用最細字體 */
+    font-size: 11px;
+    letter-spacing: 1px;
+    color: #888;
 }
 
-/* 需求：品牌標籤 (背景藍灰，文字奶油米色) */
-.brand-tag {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  z-index: 5;
-  background: #b9c3cd;
-  color: #ede4d2; 
-  padding: 2px 8px;
-  font-size: 11px;
-  border-radius: 4px;
-  font-weight: bold;
-}
+/* ============================================================
+   [2.2 & 2.3] 商品列表排版 (Grids)
+   ============================================================ */
+.container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
 
-.image-wrapper {
-  width: 100%;
-  aspect-ratio: 1 / 1;
-  overflow: hidden;
-  border-radius: calc(var(--radius) - 4px);
-  margin-bottom: 12px;
-}
-.image-wrapper img { width: 100%; height: 100%; object-fit: cover; }
-
-.product-info .name {
-  font-size: 16px;
-  margin: 8px 0;
-  color: var(--color-primary);
-  font-weight: 600;
-}
-
-/* 顏色色塊 */
-.color-swatches { display: flex; gap: 6px; margin: 8px 0; flex-wrap: wrap; }
-.swatch-dot {
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  border: 1px solid #eee;
-  background-size: cover;
-  background-position: center;
-}
-
-/* 價格排版與標籤顏色 (#e2c890) */
-.price-group { border-top: 1px dashed var(--color-section); padding-top: 10px; }
-.price-row { display: flex; align-items: center; font-size: 13px; margin-bottom: 4px; }
-.size-label { color: #e2c890; width: 75px; font-weight: bold; }
-
-.original-price { text-decoration: line-through; color: #bbb; margin-right: 6px; font-size: 11px; }
-.sale-price { color: #d14d4d; font-weight: bold; }
-
-@media (max-width: 768px) {
-  .product-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
-}
-/* 詳情頁佈局 */
-.product-detail-layout {
+/* 2 欄新品區 [2.2] */
+.product-grid-2 {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(2, 1fr);
     gap: 40px;
-    margin-bottom: 50px;
+    margin-bottom: 60px;
 }
 
-/* 輪播圖控制 */
-.carousel-main {
-    position: relative;
-    aspect-ratio: 1/1;
-    background: #fff;
-    border-radius: 12px;
-    overflow: hidden;
-}
-.carousel-main .slide {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    opacity: 0;
-    transition: 0.5s;
-}
-.carousel-main .slide.active { opacity: 1; }
-.carousel-main button {
-    position: absolute; top: 50%; transform: translateY(-50%);
-    background: rgba(255,255,255,0.7); border: none; padding: 10px; cursor: pointer;
-}
-.carousel-main .next { right: 10px; } .carousel-main .prev { left: 10px; }
-
-/* 顏色選擇器 */
-.color-dot {
-    width: 30px; height: 30px; border-radius: 50%; display: inline-block;
-    margin-right: 10px; border: 2px solid #ddd; cursor: pointer; background-size: cover;
+/* 4 欄系列區 [2.3] */
+.product-grid-4 {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
 }
 
-/* 細節圖 */
-.detail-images-grid { display: flex; flex-direction: column; gap: 20px; }
-.detail-img { width: 100%; border-radius: 8px; }
+/* [2.4] 售罄遮罩與色票 */
+.product-card { position: relative; display: block; text-decoration: none; color: inherit; }
 
+.sold-out-overlay {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(255, 255, 255, 0.65);
+    display: flex; justify-content: center; align-items: center;
+    z-index: 5;
+}
+
+.sold-out-text {
+    font-weight: var(--weight-medium);
+    background: #000; color: #fff; padding: 6px 16px; font-size: 11px;
+    letter-spacing: 2px;
+}
+
+.color-swatches { display: flex; gap: 6px; margin-top: 12px; }
+.color-dot { width: 12px; height: 12px; border-radius: 50%; border: 1px solid #eee; }
+
+/* ============================================================
+   [3.3 - 3.7] 商品詳情頁組件 (Detail)
+   ============================================================ */
+/* 三色(尺寸)鈕 [3.3] */
+.size-grid { display: flex; gap: 10px; margin: 15px 0; }
+
+.size-btn {
+    flex: 1; padding: 12px;
+    font-family: var(--font-kr);
+    font-weight: var(--weight-medium); /* 按鈕字體稍重 */
+    border: 1px solid var(--border-gray);
+    background: #fff; cursor: pointer; transition: 0.3s;
+}
+
+.size-btn.active { background: #000; color: #fff; border-color: #000; }
+
+.size-btn.out-of-stock {
+    background: #f9f9f9; color: #ccc; cursor: not-allowed;
+    text-decoration: line-through; border-color: #eee;
+}
+
+/* 數量增減器 [3.5] */
+.qty-control { display: inline-flex; border: 1px solid var(--border-gray); }
+.qty-control button { 
+    width: 40px; height: 40px; background: #fff; border: none; cursor: pointer;
+    font-size: 18px; 
+}
+.qty-control input {
+    width: 45px; text-align: center; border: none;
+    font-family: var(--font-kr); font-weight: var(--weight-medium);
+    border-left: 1px solid var(--border-gray);
+    border-right: 1px solid var(--border-gray);
+}
+
+/* 1+1 Styling Tips [3.6] */
+.styling-tip {
+    margin: 20px 0; padding: 15px;
+    background: var(--bellot-beige);
+    border: 1px dashed #e6a23c;
+    font-size: 13px; font-weight: var(--weight-light);
+}
+
+/* 詳細說明多圖 [3.7] */
+.more-images-list img { width: 100%; display: block; margin-bottom: 10px; }
+
+/* ============================================================
+   [4.6] 購物車結算大方塊 (Cart Summary)
+   ============================================================ */
+.checkout-summary-box {
+    margin-top: 40px; border: 4px solid var(--light-gray); padding: 30px;
+    display: flex; justify-content: space-around; align-items: center;
+}
+
+.summary-item strong {
+    font-weight: var(--weight-medium);
+    font-size: 18px;
+}
+
+.final-total-price {
+    font-size: 24px; color: var(--sale-red);
+    font-weight: var(--weight-medium);
+}
+
+/* 結帳按鈕 [4.7] */
+.primary-btn {
+    width: 100%; padding: 20px; background: #000; color: #fff;
+    border: none; font-family: var(--font-kr); font-weight: var(--weight-medium);
+    letter-spacing: 2px; cursor: pointer; transition: 0.3s;
+}
+.primary-btn:hover { background: #333; }
+
+/* ============================================================
+   [5.1] 動效與響應式 (Skeleton & RWD)
+   ============================================================ */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* RWD: 手機版全網格回彈至 2 欄位 */
 @media (max-width: 768px) {
-    .product-detail-layout { grid-template-columns: 1fr; }
+    .product-grid-2, .product-grid-4 {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+    }
+    .checkout-summary-box {
+        flex-direction: column; gap: 20px;
+    }
 }

@@ -1,22 +1,40 @@
-<!-- sidebar.html -->
-<aside id="sidebar" class="sidebar">
-    <!-- 側欄切換按鈕 -->
-    <button id="sidebar-toggle" class="sidebar-toggle">☰ 分類/篩選</button>
-
-    <!-- 側欄內容容器 -->
+<aside id="sidebar-left" class="sidebar">
+    <div class="sidebar-header">
+        <button class="close-btn" onclick="Sidebar.toggle('left')">✕</button>
+    </div>
     <div class="sidebar-content">
-        <!-- 分類列表容器 -->
-        <section class="sidebar-section">
-            <h3>分類</h3>
-            <ul id="category-list"></ul>
-        </section>
-
-        <!-- 品牌列表容器 -->
-        <section class="sidebar-section">
-            <h3>品牌</h3>
-            <ul id="brand-list"></ul>
-        </section>
-
-
+        <nav id="category-menu"></nav>
+        
+        <hr class="thin-line">
+        
+        <div id="brand-filter-area">
+            <h4>BRANDS</h4>
+            <div id="brand-list"></div>
+        </div>
     </div>
 </aside>
+
+<aside id="sidebar-right" class="sidebar">
+    <div class="sidebar-header">
+        <h3>SHOPPING CART</h3>
+        <button class="close-btn" onclick="Sidebar.toggle('right')">✕</button>
+    </div>
+    
+    <div class="cart-items-container" id="cart-items">
+        </div>
+
+    <div class="cart-footer">
+        <div id="cart-summary-area">
+            </div>
+        <a href="cart.html" class="checkout-btn">PROCEED TO CHECKOUT</a>
+    </div>
+</aside>
+
+<div id="quick-tools">
+    <a href="" class="quick-tool-btn line-btn quick-line-link" target="_blank">
+        <img src="images/line-icon.png" alt="LINE">
+    </a>
+    <button id="back-to-top" class="quick-tool-btn" onclick="window.scrollTo({top:0, behavior:'smooth'})">
+        TOP
+    </button>
+</div>
