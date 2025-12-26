@@ -1,80 +1,70 @@
-// load-snippets.js
-// 功能：載入 HTML snippet，並支援購物車更新與事件綁定
+/**
+ * assets/js/load-snippets.js
+ * 職責：載入全站 HTML 片段並填充 [31項檢核] 相關數據
+ */
 
-async function loadSnippet(fileName, containerId) {
-    const container = document.getElementById(containerId);
-    if (!container) {
-        console.warn(`loadSnippet 防呆：容器 #${containerId} 不存在`);
-        return;
-    }
+async function loadSnippets() {
+    console.log("🏗️ Snippets: 開始組裝頁面骨架...");
 
-    const snippetPath = `assets/snippets/${fileName}.html`; // 相對路徑
-
-    try {
-        const response = await fetch(snippetPath);
-        if (!response.ok) {
-            console.warn(`載入失敗：${snippetPath} (${response.status})`);
-            container.innerHTML = `<p style="color:red;">⚠️ 無法載入 ${fileName}</p>`;
-            return;
-        }
-        const html = await response.text();
-        container.innerHTML = html;
-
-        // 如果載入的是 header，執行購物車相關功能
-        if (fileName === 'header') {
-            updateCartIcon();
-            attachCartListeners();
-        }
-
-    } catch (err) {
-        console.error(`載入 ${snippetPath} 時發生錯誤:`, err);
-        container.innerHTML = `<p style="color:red;">⚠️ 載入 ${fileName} 發生錯誤</p>`;
-    }
-}
-
-// 一次載入多個 snippet
-async function loadAllSnippets(snippets) {
-    if (!Array.isArray(snippets) || snippets.length === 0) return;
-    const promises = snippets.map(s => loadSnippet(s.fileName, s.containerId));
-    await Promise.all(promises);
-}
-
-// 購物車圖示更新
-function updateCartIcon() {
-    const cart = JSON.parse(localStorage.getItem('cart') || '{}');
-    const count = Object.values(cart).reduce((sum, item) => sum + (item.qty || 0), 0);
-
-    const cartIcon = document.getElementById('cartIcon');
-    const cartCount = document.getElementById('cartCount');
-
-    if (cartIcon && cartCount) {
-        if (count >= 1) {
-            cartIcon.src = "https://raw.githubusercontent.com/aifangkids/aifang-studio/main/images/cart3.png";
-            cartCount.textContent = count;
-            cartCount.style.display = "flex";
-        } else {
-            cartIcon.src = "https://raw.githubusercontent.com/aifangkids/aifang-studio/main/images/cart2.png";
-            cartCount.style.display = "none";
-        }
-    }
-}
-
-// 綁定購物車點擊事件
-function attachCartListeners() {
-    const cartContainer = document.querySelector('.cart-container');
-    if (cartContainer) {
-        cartContainer.addEventListener('click', () => {
-            window.location.href = 'cart.html';
-        });
-    }
-}
-
-// DOMContentLoaded 時自動載入 snippets
-document.addEventListener('DOMContentLoaded', () => {
-    const snippetsToLoad = [
-        { fileName: 'header', containerId: 'header-container' },
-        { fileName: 'footer', containerId: 'footer-container' },
-        { fileName: 'sidebar', containerId: 'sidebar-container' }
+    const snippets = [
+        { id: 'header-placeholder', file: 'assets/snippets/header.html' },
+        { id: 'footer-placeholder', file: 'assets/snippets/footer.html' },
+        { id: 'sidebar-placeholder', file: 'assets/snippets/sidebar.html' }
     ];
-    loadAllSnippets(snippetsToLoad);
-});
+
+    for (const item of snippets) {
+        const target = document.getElementById(item.id);
+        if (!target) continue;
+
+        try {
+            const response = await fetch(item.file);
+            if (!response.ok) throw new Error(`無法讀取 ${item.file}`);
+            const html = await response.text();
+            target.innerHTML = html;
+        } catch (error) {
+            console.error(`❌ Snippets Error [4.5]:`, error);
+            target.style.display = 'none'; // 防錯：載入失敗就隱藏該區塊
+        }
+    }
+
+    // 填充數據
+    hydrateSnippets();
+}
+
+/**
+ * 數據填充 (Hydration)
+ * 對應項目：[1.1], [6.1], [6.2], [6.3], [5.4]
+ */
+function hydrateSnippets() {
+    // [1.1] LOGO 設定 (修正路徑)
+    const logoImgs = document.querySelectorAll('.header-logo img');
+    logoImgs.forEach(img => {
+        img.src = CONFIG.BRAND.LOGO_IMG;
+        img.alt = CONFIG.BRAND.NAME;
+    });
+
+    // [6.2] 自動更新年份
+    const yearSpan = document.getElementById('year');
+    if (yearSpan) yearSpan.innerText = new Date().getFullYear();
+
+    // [6.1] Footer 客服資訊
+    const footerEmail = document.getElementById('footer-email');
+    if (footerEmail) footerEmail.innerText = CONFIG.BRAND.EMAIL;
+    
+    // [6.3] 公司資訊
+    const footerCompany = document.getElementById('footer-company');
+    if (footerCompany) footerCompany.innerText = CONFIG.BRAND.COMPANY_FULL_NAME;
+
+    const footerTax = document.getElementById('footer-tax');
+    if (footerTax) footerTax.innerText = CONFIG.BRAND.TAX_ID;
+
+    // [5.4] LINE 連結同步
+    const lineLinks = document.querySelectorAll('.quick-line-link');
+    lineLinks.forEach(link => {
+        link.href = CONFIG.BRAND.LINE_URL;
+    });
+
+    console.log("✨ Snippets: 31項相關數據填充完成");
+}
+
+document.addEventListener('DOMContentLoaded', loadSnippets);
