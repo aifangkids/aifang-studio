@@ -6,7 +6,7 @@
  * - postOrderAction() (訂單狀態操作)
  */
 
-const GAS_API_BASE = "https://script.google.com/macros/s/AKfycbxGx5-DLVsOyEgFsCnASkCbikJk9qBNTWcO3hWNdWqYiYcyv9QS2eg4ugFEEZ_IFiHWEA/exec";
+const GAS_API_BASE = "https://script.google.com/macros/s/AKfycbxnlAwKJucHmCKcJwv67TWuKV0X74Daag9X9I4NG7DOESREuYdU7BtWBPcEHyoJphoEfg/exec";
 const API_KEY = "300689";
 
 /**
