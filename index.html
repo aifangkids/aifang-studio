@@ -1,65 +1,33 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AiFang Studio | Bellot 2.0 Mode</title>
-    <link rel="stylesheet" href="assets/css/style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AiFang Kids Studio</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
+<header id="main-header">
+    <div class="menu-icon" onclick="openNav('left-menu')">☰</div>
+    <div class="logo" onclick="location.reload()">AiFang</div>
+    <div class="cart-icon" onclick="openNav('right-cart')">🛒</div>
+</header>
 
-    <div id="header-placeholder"></div>
+<div class="nav-overlay" id="overlay" onclick="closeAll()"></div>
 
-    <main class="home-main">
+<div class="side-nav" id="left-menu"></div>
+<div class="side-nav" id="right-cart"></div>
 
-        <section class="hero-section">
-            <div class="hero-inner">
-                <div class="hero-text-box">
-                    <span class="sub-title">2025 SS COLLECTION</span>
-                    <h2 class="main-title">Simply, Purely, AiFangKids.</h2>
-                    <a href="#series-container" class="shop-now-btn">VIEW COLLECTION</a>
-                </div>
-            </div>
-        </section>
+<main id="page-index">
+    <section class="hero"></section>
+    <div class="section-title">NEW ARRIVALS</div>
+    <div class="grid-2col" id="new-arrivals"></div>
 
-        <section class="section-new-arrivals">
-            <div class="section-header">
-                <h3 id="home-title">NEW ARRIVALS</h3>
-                <p>探索本季最迷人的 BEBE / KIDS / JUNIOR 系列</p>
-            </div>
-            
-            <div id="new-arrivals-container" class="product-grid-2">
-                <div class="skeleton-card"></div>
-                <div class="skeleton-card"></div>
-            </div>
-        </section>
+    <div class="section-title">COLLECTION</div>
+    <div class="grid-4col" id="collection"></div>
+</main>
 
-        <section class="section-series-items">
-            <div class="section-header">
-                <h3>WEEKLY BEST</h3>
-            </div>
-
-            <div id="series-container" class="product-grid-4">
-                </div>
-        </section>
-
-    </main>
-
-    <div id="footer-placeholder"></div>
-
-    <div id="sidebar-placeholder"></div>
-    <div id="quick-tools-placeholder"></div>
-
-    <script src="assets/js/config.js"></script>
-    
-    <script src="assets/js/api.js"></script>
-    
-    <script src="assets/js/cart.js"></script>
-    <script src="assets/js/sidebar.js"></script>
-    
-    <script src="assets/js/index-render.js"></script>
-    
-    <script src="assets/js/load-snippets.js"></script>
-
+<script src="api.js"></script>
+<script src="index.js"></script>
 </body>
 </html>
