@@ -1,20 +1,32 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="zh-Hant">
 <head>
   <meta charset="UTF-8" />
-  <title>AiFang Kids</title>
-  <link rel="stylesheet" href="./css/index.css">
+  <title>AiFang Kids Studio</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- favicon -->
+  <link rel="icon" href="./favicon.ico" />
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="./css/index.css" />
 </head>
+
 <body>
+  <!-- Header -->
+  <header class="site-header">
+    <h1 class="logo">AiFang Kids</h1>
+  </header>
 
-<section class="hero"></section>
+  <main class="layout">
+    <!-- Sidebar -->
+    <aside id="sidebar" class="sidebar"></aside>
 
-<h2 class="section-title">NEW ARRIVALS</h2>
-<div class="grid-2col" id="new-arrivals"></div>
+    <!-- Product List -->
+    <section id="product-list" class="product-list"></section>
+  </main>
 
-<h2 class="section-title">COLLECTION</h2>
-<div class="grid-4col" id="collection"></div>
-
-<script type="module" src="./js/index.js"></script>
+  <!-- JS -->
+  <script type="module" src="./js/index.js"></script>
 </body>
 </html>
