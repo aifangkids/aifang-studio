@@ -1,4 +1,4 @@
-import { fetchProducts } from "./api.js"; // 永遠不用改 api.js
+import { fetchProducts } from "./js/api.js"; // 永遠不用改 api.js
 
 const heroBanner = document.getElementById("hero-banner");
 const newArrivals = document.getElementById("new-arrivals");
