@@ -1,55 +1,47 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AiFang Studio | NEW & COLLECTION</title>
-<link rel="stylesheet" href="./css/index.css">
+  <meta charset="UTF-8" />
+  <title>AiFang Studio</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="./index.css" />
+
 </head>
 <body>
 
-<!-- Header -->
-<header id="main-header">
-    <div class="logo">
-        <a href="./index.html"><img src="./images/ui/logo.png" alt="AiFang Logo"></a>
-    </div>
-    <div class="cart-icon" onclick="openCart()">
-        <img src="./images/ui/icon_tcart.png" alt="Cart">
-    </div>
-    <div class="menu-icon" onclick="toggleLeftMenu(true)">
-        <img src="./images/ui/menu.png" alt="Menu">
-    </div>
+<!-- ================= HEADER ================= -->
+<header class="header">
+  <img src="./images/ui/menu.png" class="icon" id="btnMenu" />
+  <img src="./images/ui/logo.png" class="logo" id="btnHome" />
+  <img src="./images/ui/icon_tcart.png" class="icon" id="btnCart" />
 </header>
 
-<!-- Banner -->
+<!-- ================= HERO ================= -->
 <section class="hero">
-    <img src="./images/banner/hero.jpg" alt="Hero Banner">
+  <!-- 寫死路徑，之後只換圖 -->
+  <img src="./images/banner/hero.jpg" alt="Hero">
 </section>
 
-<!-- 左側分類 / 品牌 -->
-<aside id="left-menu" class="side-nav">
-    <div class="menu-header">分類 / 品牌</div>
-    <div id="category-list"></div>
-</aside>
+<!-- ================= MAIN ================= -->
+<main class="container">
 
-<!-- 右側購物車 -->
-<aside id="right-cart" class="side-nav">
-    <div class="menu-header">購物車</div>
-    <div id="cart-preview"></div>
-    <button id="go-cart">前往購物車</button>
-</aside>
+  <!-- NEW -->
+  <section>
+    <h2 class="section-title">NEW</h2>
+    <div id="newGrid" class="grid grid-2col"></div>
+  </section>
 
-<!-- 主內容 -->
-<main>
-    <section class="section-title">NEW ARRIVALS</section>
-    <div id="new-grid" class="grid-2col"></div>
+  <!-- COLLECTION -->
+  <section>
+    <h2 class="section-title">COLLECTION</h2>
+    <div id="collectionGrid" class="grid grid-4col"></div>
+  </section>
 
-    <section class="section-title">COLLECTION</section>
-    <div id="collection-grid" class="grid-4col"></div>
 </main>
 
-<!-- Scripts -->
-<script src="./js/api.js"></script>
-<script src="./js/index.js"></script>
+<!-- ================= JS (MODULE) ================= -->
+<script type="module" src="./js/index.js"></script>
 </body>
 </html>
