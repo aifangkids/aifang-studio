@@ -1,102 +1,80 @@
-// index.js (正式版)
-// ⚠️ 注意：不改 api.js，直接使用它提供的資料或函式
-document.addEventListener('DOMContentLoaded', () => {
-    try {
-        initPage();
-    } catch (err) {
-        console.error("初始化頁面錯誤", err);
-    }
-});
+// index.js
+document.addEventListener('DOMContentLoaded', initPage);
 
 function initPage() {
-    // 1️⃣ 動態生成分類 / 品牌
-    generateCategories(products); // 假設 api.js 有全域變數 products
-
-    // 2️⃣ 分流 NEW / COLLECTION
-    const newProducts = products.filter(p => p.collection === 'NEW' && p.status === 'ACTIVE');
-    const collectionProducts = products.filter(p => p.collection === 'COLLECTION' && p.status === 'ACTIVE');
-
-    generateProductGrid('new-grid', newProducts);
-    generateProductGrid('collection-grid', collectionProducts);
-
-    // 3️⃣ 購物車初始化
-    renderCart();
+    const apiUrl = './js/api.js'; // api.js 鎖死，不能改
+    // fetch API.js 或你的 JSON endpoint
+    fetch(apiUrl)
+        .then(res => res.json())
+        .then(products => {
+            generateCategories(products);
+            generateProductGrid('new-grid', products.filter(p => p.collection === 'NEW'));
+            generateProductGrid('collection-grid', products.filter(p => p.collection === 'COLLECTION'));
+        })
+        .catch(err => console.error('API fetch error:', err));
 }
 
-// -------------------- 左側分類 / 品牌 --------------------
+// 左側分類 / 品牌
 function generateCategories(products) {
-    const container = document.getElementById('category-container');
-    const categoryMap = {};
+    const container = document.getElementById('category-list');
+    const categories = [...new Set(products.map(p => p.category))];
 
-    products.forEach(p => {
-        if(p.status !== 'ACTIVE') return;
-        if(!categoryMap[p.category]) categoryMap[p.category] = new Set();
-        categoryMap[p.category].add(p.brand);
-    });
-
-    let html = '';
-    Object.keys(categoryMap).forEach(cat => {
-        html += `<div class="cat-item">${cat}<div class="brands">`;
-        categoryMap[cat].forEach(brand => {
-            html += `<label><input type="checkbox" class="brand-filter" value="${brand}"> ${brand}</label>`;
+    categories.forEach(cat => {
+        const brands = [...new Set(products.filter(p => p.category === cat).map(p => p.brand))];
+        const catDiv = document.createElement('div');
+        catDiv.className = 'category';
+        catDiv.innerHTML = `<div class="cat-title">${cat}</div>`;
+        const brandList = document.createElement('ul');
+        brands.forEach(brand => {
+            const li = document.createElement('li');
+            li.innerHTML = `<label><input type="checkbox" class="brand-checkbox" value="${brand}"> ${brand}</label>`;
+            brandList.appendChild(li);
         });
-        html += `</div></div>`;
-    });
-
-    container.innerHTML = html;
-
-    // 篩選事件
-    container.querySelectorAll('.brand-filter').forEach(cb => {
-        cb.addEventListener('change', filterProductsByBrand);
+        catDiv.appendChild(brandList);
+        container.appendChild(catDiv);
     });
 }
 
-function filterProductsByBrand() {
-    const checkedBrands = Array.from(document.querySelectorAll('.brand-filter:checked')).map(cb=>cb.value);
-    const newProducts = products.filter(p => p.collection==='NEW' && p.status==='ACTIVE' && (checkedBrands.length===0 || checkedBrands.includes(p.brand)));
-    const collectionProducts = products.filter(p => p.collection==='COLLECTION' && p.status==='ACTIVE' && (checkedBrands.length===0 || checkedBrands.includes(p.brand)));
-
-    generateProductGrid('new-grid', newProducts);
-    generateProductGrid('collection-grid', collectionProducts);
-}
-
-// -------------------- 生成商品卡 --------------------
-function generateProductGrid(containerId, items) {
+// 生成商品卡
+function generateProductGrid(containerId, products) {
     const container = document.getElementById(containerId);
     container.innerHTML = '';
-
-    items.forEach(p => {
-        const soldOut = !p.price_baby && !p.price_kid && !p.price_junior && !p.price_adult;
-        const priceHtml = soldOut ? `<span class="sold-out">SOLD OUT</span>` :
-            (p.price_baby_10off ? `<span class="price-off">NT$ ${p.price_baby_10off} <del>${p.price_baby}</del></span>` : `<span class="price">NT$ ${p.price_baby}</span>`);
-
-        let colorHtml = '';
-        if(p.color_code) {
-            const colors = p.color_code.split(',');
-            colors.forEach(c=>colorHtml+=`<span class="color-dot" style="background:${c}"></span>`);
-        }
-        container.innerHTML += `
-        <div class="p-card" onclick="location.href='detail.html?code=${p.code}'">
+    products.forEach(p => {
+        const card = document.createElement('div');
+        card.className = 'p-card';
+        card.innerHTML = `
             <div class="p-img-box">
-                <img src="./images/${p.image_main}" class="p-img-main">
-                ${p.image_hover ? `<img src="./images/${p.image_hover}" class="p-img-hover">` : ''}
+                <img class="p-img-main" src="./images/${p.image_main}" alt="${p.name}">
+                <img class="p-img-hover" src="./images/${p.image_hover}" alt="${p.name}">
             </div>
             <div class="p-info">
                 <div class="brand-tag">${p.brand}</div>
                 <div class="p-name">${p.name}</div>
-                <div class="p-price">${priceHtml}</div>
-                <div class="color-container">${colorHtml}</div>
+                <div class="p-price">
+                    ${p.price_baby_10off ? `<span class="old">NT$${p.price_baby}</span> <span class="discount">NT$${p.price_baby_10off} -10%OFF</span>` : `NT$${p.price_baby}`}
+                </div>
+                <div class="color-swatch">
+                    ${generateColorSwatch(p.color_code, p.color_pattern)}
+                </div>
             </div>
-        </div>`;
+        `;
+        card.onclick = () => window.location.href = `detail.html?code=${p.code}`;
+        container.appendChild(card);
     });
 }
 
-// -------------------- 購物車 --------------------
-function renderCart() {
-    const cartContainer = document.getElementById('cart-container');
-    cartContainer.innerHTML = `<p>購物車預覽</p>`;
+function generateColorSwatch(color_code, color_pattern) {
+    let swatches = '';
+    if(color_code) swatches += `<span class="swatch" style="background:${color_code}"></span>`;
+    if(color_pattern) swatches += `<span class="swatch pattern" style="background:url('./images/${color_pattern}') center/cover"></span>`;
+    return swatches;
 }
 
-// -------------------- 側邊欄控制 --------------------
-function openNav(id){document.getElementById(id).classList.add('active');document.getElementById('overlay').style.display='block';}
-function closeAll(){document.getElementById('left-menu').classList.remove('active');document.getElementById('right-cart').classList.remove('active');document.getElementById('overlay').style.display='none';}
+// 右側購物車
+function openCart() {
+    document.getElementById('right-cart').classList.toggle('active');
+}
+
+function toggleLeftMenu(open) {
+    document.getElementById('left-menu').classList.toggle('active', open);
+}
