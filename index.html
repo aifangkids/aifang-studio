@@ -2,71 +2,62 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8" />
+  <title>AiFang Kids Studio</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AiFang Kids</title>
 
-  <!-- ============================= -->
-  <!-- CSS（路徑固定） -->
-  <!-- ============================= -->
-  <link rel="stylesheet" href="./css/index.css" />
+  <!-- CSS -->
+  <link rel="stylesheet" href="./index.css" />
 
-  <!-- ============================= -->
-  <!-- API（鎖定，不可改） -->
-  <!-- ============================= -->
-  <script src="./js/api.js"></script>
+  <!-- JS -->
+  <script type="module" src="./js/index.js" defer></script>
 </head>
-
 <body>
 
-  <!-- ============================= -->
-  <!-- HERO / LOGO（寫死路徑） -->
-  <!-- 之後換圖只改 src -->
-  <!-- ============================= -->
-  <header class="hero-header">
-    <a href="./index.html" class="logo-link">
-      <!-- LOGO 圖 -->
-      <img
-        src="./images/ui/logo.png"
-        alt="AiFang Kids"
-        class="site-logo"
-      />
-    </a>
+<!-- ================= Header ================= -->
+<header class="site-header">
+  <a href="./index.html" class="logo">
+    <img src="./images/ui/logo.png" alt="AiFang Kids">
+  </a>
+</header>
 
-    <!-- HERO BANNER -->
-    <div class="hero-banner">
-      <img
-        src="./images/banner/hero.jpg"
-        alt="Hero Banner"
-        class="hero-image"
-      />
-    </div>
-  </header>
+<!-- ================= Hero Banner ================= -->
+<section class="hero">
+  <!-- 🔧 之後只要換這張圖即可 -->
+  <img src="./images/banner/hero.jpg" alt="Hero Banner">
+</section>
 
-  <!-- ============================= -->
-  <!-- NEW 區塊 -->
-  <!-- category = NEW -->
-  <!-- ============================= -->
-  <section class="section">
-    <h2 class="section-title">NEW</h2>
+<!-- ================= Main ================= -->
+<main class="layout">
 
-    <!-- JS 自動塞商品卡 -->
-    <div id="new-collection" class="collection-grid"></div>
+  <!-- ===== Left Menu ===== -->
+  <aside class="left-menu">
+    <h3>☰ 分類</h3>
+    <div id="categoryMenu"></div>
+  </aside>
+
+  <!-- ===== Product Area ===== -->
+  <section class="product-area">
+
+    <!-- NEW -->
+    <section class="collection-block">
+      <h2>NEW</h2>
+      <div id="newProducts" class="grid grid-2"></div>
+    </section>
+
+    <!-- COLLECTION -->
+    <section class="collection-block">
+      <h2>COLLECTION</h2>
+      <div id="collectionProducts" class="grid grid-4"></div>
+    </section>
+
   </section>
 
-  <!-- ============================= -->
-  <!-- COLLECTION 區塊 -->
-  <!-- category = COLLECTION -->
-  <!-- ============================= -->
-  <section class="section">
-    <h2 class="section-title">COLLECTION</h2>
+  <!-- ===== Right Cart Sidebar ===== -->
+<section class="cart-sidebar">
+  <!-- 🔧 之後只要換這張圖即可 -->
+  <img src="./images/ui/cart.png" alt="cart-sidebar">
+</section>
+</main>
 
-    <!-- JS 自動塞商品卡 -->
-    <div id="main-collection" class="collection-grid"></div>
-  </section>
-
-  <!-- ============================= -->
-  <!-- INDEX JS（商業邏輯） -->
-  <!-- ============================= -->
-  <script src="./js/index.js"></script>
 </body>
 </html>

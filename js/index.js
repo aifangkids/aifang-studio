@@ -1,93 +1,152 @@
-import { fetchProducts } from "./js/api.js"; // 永遠不用改 api.js
+import { fetchProducts } from "./api.js";
 
-const heroBanner = document.getElementById("hero-banner");
-const newArrivals = document.getElementById("new-arrivals");
-const collection = document.getElementById("collection");
+/* =========================
+   狀態
+========================= */
+let allProducts = [];
+let activeCategories = new Set();
+let activeBrands = new Set();
 
-const SIZES = ["baby","kids","junior","adult"];
-
-// 初始化
-async function init() {
-    try {
-        const products = await fetchProducts();
-        const activeProducts = products.filter(p => p.status === "ACTIVE");
-
-        renderHero(activeProducts);
-        renderNewArrivals(activeProducts);
-        renderCollection(activeProducts);
-    } catch(err) {
-        console.error("初始化失敗", err);
-    }
-}
-
-// 取得顯示價格
-function getDisplayPrice(product, sizeKey) {
-    const price = product[`price_${sizeKey}`];
-    const priceOff = product[`price_${sizeKey}_10off`] || product[`price_${sizeKey}_sale`];
-    const label = product[`price_${sizeKey}_label`] || "";
-
-    if(!price) return "";
-    if(priceOff) return `<del>${price}</del> <span style="color:#d9534f;">${priceOff} ${label}</span>`;
-    return `${price} ${product.currency || "NT$"}`;
-}
-
-// 生成尺寸按鈕區塊
-function renderSizeButtons(product, sizeKey) {
-    const sizes = product[`sizes_${sizeKey}`];
-    if(!sizes || sizes.length === 0) return "";
-    const priceHTML = getDisplayPrice(product, sizeKey);
-
-    return `
-    <div class="size-category">
-        <div style="display:flex; justify-content:space-between; font-size:13px; margin-bottom:10px;">
-            ${sizeKey.toUpperCase()} <strong>${priceHTML}</strong>
-        </div>
-        <div style="display:flex; gap:10px;">
-            ${sizes.map(sz => `<button class="s-btn s-btn-${sizeKey}">${sz}</button>`).join("")}
-        </div>
-    </div>
-    `;
-}
-
-// 商品卡
-function renderProductCard(product) {
-    // hover 圖片僅存在才加入
-    const hoverImg = product.image_hover ? `<img class="p-img-hover" src="${product.image_hover}">` : "";
-    
-    // 判斷使用哪個尺寸做首頁顯示價格，優先 baby > kids > junior > adult
-    let displaySize = SIZES.find(s => product[`price_${s}`]);
-    const priceHTML = displaySize ? getDisplayPrice(product, displaySize) : "";
-
-    return `
-    <div class="p-card">
-        <div class="p-img-box">
-            <img class="p-img-main" src="${product.image_main}">
-            ${hoverImg}
-        </div>
-        <div class="p-info">
-            <div class="p-name">${product.name}</div>
-            <div class="p-price">${priceHTML}</div>
-        </div>
-    </div>
-    `;
-}
-
-// Hero Banner: 取 collection 欄位第一個
-function renderHero(products) {
-    const hero = products.find(p => p.collection);
-    if(hero) heroBanner.style.backgroundImage = `url(${hero.image_main})`;
-}
-
-// NEW ARRIVALS: is_new === true
-function renderNewArrivals(products) {
-    const newProducts = products.filter(p => p.is_new);
-    newArrivals.innerHTML = newProducts.map(renderProductCard).join("");
-}
-
-// COLLECTION: 前 8 個商品
-function renderCollection(products) {
-    const collProducts = products.slice(0, 8);
-    collection.innerHTML = collProducts.map(renderProductCard).join("");
-}
-
+/* =========================
+   初始化
+========================= */
 init();
+
+async function init() {
+  allProducts = (await fetchProducts())
+    .filter(p => p.status === "ACTIVE");
+
+  renderCategoryMenu();
+  renderProducts();
+}
+
+/* =========================
+   左側分類 / 品牌
+========================= */
+function renderCategoryMenu() {
+  const container = document.getElementById("categoryMenu");
+  container.innerHTML = "";
+
+  const categories = [...new Set(allProducts.map(p => p.category))];
+
+  categories.forEach(cat => {
+    const catBlock = document.createElement("div");
+    catBlock.className = "category-block";
+
+    const catTitle = document.createElement("div");
+    catTitle.className = "category-title";
+    catTitle.textContent = cat;
+    catTitle.onclick = () => toggleCategory(cat);
+
+    const brandList = document.createElement("div");
+    brandList.className = "brand-list";
+
+    const brands = [...new Set(
+      allProducts.filter(p => p.category === cat).map(p => p.brand)
+    )];
+
+    brands.forEach(brand => {
+      const label = document.createElement("label");
+      label.innerHTML = `
+        <input type="checkbox" data-brand="${brand}">
+        ${brand}
+      `;
+      label.querySelector("input").onchange = e => {
+        e.target.checked
+          ? activeBrands.add(brand)
+          : activeBrands.delete(brand);
+        renderProducts();
+      };
+      brandList.appendChild(label);
+    });
+
+    catBlock.append(catTitle, brandList);
+    container.appendChild(catBlock);
+  });
+}
+
+function toggleCategory(cat) {
+  activeCategories.has(cat)
+    ? activeCategories.delete(cat)
+    : activeCategories.add(cat);
+  renderProducts();
+}
+
+/* =========================
+   商品渲染
+========================= */
+function renderProducts() {
+  const newBox = document.getElementById("newProducts");
+  const colBox = document.getElementById("collectionProducts");
+  newBox.innerHTML = "";
+  colBox.innerHTML = "";
+
+  getFilteredProducts().forEach(p => {
+    const card = createProductCard(p);
+    p.collection === "NEW"
+      ? newBox.appendChild(card)
+      : colBox.appendChild(card);
+  });
+}
+
+function getFilteredProducts() {
+  return allProducts.filter(p => {
+    if (activeCategories.size && !activeCategories.has(p.category)) return false;
+    if (activeBrands.size && !activeBrands.has(p.brand)) return false;
+    return true;
+  });
+}
+
+/* =========================
+   商品卡
+========================= */
+function createProductCard(p) {
+  const soldOut = isSoldOut(p);
+
+  const card = document.createElement("a");
+  card.className = "product-card";
+  card.href = `./detail.html?code=${p.code}`;
+
+  card.innerHTML = `
+    <div class="img-wrap">
+      ${soldOut ? `<span class="soldout">SOLD OUT</span>` : ""}
+      <span class="brand-tag">${p.brand}</span>
+      <img src="${p.image_main}" alt="${p.name}">
+    </div>
+
+    <h4>${p.name}</h4>
+
+    ${renderPrice(p)}
+
+    <div class="colors">
+      ${renderColors(p)}
+    </div>
+  `;
+  return card;
+}
+
+function isSoldOut(p) {
+  return !p.price_baby && !p.price_kid && !p.price_junior;
+}
+
+function renderPrice(p) {
+  if (p.price_baby_10off) {
+    return `
+      <div class="price">
+        <del>${p.currency}${p.price_baby}</del>
+        <span class="sale">${p.currency}${p.price_baby_10off}</span>
+        <span class="off">-10%OFF</span>
+      </div>
+    `;
+  }
+  return `<div class="price">${p.currency}${p.price_baby}</div>`;
+}
+
+function renderColors(p) {
+  let html = "";
+  if (p.color_code)
+    html += `<span class="dot" style="background:${p.color_code}"></span>`;
+  if (p.color_pattern)
+    html += `<span class="dot pattern"></span>`;
+  return html;
+}

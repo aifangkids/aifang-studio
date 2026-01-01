@@ -1,104 +1,115 @@
-/* ============================= */
-/* 基本設定 */
-/* ============================= */
-* {
-  box-sizing: border-box;
-}
-
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, "Noto Sans TC", sans-serif;
-  background: #fff;
-  color: #333;
+  font-family: sans-serif;
 }
 
-/* ============================= */
-/* HERO / LOGO */
-/* ============================= */
-.hero-header {
-  text-align: center;
+.site-header {
+  padding: 12px;
 }
 
-.logo-link {
-  display: inline-block;
-  margin: 20px 0;
+.logo img {
+  height: 40px;
 }
 
-.site-logo {
-  height: 64px;
-  object-fit: contain;
-}
-
-.hero-banner img {
+.hero img {
   width: 100%;
-  display: block;
 }
 
-/* ============================= */
-/* 區塊標題 */
-/* ============================= */
-.section {
-  padding: 40px 20px;
+.layout {
+  display: flex;
 }
 
-.section-title {
-  font-size: 20px;
-  margin-bottom: 20px;
-  text-align: center;
+.left-menu {
+  width: 220px;
+  padding: 16px;
 }
 
-/* ============================= */
-/* 商品 Grid */
-/* ============================= */
-.collection-grid {
+.product-area {
+  flex: 1;
+  padding: 16px;
+}
+
+.cart-sidebar {
+  width: 240px;
+  border-left: 1px solid #eee;
+  padding: 16px;
+}
+
+.grid {
   display: grid;
-  gap: 20px;
+  gap: 16px;
 }
 
-/* 2 欄 */
-.collection-grid.col-2 {
+.grid-2 {
   grid-template-columns: repeat(2, 1fr);
 }
 
-/* 4 欄 */
-.collection-grid.col-4 {
+.grid-4 {
   grid-template-columns: repeat(4, 1fr);
 }
 
-/* ============================= */
-/* 商品卡 */
-/* ============================= */
 .product-card {
-  text-align: center;
+  text-decoration: none;
+  color: #000;
 }
 
-.product-image {
+.img-wrap {
   position: relative;
 }
 
-.product-image img {
+.img-wrap img {
   width: 100%;
-  display: block;
 }
 
-/* hover 圖 */
-.product-image img.hover {
+.brand-tag {
   position: absolute;
-  top: 0;
-  left: 0;
-  opacity: 0;
+  top: 8px;
+  left: 8px;
+  border: 1px solid #000;
+  background: #fff;
+  padding: 2px 6px;
+  font-size: 12px;
 }
 
-.product-image:hover img.hover {
-  opacity: 1;
+.soldout {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: #000;
+  color: #fff;
+  padding: 2px 6px;
 }
 
-.product-name {
-  margin-top: 8px;
-  font-size: 14px;
+.price del {
+  color: #999;
+  margin-right: 6px;
 }
 
-.product-price {
-  font-size: 14px;
-  margin-top: 4px;
+.sale {
+  color: red;
+}
+
+.off {
+  color: red;
+  font-size: 12px;
+  margin-left: 4px;
+}
+
+.colors .dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 4px;
+  border: 1px solid #ccc;
+}
+
+.dot.pattern {
+  background: repeating-linear-gradient(
+    45deg,
+    #000,
+    #000 2px,
+    #fff 2px,
+    #fff 4px
+  );
 }
