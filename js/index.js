@@ -1,4 +1,4 @@
-import { fetchProducts } from "./api.js";
+import { fetchProducts } from "./js/api.js";
 
 /* =========================
    狀態

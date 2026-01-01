@@ -1,115 +1,276 @@
-body {
+/* =================================================
+   FONT
+================================================= */
+@font-face {
+  font-family: 'Noto Sans KR';
+  src: url('./fonts/NotoSansKR-Light.ttf') format('truetype');
+  font-weight: 300;
+}
+@font-face {
+  font-family: 'Noto Sans KR';
+  src: url('./fonts/NotoSansKR-Regular.ttf') format('truetype');
+  font-weight: 400;
+}
+@font-face {
+  font-family: 'Noto Sans KR';
+  src: url('./fonts/NotoSansKR-Medium.ttf') format('truetype');
+  font-weight: 500;
+}
+
+* {
   margin: 0;
-  font-family: sans-serif;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-.site-header {
-  padding: 12px;
+body {
+  font-family: 'Noto Sans KR','Nanum Gothic','Malgun Gothic',sans-serif;
+  font-size: 12px;
+  color: #000;
+  background: #fff;
 }
 
-.logo img {
-  height: 40px;
-}
-
-.hero img {
-  width: 100%;
-}
-
-.layout {
-  display: flex;
-}
-
-.left-menu {
+/* =================================================
+   SIDEBAR (Left)
+================================================= */
+#sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
   width: 220px;
-  padding: 16px;
+  height: 100vh;
+  padding: 40px 20px;
+  background: #fff;
+  z-index: 100;
 }
 
-.product-area {
-  flex: 1;
-  padding: 16px;
+/* LOGO */
+.sb_top_logo {
+  margin-bottom: 40px;
 }
-
-.cart-sidebar {
-  width: 240px;
-  border-left: 1px solid #eee;
-  padding: 16px;
-}
-
-.grid {
-  display: grid;
-  gap: 16px;
-}
-
-.grid-2 {
-  grid-template-columns: repeat(2, 1fr);
-}
-
-.grid-4 {
-  grid-template-columns: repeat(4, 1fr);
-}
-
-.product-card {
+.sb_top_logo a {
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  color: #000;
   text-decoration: none;
+}
+
+/* CATEGORY */
+#category ul {
+  list-style: none;
+}
+#category li {
+  margin-bottom: 14px;
+}
+#category a {
+  font-size: 12px;
+  letter-spacing: 0.05em;
+  color: #000;
+  text-decoration: none;
+}
+#category a:hover {
+  opacity: .6;
+}
+
+/* BOARD */
+.Lcomm {
+  margin-top: 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.Lcomm a {
+  font-size: 11px;
+  color: #666;
+  text-decoration: none;
+}
+.Lcomm a:hover {
   color: #000;
 }
 
-.img-wrap {
-  position: relative;
-}
-
-.img-wrap img {
-  width: 100%;
-}
-
-.brand-tag {
+/* SHARE */
+.btn_wrap {
   position: absolute;
-  top: 8px;
-  left: 8px;
+  bottom: 30px;
+  left: 20px;
+}
+.btn_wrap span {
+  font-size: 11px;
+  color: #999;
+  display: block;
+  margin-bottom: 8px;
+}
+.btn_wrap_container a {
+  margin-right: 10px;
+  font-size: 14px;
+  color: #000;
+}
+.btn_wrap_container a:hover {
+  opacity: .6;
+}
+
+/* =================================================
+   MAIN CONTENT
+================================================= */
+main,
+#content {
+  margin-left: 220px;
+  padding: 60px 60px 100px;
+}
+
+/* =================================================
+   HERO
+================================================= */
+.hero {
+  width: 100%;
+  margin-bottom: 80px;
+}
+.hero img {
+  width: 100%;
+  display: block;
+}
+
+/* =================================================
+   SECTION TITLE (NEW / COLLECTION)
+================================================= */
+.section-title {
+  font-size: 13px;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  margin-bottom: 30px;
+}
+
+/* =================================================
+   PRODUCT GRID
+================================================= */
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 40px 24px;
+  margin-bottom: 100px;
+}
+
+/* 2col 用（NEW） */
+.product-grid.col-2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+/* =================================================
+   PRODUCT CARD
+================================================= */
+.product-card {
+  position: relative;
+  cursor: pointer;
+}
+
+.product-image {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+}
+.product-image img {
+  width: 100%;
+  display: block;
+}
+
+/* SOLD OUT */
+.badge-soldout {
+  position: absolute;
+  top: 10px;
+  right: 10px;
   border: 1px solid #000;
   background: #fff;
-  padding: 2px 6px;
-  font-size: 12px;
+  padding: 3px 6px;
+  font-size: 10px;
+  letter-spacing: .05em;
 }
 
-.soldout {
+/* BRAND */
+.badge-brand {
   position: absolute;
-  top: 8px;
-  right: 8px;
-  background: #000;
-  color: #fff;
-  padding: 2px 6px;
+  top: 10px;
+  left: 10px;
+  border: 1px solid #000;
+  background: #fff;
+  padding: 3px 6px;
+  font-size: 10px;
 }
 
-.price del {
+/* INFO */
+.product-info {
+  margin-top: 12px;
+}
+.product-name {
+  font-size: 12px;
+  line-height: 1.4;
+  margin-bottom: 6px;
+}
+.product-price {
+  font-size: 11px;
+}
+.product-price del {
   color: #999;
   margin-right: 6px;
 }
-
-.sale {
-  color: red;
+.product-price .sale {
+  color: #c00;
+  margin-left: 6px;
+  font-size: 10px;
 }
 
-.off {
-  color: red;
-  font-size: 12px;
-  margin-left: 4px;
+/* =================================================
+   COLOR DOTS
+================================================= */
+.color-dots {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
 }
-
-.colors .dot {
-  display: inline-block;
+.color-dot {
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  margin-right: 4px;
-  border: 1px solid #ccc;
+  border: 1px solid #ddd;
 }
 
-.dot.pattern {
-  background: repeating-linear-gradient(
-    45deg,
-    #000,
-    #000 2px,
-    #fff 2px,
-    #fff 4px
-  );
+/* =================================================
+   RIGHT CART (Preview)
+================================================= */
+#cart-sidebar {
+  position: fixed;
+  top: 0;
+  right: -360px;
+  width: 360px;
+  height: 100vh;
+  background: #fff;
+  border-left: 1px solid #eee;
+  padding: 30px;
+  transition: right .3s ease;
+  z-index: 200;
+}
+#cart-sidebar.active {
+  right: 0;
+}
+
+/* =================================================
+   RESPONSIVE
+================================================= */
+@media (max-width: 1024px) {
+  .product-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+@media (max-width: 768px) {
+  #sidebar {
+    display: none;
+  }
+  main,
+  #content {
+    margin-left: 0;
+    padding: 40px 20px;
+  }
+  .product-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
