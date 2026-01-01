@@ -1,78 +1,78 @@
-// index.js (ES Module)
-import { fetchProducts } from './api.js';
+/* ================== STEP 3 : CATEGORY + BRAND FILTER ================== */
 
-document.addEventListener('DOMContentLoaded', initPage);
+let allProducts = [];      // 原始商品
+let filteredProducts = []; // 篩選後商品
 
-async function initPage() {
-  try {
-    const products = await fetchProducts();
+function initPage(products) {
+  allProducts = products;
+  filteredProducts = products;
 
-    if (!Array.isArray(products)) {
-      console.error('API products 不是陣列', products);
-      return;
-    }
+  generateCategoryFilters(products);
+  generateBrandFilters(products);
 
-    renderProducts(products);
-  } catch (err) {
-    console.error('初始化頁面錯誤', err);
+  renderProducts(filteredProducts); // 你原本的商品卡渲染函式
+}
+
+/* ---------- 產生分類 ---------- */
+function generateCategoryFilters(products) {
+  const categories = [...new Set(products.map(p => p.category).filter(Boolean))];
+  const ul = document.getElementById('filter-category');
+  ul.innerHTML = '';
+
+  categories.forEach(cat => {
+    ul.innerHTML += `
+      <li>
+        <label>
+          <input type="checkbox" value="${cat}" class="filter-category">
+          ${cat}
+        </label>
+      </li>
+    `;
+  });
+}
+
+/* ---------- 產生品牌 ---------- */
+function generateBrandFilters(products) {
+  const brands = [...new Set(products.map(p => p.brand).filter(Boolean))];
+  const ul = document.getElementById('filter-brand');
+  ul.innerHTML = '';
+
+  brands.forEach(brand => {
+    ul.innerHTML += `
+      <li>
+        <label>
+          <input type="checkbox" value="${brand}" class="filter-brand">
+          ${brand}
+        </label>
+      </li>
+    `;
+  });
+}
+
+/* ---------- 綁定事件 ---------- */
+document.addEventListener('change', e => {
+  if (e.target.classList.contains('filter-category') ||
+      e.target.classList.contains('filter-brand')) {
+    applyFilters();
   }
-}
+});
 
-function renderProducts(products) {
-  const newGrid = document.getElementById('newGrid');
-  const collectionGrid = document.getElementById('collectionGrid');
+function applyFilters() {
+  const checkedCategories = [...document.querySelectorAll('.filter-category:checked')]
+    .map(cb => cb.value);
 
-  newGrid.innerHTML = '';
-  collectionGrid.innerHTML = '';
+  const checkedBrands = [...document.querySelectorAll('.filter-brand:checked')]
+    .map(cb => cb.value);
 
-  products
-    .filter(p => p.status === 'ACTIVE')
-    .forEach(p => {
-      const card = createProductCard(p);
+  filteredProducts = allProducts.filter(p => {
+    const matchCategory =
+      checkedCategories.length === 0 || checkedCategories.includes(p.category);
 
-      if (p.collection === 'NEW') {
-        newGrid.appendChild(card);
-      } else if (p.collection === 'COLLECTION') {
-        collectionGrid.appendChild(card);
-      }
-    });
-}
+    const matchBrand =
+      checkedBrands.length === 0 || checkedBrands.includes(p.brand);
 
-function createProductCard(p) {
-  const div = document.createElement('div');
-  div.className = 'product-card';
-
-  div.innerHTML = `
-    <div class="img-box">
-      <img src="${p.image_main}" alt="${p.name}">
-    </div>
-    <div class="info">
-      <div class="brand">${p.brand}</div>
-      <div class="name">${p.name}</div>
-      <div class="price">
-        ${renderPrice(p)}
-      </div>
-    </div>
-  `;
-
-  div.addEventListener('click', () => {
-    location.href = `detail.html?code=${p.code}`;
+    return matchCategory && matchBrand;
   });
 
-  return div;
-}
-
-function renderPrice(p) {
-  // index 頁只顯示「最低價區間」
-  const prices = [
-    p.price_baby_10off || p.price_baby,
-    p.price_kid_10off || p.price_kid,
-    p.price_junior_10off || p.price_junior,
-    p.price_adult_10off || p.price_adult
-  ].filter(Boolean);
-
-  if (!prices.length) return '<span class="soldout">SOLD OUT</span>';
-
-  const min = Math.min(...prices);
-  return `${p.currency || 'NT$'} ${min}`;
+  renderProducts(filteredProducts);
 }

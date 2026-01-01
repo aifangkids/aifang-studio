@@ -107,3 +107,40 @@ body {
 .soldout {
   color: #999;
 }
+
+/* ================== FILTER SIDEBAR ================== */
+#filter-sidebar {
+  padding: 20px 0;
+  font-size: 12px;
+}
+
+.filter-group {
+  margin-bottom: 24px;
+}
+
+.filter-group h4 {
+  font-weight: 500;
+  margin-bottom: 10px;
+  letter-spacing: .5px;
+}
+
+.filter-group ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.filter-group li {
+  margin-bottom: 6px;
+}
+
+.filter-group label {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.filter-group input[type="checkbox"] {
+  accent-color: #000;
+}
