@@ -1,59 +1,63 @@
 <!DOCTYPE html>
-<html lang="zh-Hant">
+<html lang="zh-TW">
 <head>
-  <meta charset="UTF-8" />
-  <title>AiFang Kids</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AIFANGKIDS | studio</title>
 
-  <!-- CSS -->
-  <link rel="stylesheet" href="./index.css" />
+  <link rel="icon" href="./favicon.ico" type="image/x-icon">
+  <link rel="stylesheet" href="./index.css">
 </head>
 
 <body>
 
-<!-- ================= HEADER ================= -->
-<header id="site-header">
-  <!-- LOGO（寫死路徑） -->
-  <img src="./images/ui/logo.png" class="logo" alt="AiFang Kids">
-
-  <!-- CART ICON（暫時只是圖） -->
-  <div class="cart-icon">🛒</div>
+<header class="top-header">
+  <img src="./images/ui/menu.png" class="header-icon" onclick="toggleMenu()" alt="Menu">
+  <img src="./images/ui/logo.png" class="main-logo" onclick="location.reload()" alt="AIFANGKIDS">
+  <img src="./images/ui/icon_tcart.png" class="header-icon" onclick="toggleCart()" alt="Cart">
 </header>
 
-<!-- ================= HERO ================= -->
-<section class="hero">
-  <!-- HERO 圖（寫死路徑） -->
-  <img src="./images/banner/hero.jpg" alt="Hero">
-</section>
+<div id="overlay" class="sidebar-overlay" onclick="closeMenu()"></div>
 
-<!-- ================= MAIN ================= -->
-<main class="container">
+<div id="popup-overlay">
+  <div class="popup-box">
+    <img id="popup-img" style="width:100%; display:block;">
+    <div class="popup-close" onclick="closePopup()">CLOSE [X]</div>
+  </div>
+</div>
 
-  <!-- ===== LEFT SIDEBAR ===== -->
-  <aside class="sidebar">
-    <h3>Category</h3>
-    <ul id="category-list"></ul>
+<div class="fixed-tools">
+  <div class="tool-btn" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">TOP</div>
+  <div class="tool-btn line-btn" onclick="window.open('https://line.me/R/ti/p/@844bwwjl', '_blank')">LINE</div>
+</div>
 
-    <h3>Brand</h3>
-    <ul id="brand-list"></ul>
-  </aside>
+<aside id="sidebar" class="sidebar">
+  <div class="filter-section">
+    <p class="filter-title">Category</p>
+    <ul class="category-menu">
+      <li onclick="filterByCat('All')" class="active">ALL ITEMS</li>
+      <li onclick="filterByCat('TOP')">TOP</li>
+      <li onclick="filterByCat('BOTTOM')">BOTTOM</li>
+      <li onclick="filterByCat('SET')">SET</li>
+      <li onclick="filterByCat('OUTRE')">OUTRE</li>
+      <li onclick="filterByCat('BEBE')">BEBE</li>
+      <li onclick="filterByCat('FAMILY')">FAMILY</li>
+      <li onclick="filterByCat('ACC')">ACC</li>
+    </ul>
+  </div>
 
-  <!-- ===== PRODUCT AREA ===== -->
-  <section class="product-area">
+  <div id="brand-area" class="brand-panel">
+    <p class="filter-title" style="font-size:10px;border:none;margin-top:10px;">
+      Select Brand
+    </p>
+    <div id="brand-list"></div>
+  </div>
+</aside>
 
-    <!-- NEW -->
-    <h2 class="section-title">NEW</h2>
-    <div id="new-products" class="product-grid"></div>
-
-    <!-- COLLECTION -->
-    <h2 class="section-title">COLLECTION</h2>
-    <div id="collection-products" class="product-grid"></div>
-
-  </section>
-
+<main id="main-content" class="main-content">
+  <div id="product-list" class="product-grid"></div>
 </main>
 
-<!-- JS -->
 <script src="./js/index.js"></script>
 </body>
 </html>
