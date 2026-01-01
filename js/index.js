@@ -1,78 +1,68 @@
-/* ================== STEP 3 : CATEGORY + BRAND FILTER ================== */
+/* ================= API ================= */
+const API_URL = 'https://script.google.com/macros/s/AKfycbxnlAwKJucHmCKcJwv67TWuKV0X74Daag9X9I4NG7DOESREuYdU7BtWBPcEHyoJphoEfg/exec'; // ← 그대로 붙여
 
-let allProducts = [];      // 原始商品
-let filteredProducts = []; // 篩選後商品
+/* ================= STATE ================= */
+let allProducts = [];
 
-function initPage(products) {
-  allProducts = products;
-  filteredProducts = products;
-
-  generateCategoryFilters(products);
-  generateBrandFilters(products);
-
-  renderProducts(filteredProducts); // 你原本的商品卡渲染函式
-}
-
-/* ---------- 產生分類 ---------- */
-function generateCategoryFilters(products) {
-  const categories = [...new Set(products.map(p => p.category).filter(Boolean))];
-  const ul = document.getElementById('filter-category');
-  ul.innerHTML = '';
-
-  categories.forEach(cat => {
-    ul.innerHTML += `
-      <li>
-        <label>
-          <input type="checkbox" value="${cat}" class="filter-category">
-          ${cat}
-        </label>
-      </li>
-    `;
-  });
-}
-
-/* ---------- 產生品牌 ---------- */
-function generateBrandFilters(products) {
-  const brands = [...new Set(products.map(p => p.brand).filter(Boolean))];
-  const ul = document.getElementById('filter-brand');
-  ul.innerHTML = '';
-
-  brands.forEach(brand => {
-    ul.innerHTML += `
-      <li>
-        <label>
-          <input type="checkbox" value="${brand}" class="filter-brand">
-          ${brand}
-        </label>
-      </li>
-    `;
-  });
-}
-
-/* ---------- 綁定事件 ---------- */
-document.addEventListener('change', e => {
-  if (e.target.classList.contains('filter-category') ||
-      e.target.classList.contains('filter-brand')) {
-    applyFilters();
-  }
+/* ================= INIT ================= */
+document.addEventListener('DOMContentLoaded', () => {
+  fetch(API_URL)
+    .then(res => res.json())
+    .then(data => {
+      allProducts = data.products || data;
+      initFilters();
+      renderAll();
+    })
+    .catch(err => {
+      console.error('API error', err);
+    });
 });
 
-function applyFilters() {
-  const checkedCategories = [...document.querySelectorAll('.filter-category:checked')]
-    .map(cb => cb.value);
+/* ================= FILTER ================= */
+function initFilters() {
+  const categorySet = new Set();
+  const brandSet = new Set();
 
-  const checkedBrands = [...document.querySelectorAll('.filter-brand:checked')]
-    .map(cb => cb.value);
-
-  filteredProducts = allProducts.filter(p => {
-    const matchCategory =
-      checkedCategories.length === 0 || checkedCategories.includes(p.category);
-
-    const matchBrand =
-      checkedBrands.length === 0 || checkedBrands.includes(p.brand);
-
-    return matchCategory && matchBrand;
+  allProducts.forEach(p => {
+    if (p.category) categorySet.add(p.category);
+    if (p.brand) brandSet.add(p.brand);
   });
 
-  renderProducts(filteredProducts);
+  document.getElementById('category-list').innerHTML =
+    [...categorySet].map(c => `<li>${c}</li>`).join('');
+
+  document.getElementById('brand-list').innerHTML =
+    [...brandSet].map(b => `<li>${b}</li>`).join('');
+}
+
+/* ================= RENDER ================= */
+function renderAll() {
+  const newBox = document.getElementById('new-products');
+  const colBox = document.getElementById('collection-products');
+
+  newBox.innerHTML = '';
+  colBox.innerHTML = '';
+
+  allProducts.forEach(p => {
+    const card = createCard(p);
+    if (p.collection === 'NEW') {
+      newBox.appendChild(card);
+    } else if (p.collection === 'COLLECTION') {
+      colBox.appendChild(card);
+    }
+  });
+}
+
+function createCard(p) {
+  const div = document.createElement('div');
+  div.className = 'product-card';
+  div.innerHTML = `
+    <div class="product-brand">${p.brand || ''}</div>
+    <img src="${p.image || ''}" alt="">
+    <div class="product-name">${p.name || ''}</div>
+  `;
+  div.onclick = () => {
+    location.href = `detail.html?code=${p.code}`;
+  };
+  return div;
 }

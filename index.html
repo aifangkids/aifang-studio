@@ -1,61 +1,59 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="zh-Hant">
 <head>
   <meta charset="UTF-8" />
-  <title>AiFang Studio</title>
+  <title>AiFang Kids</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <!-- CSS -->
   <link rel="stylesheet" href="./index.css" />
-
 </head>
+
 <body>
 
 <!-- ================= HEADER ================= -->
-<header class="header">
-  <img src="./images/ui/menu.png" class="icon" id="btnMenu" />
-  <img src="./images/ui/logo.png" class="logo" id="btnHome" />
-  <img src="./images/ui/icon_tcart.png" class="icon" id="btnCart" />
+<header id="site-header">
+  <!-- LOGO（寫死路徑） -->
+  <img src="./images/ui/logo.png" class="logo" alt="AiFang Kids">
+
+  <!-- CART ICON（暫時只是圖） -->
+  <div class="cart-icon">🛒</div>
 </header>
 
 <!-- ================= HERO ================= -->
 <section class="hero">
-  <!-- 寫死路徑，之後只換圖 -->
+  <!-- HERO 圖（寫死路徑） -->
   <img src="./images/banner/hero.jpg" alt="Hero">
 </section>
-
-<!-- ================== FILTER SIDEBAR S ================== -->
-<aside id="filter-sidebar">
-  <div class="filter-group">
-    <h4>Category</h4>
-    <ul id="filter-category"></ul>
-  </div>
-
-  <div class="filter-group">
-    <h4>Brand</h4>
-    <ul id="filter-brand"></ul>
-  </div>
-</aside>
-<!-- ================== FILTER SIDEBAR E ================== -->
 
 <!-- ================= MAIN ================= -->
 <main class="container">
 
-  <!-- NEW -->
-  <section>
-    <h2 class="section-title">NEW</h2>
-    <div id="newGrid" class="grid grid-2col"></div>
-  </section>
+  <!-- ===== LEFT SIDEBAR ===== -->
+  <aside class="sidebar">
+    <h3>Category</h3>
+    <ul id="category-list"></ul>
 
-  <!-- COLLECTION -->
-  <section>
+    <h3>Brand</h3>
+    <ul id="brand-list"></ul>
+  </aside>
+
+  <!-- ===== PRODUCT AREA ===== -->
+  <section class="product-area">
+
+    <!-- NEW -->
+    <h2 class="section-title">NEW</h2>
+    <div id="new-products" class="product-grid"></div>
+
+    <!-- COLLECTION -->
     <h2 class="section-title">COLLECTION</h2>
-    <div id="collectionGrid" class="grid grid-4col"></div>
+    <div id="collection-products" class="product-grid"></div>
+
   </section>
 
 </main>
 
-<!-- ================= JS (MODULE) ================= -->
-<script type="module" src="./js/index.js"></script>
+<!-- JS -->
+<script src="./js/index.js"></script>
 </body>
 </html>
