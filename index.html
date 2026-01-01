@@ -1,62 +1,72 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="zh-Hant">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AiFang Studio</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AiFang Kids</title>
 
-<!-- CSS -->
-<link rel="stylesheet" href="./css/index.css">
+  <!-- ============================= -->
+  <!-- CSS（路徑固定） -->
+  <!-- ============================= -->
+  <link rel="stylesheet" href="./css/index.css" />
 
-<!-- Favicon -->
-<link rel="icon" href="favicon.ico" type="image/x-icon">
-
-<!-- Google Font Noto Sans KR -->
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
+  <!-- ============================= -->
+  <!-- API（鎖定，不可改） -->
+  <!-- ============================= -->
+  <script src="./js/api.js"></script>
 </head>
+
 <body>
 
-<div class="nav-overlay" id="overlay" onclick="closeAll()"></div>
+  <!-- ============================= -->
+  <!-- HERO / LOGO（寫死路徑） -->
+  <!-- 之後換圖只改 src -->
+  <!-- ============================= -->
+  <header class="hero-header">
+    <a href="./index.html" class="logo-link">
+      <!-- LOGO 圖 -->
+      <img
+        src="./images/ui/logo.png"
+        alt="AiFang Kids"
+        class="site-logo"
+      />
+    </a>
 
-<!-- 左側選單 -->
-<div class="side-nav" id="left-menu"></div>
+    <!-- HERO BANNER -->
+    <div class="hero-banner">
+      <img
+        src="./images/banner/hero.jpg"
+        alt="Hero Banner"
+        class="hero-image"
+      />
+    </div>
+  </header>
 
-<!-- 右側購物車 -->
-<div class="side-nav" id="right-cart"></div>
+  <!-- ============================= -->
+  <!-- NEW 區塊 -->
+  <!-- category = NEW -->
+  <!-- ============================= -->
+  <section class="section">
+    <h2 class="section-title">NEW</h2>
 
-<!-- Header -->
-<header id="main-header">
-    <div class="menu-icon" onclick="openNav('left-menu')">☰</div>
-    <div class="logo" onclick="location.reload()">AiFang</div>
-    <div class="cart-icon" onclick="openNav('right-cart')">🛒</div>
-</header>
+    <!-- JS 自動塞商品卡 -->
+    <div id="new-collection" class="collection-grid"></div>
+  </section>
 
-<!-- INDEX PAGE -->
-<div id="page-index">
-    <section class="hero" id="hero-banner"></section>
+  <!-- ============================= -->
+  <!-- COLLECTION 區塊 -->
+  <!-- category = COLLECTION -->
+  <!-- ============================= -->
+  <section class="section">
+    <h2 class="section-title">COLLECTION</h2>
 
-    <div class="section-title">NEW ARRIVALS</div>
-    <div class="grid-2col" id="is_new"></div>
+    <!-- JS 自動塞商品卡 -->
+    <div id="main-collection" class="collection-grid"></div>
+  </section>
 
-    <div class="section-title">COLLECTION</div>
-    <div class="grid-4col" id="collection"></div>
-</div>
-
-<!-- DETAIL PAGE -->
-<div id="page-detail"></div>
-
-<!-- Footer -->
-<footer id="main-footer"></footer>
-
-<!-- QUICK BUTTONS -->
-<div class="quick-btm">
-    <div class="btm-btn" onclick="window.scrollTo({top:0, behavior:'smooth'})">TOP</div>
-    <div class="btm-btn line-btn">LINE</div>
-</div>
-
-<!-- JS -->
-<script type="module" src="./js/api.js"></script>
-<script type="module" src="./js/index.js"></script>
+  <!-- ============================= -->
+  <!-- INDEX JS（商業邏輯） -->
+  <!-- ============================= -->
+  <script src="./js/index.js"></script>
 </body>
 </html>
