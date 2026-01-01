@@ -1,63 +1,55 @@
 <!DOCTYPE html>
-<html lang="zh-Hant">
+<html lang="zh-TW">
 <head>
-  <meta charset="UTF-8" />
-  <title>AiFang Kids Studio</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-  <!-- CSS -->
-  <link rel="stylesheet" href="./css/index.css" />
-
-  <!-- JS -->
-  <script type="module" src="./js/index.js" defer></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AiFang Studio | Bellot Full Experience</title>
+<link rel="stylesheet" href="./css/index.css">
 </head>
 <body>
 
-<!-- ================= Header ================= -->
-<header class="site-header">
-  <a href="./index.html" class="logo">
-    <img src="./images/ui/logo.png" alt="AiFang Kids">
-  </a>
+<!-- ===== LOGO & HEADER ===== -->
+<header id="main-header">
+    <div class="logo">
+        <img src="./images/ui/logo.png" alt="AiFang Studio Logo" onclick="location.reload()">
+    </div>
+    <div class="cart-icon" onclick="toggleCart()">🛒</div>
+    <div class="menu-icon" onclick="toggleMenu(true)">☰</div>
 </header>
 
-<!-- ================= Hero Banner ================= -->
+<!-- ===== HERO BANNER ===== -->
 <section class="hero">
-  <!-- 🔧 之後只要換這張圖即可 -->
-  <img src="./images/banner/hero.jpg" alt="Hero Banner">
+    <img src="./images/banner/hero.jpg" alt="Hero Banner">
 </section>
 
-<!-- ================= Main ================= -->
-<main class="layout">
+<!-- ===== LEFT SIDE CATEGORY ===== -->
+<aside id="left-menu">
+    <h3>分類 / 品牌</h3>
+    <div id="category-list"></div>
+</aside>
 
-  <!-- ===== Left Menu ===== -->
-  <aside class="left-menu">
-    <h3>☰ 分類</h3>
-    <div id="categoryMenu"></div>
-  </aside>
+<!-- ===== RIGHT SIDE CART ===== -->
+<aside id="right-cart">
+    <h3>購物車</h3>
+    <div id="cart-items"></div>
+    <button id="go-to-cart">前往購物車</button>
+</aside>
 
-  <!-- ===== Product Area ===== -->
-  <section class="product-area">
+<!-- ===== OVERLAY ===== -->
+<div id="overlay" onclick="closeAll()"></div>
 
-    <!-- NEW -->
-    <section class="collection-block">
-      <h2>NEW</h2>
-      <div id="newProducts" class="grid grid-2"></div>
-    </section>
-
-    <!-- COLLECTION -->
-    <section class="collection-block">
-      <h2>COLLECTION</h2>
-      <div id="collectionProducts" class="grid grid-4"></div>
-    </section>
-
-  </section>
-
-  <!-- ===== Right Cart Sidebar ===== -->
-<section class="cart-sidebar">
-  <!-- 🔧 之後只要換這張圖即可 -->
-  <img src="./images/ui/cart.png" alt="cart-sidebar">
+<!-- ===== NEW ARRIVALS ===== -->
+<section id="new-arrivals">
+    <h2>NEW ARRIVALS</h2>
+    <div id="new-grid" class="product-grid"></div>
 </section>
-</main>
 
+<!-- ===== COLLECTION ===== -->
+<section id="collection">
+    <h2>COLLECTION</h2>
+    <div id="collection-grid" class="product-grid"></div>
+</section>
+
+<script type="module" src="./js/index.js"></script>
 </body>
 </html>
