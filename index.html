@@ -3,60 +3,55 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AiFang Studio | Bellot Full Experience</title>
+<title>AiFang Studio | Home</title>
 <link rel="stylesheet" href="./css/index.css">
 </head>
 <body>
 
-<!-- Popup -->
-<div id="popup-overlay" class="popup-overlay">
-  <div class="popup-content">
-    <span class="popup-close" onclick="closePopup()">&times;</span>
-    <div id="popup-slider" class="popup-slider"></div>
-    <button class="popup-prev" onclick="prevPopup()">‹</button>
-    <button class="popup-next" onclick="nextPopup()">›</button>
-  </div>
-</div>
-
 <!-- Header -->
 <header id="main-header">
-  <div class="header-left">
-    <img src="./images/ui/logo.png" class="logo" onclick="location.reload()" alt="LOGO">
-    <img src="./images/ui/menu.png" class="menu-btn" onclick="toggleLeftMenu()" alt="Menu">
-  </div>
-  <div class="header-right">
-    <img src="./images/ui/icon_tcart.png" class="cart-btn" onclick="toggleRightCart()" alt="Cart">
-  </div>
+    <div class="logo">
+        <a href="./index.html"><img src="./images/ui/logo.png" alt="AiFang Logo"></a>
+    </div>
+    <div class="menu-icon">
+        <img src="./images/ui/menu.png" alt="Menu" onclick="openNav('left-menu')">
+    </div>
+    <div class="cart-icon" onclick="openNav('right-cart')">
+        <img src="./images/ui/icon_tcart.png" alt="Cart">
+    </div>
 </header>
 
-<!-- Left Sidebar -->
-<div id="left-menu" class="side-nav">
-  <h3>分類 / 品牌</h3>
-  <ul id="category-list"></ul>
+<!-- 左側分類 / 品牌 -->
+<div class="side-nav" id="left-menu">
+    <div class="side-title">分類 / 品牌</div>
+    <div id="category-container"></div>
 </div>
 
-<!-- Right Cart Sidebar -->
-<div id="right-cart" class="side-nav">
-  <h3>購物車</h3>
-  <div id="cart-items"></div>
-  <button onclick="goToCartPage()">GO TO CART</button>
+<!-- 右側購物車 -->
+<div class="side-nav" id="right-cart">
+    <div class="side-title">購物車</div>
+    <div id="cart-container"></div>
 </div>
 
-<!-- Main Page Content -->
-<main id="page-index">
-  <!-- Hero Banner -->
-  <section class="hero">
+<!-- 覆蓋層 -->
+<div class="nav-overlay" id="overlay" onclick="closeAll()"></div>
+
+<!-- Hero Banner (固定路徑) -->
+<section class="hero">
     <img src="./images/banner/hero.jpg" alt="Hero Banner">
-  </section>
+</section>
 
-  <!-- NEW Arrivals -->
-  <div class="section-title">NEW ARRIVALS</div>
-  <div id="new-products" class="grid-2col"></div>
+<!-- NEW 商品區 -->
+<section class="section" id="new-section">
+    <h2>NEW ARRIVALS</h2>
+    <div class="grid" id="new-grid"></div>
+</section>
 
-  <!-- COLLECTION -->
-  <div class="section-title">COLLECTION</div>
-  <div id="collection-products" class="grid-4col"></div>
-</main>
+<!-- COLLECTION 商品區 -->
+<section class="section" id="collection-section">
+    <h2>COLLECTION</h2>
+    <div class="grid" id="collection-grid"></div>
+</section>
 
 <script src="./js/api.js"></script>
 <script src="./js/index.js"></script>

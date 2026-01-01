@@ -1,121 +1,102 @@
-// ================================
 // index.js (正式版)
-// ================================
-
-// --- 左側分類 / 品牌 ---
-function generateCategories(products) {
-  const categoryList = document.getElementById('category-list');
-  const categories = [...new Set(products.map(p => p.category))].sort();
-  categoryList.innerHTML = '';
-  categories.forEach(cat => {
-    const li = document.createElement('li');
-    li.textContent = cat;
-    li.addEventListener('click', () => filterByCategory(cat));
-    categoryList.appendChild(li);
-  });
-}
-
-// --- 商品卡片生成 ---
-function generateProducts(products) {
-  const newContainer = document.getElementById('new-products');
-  const colContainer = document.getElementById('collection-products');
-
-  newContainer.innerHTML = '';
-  colContainer.innerHTML = '';
-
-  products.forEach(p => {
-    if(p.status !== 'ACTIVE') return; // 不顯示 HIDDEN
-    const container = p.collection === 'NEW' ? newContainer : colContainer;
-
-    const card = document.createElement('div');
-    card.className = 'p-card';
-    card.onclick = () => location.href = `detail.html?code=${p.code}`;
-
-    const img = document.createElement('img');
-    img.src = p.image_main;
-    card.appendChild(img);
-
-    const info = document.createElement('div');
-    info.className = 'p-info';
-
-    const name = document.createElement('div');
-    name.className = 'p-name';
-    name.textContent = p.brand + ' / ' + p.name;
-    info.appendChild(name);
-
-    const price = document.createElement('div');
-    price.className = 'p-price';
-    if(p.price_baby_10off) {
-      price.innerHTML = `<s>${p.currency}${p.price_baby}</s> <span style="color:red;">${p.currency}${p.price_baby_10off} -10%OFF</span>`;
-    } else {
-      price.textContent = `${p.currency}${p.price_baby}`;
-    }
-    info.appendChild(price);
-
-    // color dots
-    const colors = document.createElement('div');
-    const colorCodes = p.color_code.split(',');
-    colorCodes.forEach(c => {
-      const dot = document.createElement('span');
-      dot.className = 'color-dot';
-      dot.style.background = c;
-      colors.appendChild(dot);
-    });
-    info.appendChild(colors);
-
-    card.appendChild(info);
-    container.appendChild(card);
-  });
-}
-
-// --- 左側分類篩選 ---
-function filterByCategory(cat) {
-  fetchProducts().then(products => {
-    const filtered = products.filter(p => p.category === cat);
-    generateProducts(filtered);
-  });
-}
-
-// --- 右側購物車 ---
-function updateCart(cartItems) {
-  const container = document.getElementById('cart-items');
-  container.innerHTML = '';
-  cartItems.forEach(item => {
-    const div = document.createElement('div');
-    div.textContent = `${item.name} / ${item.size} ${item.currency}${item.price}`;
-    container.appendChild(div);
-  });
-}
-
-// --- API 抓取 ---
-function fetchProducts() {
-  return fetch('./js/api.js')
-    .then(res => res.json())
-    .catch(err => console.error('API fetch error:', err));
-}
-
-// --- Popup ---
-const popupImages = './images/popup/popup_01.jpg,./images/popup/popup_02.jpg,./images/popup/popup_03.jpg'.split(',');
-let currentPopup = 0;
-function showPopup() {
-  const overlay = document.getElementById('popup-overlay');
-  overlay.style.display = 'block';
-  const slider = document.getElementById('popup-slider');
-  slider.innerHTML = `<img src="${popupImages[currentPopup]}">`;
-}
-function closePopup() { document.getElementById('popup-overlay').style.display = 'none'; }
-function prevPopup() { currentPopup = (currentPopup - 1 + popupImages.length) % popupImages.length; showPopup(); }
-function nextPopup() { currentPopup = (currentPopup + 1) % popupImages.length; showPopup(); }
-
-// --- 左側 / 右側 Sidebar ---
-function toggleLeftMenu() { document.getElementById('left-menu').classList.toggle('active'); }
-function toggleRightCart() { document.getElementById('right-cart').classList.toggle('active'); }
-
-// --- 初始化 ---
+// ⚠️ 注意：不改 api.js，直接使用它提供的資料或函式
 document.addEventListener('DOMContentLoaded', () => {
-  fetchProducts().then(products => {
-    generateCategories(products);
-    generateProducts(products);
-  });
-  showPopup(); // 頁面載入顯示 popup
+    try {
+        initPage();
+    } catch (err) {
+        console.error("初始化頁面錯誤", err);
+    }
 });
+
+function initPage() {
+    // 1️⃣ 動態生成分類 / 品牌
+    generateCategories(products); // 假設 api.js 有全域變數 products
+
+    // 2️⃣ 分流 NEW / COLLECTION
+    const newProducts = products.filter(p => p.collection === 'NEW' && p.status === 'ACTIVE');
+    const collectionProducts = products.filter(p => p.collection === 'COLLECTION' && p.status === 'ACTIVE');
+
+    generateProductGrid('new-grid', newProducts);
+    generateProductGrid('collection-grid', collectionProducts);
+
+    // 3️⃣ 購物車初始化
+    renderCart();
+}
+
+// -------------------- 左側分類 / 品牌 --------------------
+function generateCategories(products) {
+    const container = document.getElementById('category-container');
+    const categoryMap = {};
+
+    products.forEach(p => {
+        if(p.status !== 'ACTIVE') return;
+        if(!categoryMap[p.category]) categoryMap[p.category] = new Set();
+        categoryMap[p.category].add(p.brand);
+    });
+
+    let html = '';
+    Object.keys(categoryMap).forEach(cat => {
+        html += `<div class="cat-item">${cat}<div class="brands">`;
+        categoryMap[cat].forEach(brand => {
+            html += `<label><input type="checkbox" class="brand-filter" value="${brand}"> ${brand}</label>`;
+        });
+        html += `</div></div>`;
+    });
+
+    container.innerHTML = html;
+
+    // 篩選事件
+    container.querySelectorAll('.brand-filter').forEach(cb => {
+        cb.addEventListener('change', filterProductsByBrand);
+    });
+}
+
+function filterProductsByBrand() {
+    const checkedBrands = Array.from(document.querySelectorAll('.brand-filter:checked')).map(cb=>cb.value);
+    const newProducts = products.filter(p => p.collection==='NEW' && p.status==='ACTIVE' && (checkedBrands.length===0 || checkedBrands.includes(p.brand)));
+    const collectionProducts = products.filter(p => p.collection==='COLLECTION' && p.status==='ACTIVE' && (checkedBrands.length===0 || checkedBrands.includes(p.brand)));
+
+    generateProductGrid('new-grid', newProducts);
+    generateProductGrid('collection-grid', collectionProducts);
+}
+
+// -------------------- 生成商品卡 --------------------
+function generateProductGrid(containerId, items) {
+    const container = document.getElementById(containerId);
+    container.innerHTML = '';
+
+    items.forEach(p => {
+        const soldOut = !p.price_baby && !p.price_kid && !p.price_junior && !p.price_adult;
+        const priceHtml = soldOut ? `<span class="sold-out">SOLD OUT</span>` :
+            (p.price_baby_10off ? `<span class="price-off">NT$ ${p.price_baby_10off} <del>${p.price_baby}</del></span>` : `<span class="price">NT$ ${p.price_baby}</span>`);
+
+        let colorHtml = '';
+        if(p.color_code) {
+            const colors = p.color_code.split(',');
+            colors.forEach(c=>colorHtml+=`<span class="color-dot" style="background:${c}"></span>`);
+        }
+        container.innerHTML += `
+        <div class="p-card" onclick="location.href='detail.html?code=${p.code}'">
+            <div class="p-img-box">
+                <img src="./images/${p.image_main}" class="p-img-main">
+                ${p.image_hover ? `<img src="./images/${p.image_hover}" class="p-img-hover">` : ''}
+            </div>
+            <div class="p-info">
+                <div class="brand-tag">${p.brand}</div>
+                <div class="p-name">${p.name}</div>
+                <div class="p-price">${priceHtml}</div>
+                <div class="color-container">${colorHtml}</div>
+            </div>
+        </div>`;
+    });
+}
+
+// -------------------- 購物車 --------------------
+function renderCart() {
+    const cartContainer = document.getElementById('cart-container');
+    cartContainer.innerHTML = `<p>購物車預覽</p>`;
+}
+
+// -------------------- 側邊欄控制 --------------------
+function openNav(id){document.getElementById(id).classList.add('active');document.getElementById('overlay').style.display='block';}
+function closeAll(){document.getElementById('left-menu').classList.remove('active');document.getElementById('right-cart').classList.remove('active');document.getElementById('overlay').style.display='none';}
