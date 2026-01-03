@@ -190,14 +190,20 @@
         let activeBrands = new Set();
 
         async function fetchData() {
-            showRandomPopup();
-            try {
-                const res = await fetch(API_URL);
-                allData = await res.json();
-                render(allData);
-                document.getElementById('main-content').classList.add('loaded');
-            } catch (e) { console.error(e); }
-        }
+  showRandomPopup();
+  try {
+    const res = await fetch(API_URL);
+    const json = await res.json();
+
+    allData = json.products || [];
+    render(allData);
+
+    document.getElementById('main-content').classList.add('loaded');
+  } catch (e) {
+    console.error("API 資料錯誤", e);
+  }
+}
+
 
         function render(items) {
             const container = document.getElementById('product-list');
