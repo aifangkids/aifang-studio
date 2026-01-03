@@ -100,3 +100,11 @@ body {
   right: 20px;
   z-index: 2000;
 }
+
+.img-wrap {
+  transition: background-image 0.35s ease;
+}
+
+.color-dot {
+  cursor: pointer;
+}
