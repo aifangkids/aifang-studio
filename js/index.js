@@ -1,139 +1,61 @@
-import { fetchProducts } from "./api.js";
+// ----------------- POPUP -----------------
+const popup = document.getElementById('popup');
+const popupSlides = document.getElementById('popup-slides');
+const popupClose = document.getElementById('popup-close');
+let currentSlide = 0;
 
-let ALL_PRODUCTS = [];
-let currentCategory = "ALL";
-let currentBrand = "ALL";
+// 自動掃描 ./images/popup/ 生成圖片列表
+// 注意：由於瀏覽器安全限制，無法直接讀取資料夾
+// 需要你在 api.js 或後端提供圖片清單 JSON
+// 我們這裡使用手動陣列，如果你將來想自動掃描，可用後端 API 返回圖片列表
+let popupImages = [
+    "./images/popup/popup_01.jpg",
+    "./images/popup/popup_02.jpg",
+    "./images/popup/popup_03.jpg"
+];
 
-document.addEventListener("DOMContentLoaded", init);
+// 初始化 POPUP
+function initPopup() {
+    popupSlides.innerHTML = '';
 
-async function init() {
-  const products = await fetchProducts();
-  ALL_PRODUCTS = products;
+    if (!popupImages || popupImages.length === 0) return;
 
-  renderCategory(products);
-  renderProducts(products);
-  document.getElementById("mainContent").classList.add("loaded");
-}
-
-/* =========================
-   分類 / 品牌
-========================= */
-
-function renderCategory(products) {
-  const menu = document.getElementById("categoryMenu");
-  const categories = [...new Set(products.map(p => p.category).filter(Boolean))];
-
-  menu.innerHTML = `<li class="active" data-cat="ALL">ALL</li>` +
-    categories.map(c => `<li data-cat="${c}">${c}</li>`).join("");
-
-  menu.querySelectorAll("li").forEach(li => {
-    li.addEventListener("click", () => {
-      menu.querySelectorAll("li").forEach(x => x.classList.remove("active"));
-      li.classList.add("active");
-
-      currentCategory = li.dataset.cat;
-      currentBrand = "ALL";
-      renderBrand(products);
-      applyFilter();
-    });
-  });
-}
-
-function renderBrand(products) {
-  const panel = document.getElementById("brandPanel");
-
-  if (currentCategory === "ALL") {
-    panel.classList.remove("open");
-    panel.innerHTML = "";
-    return;
-  }
-
-  const brands = [...new Set(
-    products
-      .filter(p => p.category === currentCategory)
-      .map(p => p.brand)
-      .filter(Boolean)
-  )];
-
-  panel.innerHTML = brands
-    .map(b => `<span class="brand-item" data-brand="${b}">${b}</span>`)
-    .join("");
-
-  panel.classList.add("open");
-
-  panel.querySelectorAll(".brand-item").forEach(el => {
-    el.addEventListener("click", () => {
-      panel.querySelectorAll(".brand-item").forEach(x => x.classList.remove("selected"));
-      el.classList.add("selected");
-
-      currentBrand = el.dataset.brand;
-      applyFilter();
-    });
-  });
-}
-
-function applyFilter() {
-  let list = [...ALL_PRODUCTS];
-
-  if (currentCategory !== "ALL") {
-    list = list.filter(p => p.category === currentCategory);
-  }
-  if (currentBrand !== "ALL") {
-    list = list.filter(p => p.brand === currentBrand);
-  }
-
-  renderProducts(list);
-}
-
-/* =========================
-   商品卡
-========================= */
-
-function renderProducts(items) {
-  const grid = document.getElementById("productGrid");
-  grid.innerHTML = "";
-
-  items.forEach(p => {
-    const hoverImg = p.image_extra?.[0] || p.image;
-    const colors = p.images_by_color || [];
-
-    const card = document.createElement("div");
-    card.className = "product-card";
-
-    card.innerHTML = `
-      <div class="img-wrap"
-           style="background-image:url('${p.image}')"
-           data-main="${p.image}"
-           data-hover="${hoverImg}">
-        ${p.is_new ? `<div class="status-badge badge-NEW">NEW</div>` : ""}
-      </div>
-
-      <div class="p-name">${p.name}</div>
-
-      ${renderColors(colors)}
-
-      <div class="p-price">$${p.price_min}</div>
-    `;
-
-    const imgWrap = card.querySelector(".img-wrap");
-    imgWrap.addEventListener("mouseenter", () => {
-      imgWrap.style.backgroundImage = `url('${imgWrap.dataset.hover}')`;
-    });
-    imgWrap.addEventListener("mouseleave", () => {
-      imgWrap.style.backgroundImage = `url('${imgWrap.dataset.main}')`;
+    popupImages.forEach(src => {
+        const img = document.createElement('img');
+        img.src = src;
+        img.style.width = "100%";
+        img.style.height = "400px"; // 統一尺寸
+        img.style.objectFit = "cover";
+        popupSlides.appendChild(img);
     });
 
-    grid.appendChild(card);
-  });
+    showSlide(currentSlide);
+
+    // 只有沒關過才顯示
+    if (!localStorage.getItem('popupClosed')) {
+        popup.style.display = 'flex';
+    }
 }
 
-function renderColors(colors) {
-  if (!colors.length) return "";
-
-  const dots = colors.map(c => {
-    const [name] = c.split("|");
-    return `<span class="color-dot" style="background:${name}"></span>`;
-  }).join("");
-
-  return `<div class="color-row">${dots}</div>`;
+// 顯示指定輪播
+function showSlide(index) {
+    const slides = popupSlides.querySelectorAll('img');
+    slides.forEach(s => s.style.display = 'none');
+    slides[index].style.display = 'block';
 }
+
+// 自動輪播
+setInterval(() => {
+    if (!popup || popup.style.display === 'none') return;
+    currentSlide = (currentSlide + 1) % popupImages.length;
+    showSlide(currentSlide);
+}, 3000);
+
+// 關閉 POPUP
+popupClose.addEventListener('click', () => {
+    popup.style.display = 'none';
+    localStorage.setItem('popupClosed', 'true');
+});
+
+// 初始化
+initPopup();

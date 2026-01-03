@@ -1,41 +1,49 @@
 <!DOCTYPE html>
-<html lang="zh-Hant">
+<html lang="zh-TW">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AiFang Kids Studio</title>
-  <link rel="stylesheet" href="./index.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AiFang Kids</title>
+    <link rel="stylesheet" href="index.css">
+    <link rel="preload" href="./fonts/PetitFormalScript-Regular.ttf" as="font" type="font/ttf" crossorigin>
 </head>
 <body>
+    <!-- POPUP -->
+    <div id="popup" class="popup">
+        <div class="popup-content">
+            <span id="popup-close" class="popup-close">&times;</span>
+            <div id="popup-slides" class="popup-slides"></div>
+        </div>
+    </div>
 
-<!-- Header -->
-<header class="top-header">
-  <img src="./images/ui/menu.png" class="header-icon logo-size">
-  <img src="./images/ui/logo.png" class="main-logo logo-size">
-  <img src="./images/ui/icon_tcart.png" class="header-icon logo-size">
-</header>
+    <!-- Header / Hero Banner -->
+    <header id="hero-banner">
+        <img src="./images/banner/hero.jpg" alt="Hero Banner" class="hero-img">
+        <div class="hero-text">
+            <h1>Ai Fang Kids</h1>
+            <p>Childhood should always feel this beautiful.</p>
+            <button id="view-more" class="view-more">VIEW MORE</button>
+        </div>
+    </header>
 
-<!-- Sidebar -->
-<aside class="sidebar" id="sidebar">
-  <div class="filter-title">CATEGORY</div>
-  <ul class="category-menu" id="categoryMenu"></ul>
+    <!-- Sidebar -->
+    <aside id="sidebar">
+        <ul id="category-list"></ul>
+        <ul id="brand-list"></ul>
+    </aside>
 
-  <div class="filter-title">BRAND</div>
-  <div class="brand-panel" id="brandPanel"></div>
-</aside>
-<div class="sidebar-overlay" id="sidebarOverlay"></div>
+    <!-- Main Content -->
+    <main id="product-section">
+        <div id="products" class="products"></div>
+    </main>
 
-<!-- 主內容 -->
-<main class="main-content" id="mainContent">
-  <div class="product-grid" id="productGrid"></div>
-</main>
+    <!-- TOP / LINE -->
+    <div id="top-line">
+        <button id="btn-top" class="btn-top">TOP</button>
+        <a href="https://line.me/R/ti/p/@844bwwjl" target="_blank" class="btn-line">LINE</a>
+    </div>
 
-<!-- 工具 -->
-<div class="fixed-tools" id="fixedTools">
-  <div class="tool-btn" id="goTop">TOP</div>
-  <div class="tool-btn line-btn">LINE</div>
-</div>
-
-<script type="module" src="./index.js"></script>
+    <script src="./js/api.js"></script>
+    <script src="./js/index.js"></script>
 </body>
 </html>

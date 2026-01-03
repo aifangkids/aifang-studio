@@ -1,110 +1,51 @@
-/* --- 字體 --- */
-@font-face {
-  font-family: 'NotoSansKR';
-  src: url('./fonts/NotoSansKR-Regular.ttf') format('truetype');
-  font-weight: 400;
+/* 基本 reset */
+* { margin:0; padding:0; box-sizing:border-box; font-family: "Noto Sans TC", sans-serif; }
+
+/* Hero Banner */
+#hero-banner { position: relative; text-align:center; }
+.hero-img { width:100%; height:auto; display:block; }
+.hero-text {
+    position: absolute; top:50%; left:50%; transform:translate(-50%, -50%);
+    color:#fff; text-align:center;
+}
+.hero-text h1, .hero-text p {
+    font-family: 'PetitFormalScript-Regular', serif;
+}
+.hero-text h1 { font-size:4rem; margin-bottom:10px; }
+.hero-text p { font-size:1.2rem; margin-bottom:20px; }
+.hero-text .view-more {
+    padding:10px 20px; border:none; background:#ff8a65; color:#fff; border-radius:5px; cursor:pointer;
 }
 
-:root {
-  --sidebar-width: 260px;
-  --accent: #d9534f;
-  --new-color: #5cb85c;
-  --header-h: 80px;
+/* POPUP */
+.popup {
+    position: fixed; top:0; left:0; width:100%; height:100%;
+    background: rgba(0,0,0,0.5); display:none; justify-content:center; align-items:center; z-index:1000;
 }
-
-* { box-sizing: border-box; margin: 0; padding: 0; }
-
-body {
-  font-family: 'NotoSansKR', sans-serif;
-  background: #fff;
-  color: #333;
+.popup-content {
+    position: relative; background:#fff; padding:10px; max-width:600px; width:80%; border-radius:10px; overflow:hidden;
 }
-
-/* Header */
-.top-header {
-  position: fixed;
-  top: 0; left: 0;
-  width: 100%;
-  height: var(--header-h);
-  background: #fff;
-  border-bottom: 1px solid #eee;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 25px;
-  z-index: 1200;
+.popup-close {
+    position:absolute; top:5px; right:10px; font-size:24px; cursor:pointer;
 }
-
-.main-logo {
-  height: 38px;
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
+.popup-slides img {
+    width:100%; display:none; border-radius:10px; object-fit:cover; height:400px;
 }
 
 /* Sidebar */
-.sidebar {
-  width: var(--sidebar-width);
-  position: fixed;
-  top: 0; left: 0;
-  height: 100vh;
-  padding: calc(var(--header-h) + 40px) 30px;
-  border-right: 1px solid #eee;
-  background: #fff;
-}
+#sidebar { position:fixed; left:0; top:100px; width:200px; padding:10px; height:calc(100% - 100px); overflow-y:auto; background:transparent; }
+#sidebar h3 { margin-bottom:10px; color:#333; }
+#sidebar ul { list-style:none; }
+#sidebar li { margin-bottom:5px; cursor:pointer; }
 
-.category-menu li {
-  font-size: 13px;
-  margin-bottom: 15px;
-  cursor: pointer;
-}
+/* Products */
+#product-section { margin-left:220px; padding:20px; }
+.products { display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:15px; }
+.product-card { border:1px solid #eee; border-radius:10px; overflow:hidden; text-align:center; padding:10px; background:#fff; }
+.product-card img { width:100%; height:auto; }
+.color-swatch { display:flex; justify-content:center; margin-top:5px; }
+.color-swatch div { width:15px; height:15px; border-radius:50%; margin:0 3px; }
 
-/* Main */
-.main-content {
-  padding: calc(var(--header-h) + 40px) 50px 80px calc(var(--sidebar-width) + 40px);
-}
-
-.product-grid {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 40px 20px;
-}
-
-.product-card {
-  text-align: center;
-  cursor: pointer;
-}
-
-.img-wrap {
-  aspect-ratio: 3 / 4;
-  background-size: cover;
-  background-position: center;
-  margin-bottom: 12px;
-}
-
-.p-name { font-size: 13px; }
-.p-price { font-size: 14px; font-weight: 500; }
-
-/* Header icon 與 Logo 尺寸統一 */
-.logo-size {
-  width: 38px;
-  height: 38px;
-  object-fit: contain;
-  cursor: pointer;
-}
-
-/* 保證工具組永遠可見 */
-.fixed-tools {
-  position: fixed;
-  bottom: 30px;
-  right: 20px;
-  z-index: 2000;
-}
-
-.img-wrap {
-  transition: background-image 0.35s ease;
-}
-
-.color-dot {
-  cursor: pointer;
-}
+/* TOP / LINE */
+#top-line { position:fixed; right:20px; bottom:20px; display:none; flex-direction:column; gap:10px; }
+.btn-top, .btn-line { padding:10px; border:none; border-radius:5px; background:#ff8a65; color:#fff; cursor:pointer; text-decoration:none; text-align:center; }
