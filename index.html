@@ -1,132 +1,41 @@
-const API_URL =
-  "https://script.google.com/macros/s/AKfycbxnlAwKJucHmCKcJwv67TWuKV0X74Daag9X9I4NG7DOESREuYdU7BtWBPcEHyoJphoEfg/exec";
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AiFang Kids Studio</title>
+  <link rel="stylesheet" href="./index.css">
+</head>
+<body>
 
-let allData = [];
-let activeCat = "All";
-let activeBrands = new Set();
+<!-- Header -->
+<header class="top-header">
+  <img src="./images/ui/menu.png" class="header-icon logo-size">
+  <img src="./images/ui/logo.png" class="main-logo logo-size">
+  <img src="./images/ui/icon_tcart.png" class="header-icon logo-size">
+</header>
 
-async function fetchData() {
-  showRandomPopup();
-  const res = await fetch(API_URL);
-  const json = await res.json();
-  allData = Array.isArray(json.products) ? json.products : [];
-  buildCategories();
-  render(allData);
-  document.getElementById("main-content").classList.add("loaded");
-}
+<!-- Sidebar -->
+<aside class="sidebar" id="sidebar">
+  <div class="filter-title">CATEGORY</div>
+  <ul class="category-menu" id="categoryMenu"></ul>
 
-function render(items) {
-  const container = document.getElementById("product-list");
-  container.innerHTML = "";
+  <div class="filter-title">BRAND</div>
+  <div class="brand-panel" id="brandPanel"></div>
+</aside>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
 
-  items.forEach(item => {
-    const badge = item.is_new
-      ? `<span class="status-badge badge-NEW">NEW</span>`
-      : "";
+<!-- 主內容 -->
+<main class="main-content" id="mainContent">
+  <div class="product-grid" id="productGrid"></div>
+</main>
 
-    const colors = (item.color_code || "")
-      .split(",")
-      .map(c => c.trim())
-      .filter(c => c.startsWith("#"));
+<!-- 工具 -->
+<div class="fixed-tools" id="fixedTools">
+  <div class="tool-btn" id="goTop">TOP</div>
+  <div class="tool-btn line-btn">LINE</div>
+</div>
 
-    const colorHtml = `
-      <div class="color-row">
-        ${colors.map(c => `<div class="color-dot" style="background:${c}"></div>`).join("")}
-      </div>
-    `;
-
-    const price =
-      item.price_baby_sale ||
-      item.price_kid_sale ||
-      item.price_junior_sale ||
-      item.price_adult_sale ||
-      item.price_baby ||
-      item.price_kid ||
-      item.price_junior ||
-      item.price_adult ||
-      0;
-
-    const card = document.createElement("div");
-    card.className = "product-card";
-    card.innerHTML = `
-      <div class="img-wrap"
-        style="background-image:url('${item.image_main}')"
-        onmouseenter="this.style.backgroundImage='url(${item.image_hover || item.image_main})'"
-        onmouseleave="this.style.backgroundImage='url(${item.image_main})'">
-        ${badge}
-      </div>
-      <p class="p-name">${item.name}</p>
-      ${colorHtml}
-      <p class="p-price">NT$ ${price.toLocaleString()}</p>
-    `;
-    container.appendChild(card);
-  });
-}
-
-function buildCategories() {
-  const menu = document.getElementById("category-menu");
-  const cats = ["All", ...new Set(allData.map(p => p.category).filter(Boolean))];
-  menu.innerHTML = cats
-    .map(c => `<li onclick="filterByCat('${c}')">${c}</li>`)
-    .join("");
-}
-
-function filterByCat(cat) {
-  activeCat = cat;
-  activeBrands.clear();
-  let filtered = cat === "All" ? allData : allData.filter(p => p.category === cat);
-  buildBrands(filtered);
-  render(filtered);
-}
-
-function buildBrands(items) {
-  const area = document.getElementById("brand-area");
-  const list = document.getElementById("brand-list");
-  const brands = [...new Set(items.map(p => p.brand).filter(Boolean))];
-
-  if (!brands.length) {
-    area.classList.remove("open");
-    return;
-  }
-
-  area.classList.add("open");
-  list.innerHTML = brands
-    .map(b => `<div class="brand-item" onclick="toggleBrand('${b}')">${b}</div>`)
-    .join("");
-}
-
-function toggleBrand(b) {
-  activeBrands.has(b) ? activeBrands.delete(b) : activeBrands.add(b);
-  let result = allData.filter(
-    p =>
-      (activeCat === "All" || p.category === activeCat) &&
-      (activeBrands.size === 0 || activeBrands.has(p.brand))
-  );
-  render(result);
-}
-
-/* UI */
-function toggleMenu() {
-  document.getElementById("sidebar").classList.toggle("open");
-}
-function closeMenu() {
-  document.getElementById("sidebar").classList.remove("open");
-}
-function toggleCart() {
-  alert("購物車即將推出");
-}
-function showRandomPopup() {
-  const pops = [
-    "./images/popup/popup_01.jpg",
-    "./images/popup/popup_02.jpg",
-    "./images/popup/popup_03.jpg"
-  ];
-  document.getElementById("popup-img").src =
-    pops[Math.floor(Math.random() * pops.length)];
-  document.getElementById("popup-overlay").style.display = "flex";
-}
-function closePopup() {
-  document.getElementById("popup-overlay").style.display = "none";
-}
-
-window.onload = fetchData;
+<script type="module" src="./index.js"></script>
+</body>
+</html>

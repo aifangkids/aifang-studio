@@ -1,20 +1,8 @@
-/**
- * ================================
- * AiFang Kids Frontend API
- * api.js（ES Module）
- * ================================
- */
-
-const API_BASE_URL =
+const API_URL =
   "https://script.google.com/macros/s/AKfycbxnlAwKJucHmCKcJwv67TWuKV0X74Daag9X9I4NG7DOESREuYdU7BtWBPcEHyoJphoEfg/exec";
 
-/**
- * 前台：取得商品資料
- */
 export async function fetchProducts() {
-  const res = await fetch(`${API_BASE_URL}?mode=products`);
-  if (!res.ok) throw new Error("API 連線失敗");
-
+  const res = await fetch(`${API_URL}?mode=products`);
   const json = await res.json();
-  return Array.isArray(json.products) ? json.products : [];
+  return json.products || [];
 }
