@@ -1,67 +1,38 @@
 <!DOCTYPE html>
-<html lang="zh-Hant">
+<html lang="zh-TW">
 <head>
-  <meta charset="UTF-8">
-  <title>AiFang Kids</title>
-  <link rel="stylesheet" href="./index.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>璦坊 | 選品</title>
+  <link rel="icon" href="./favicon.ico" />
+  <link rel="stylesheet" href="./index.css" />
 </head>
+
 <body>
+  <header class="top-header">
+    <img src="./images/ui/menu.png" class="header-icon" onclick="toggleMenu()" />
+    <img src="./images/ui/logo.png" class="main-logo" onclick="location.reload()" />
+    <img src="./images/ui/icon_tcart.png" class="header-icon" onclick="toggleCart()" />
+  </header>
 
-<div id="product-list"></div>
+  <div id="overlay" class="sidebar-overlay" onclick="closeMenu()"></div>
 
-<script src="./js/api.js"></script>
-<script>
-/* ========= 價格顯示規則 ========= */
-function getDisplayPrice(item) {
-  const prices = [
-    item.price_baby_sale || item.price_baby,
-    item.price_kid_sale || item.price_kid,
-    item.price_junior_sale || item.price_junior,
-    item.price_adult_sale || item.price_adult
-  ].filter(v => Number(v) > 0);
+  <aside id="sidebar" class="sidebar">
+    <div class="filter-section">
+      <p class="filter-title">Category</p>
+      <ul id="category-menu" class="category-menu"></ul>
+    </div>
 
-  return prices.length ? Math.min(...prices) : "";
-}
+    <div id="brand-area" class="brand-panel">
+      <p class="filter-title" style="font-size:10px;border:none;">Select Brand</p>
+      <div id="brand-list"></div>
+    </div>
+  </aside>
 
-/* ========= render ========= */
-function render(items) {
-  const el = document.getElementById("product-list");
-  el.innerHTML = "";
+  <main id="main-content" class="main-content">
+    <div id="product-list" class="product-grid"></div>
+  </main>
 
-  items.forEach(item => {
-    const price = getDisplayPrice(item);
-
-    const card = document.createElement("div");
-    card.className = "product-card";
-
-    card.innerHTML = `
-      <div class="img-wrap"
-        style="background-image:url('${item.image_main || ""}')"
-        onmouseenter="this.style.backgroundImage='url(${item.image_hover || item.image_main || ""})'"
-        onmouseleave="this.style.backgroundImage='url(${item.image_main || ""})'">
-        ${item.is_new ? `<span class="badge-new">NEW</span>` : ""}
-      </div>
-
-      <div class="info-wrap">
-        <p class="p-name">${item.name || ""}</p>
-        ${price ? `<p class="p-price">NT$ ${price}</p>` : ""}
-      </div>
-    `;
-
-    el.appendChild(card);
-  });
-}
-
-/* ========= init ========= */
-(async function init(){
-  try {
-    const items = await fetchProducts();
-    render(items);
-  } catch (e) {
-    console.error("商品載入失敗", e);
-  }
-})();
-</script>
-
+  <script type="module" src="./index.js"></script>
 </body>
 </html>
