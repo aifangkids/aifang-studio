@@ -1,59 +1,67 @@
 /**
- * api.js
- * 專門用來跟你的 GAS API 互動
- * - fetchProducts()
- * - fetchOrders()  (後台)
- * - postOrderAction() (訂單狀態操作)
+ * ================================
+ * AiFang Kids Frontend API
+ * api.js（對接 GAS 商用版）
+ * ================================
  */
 
-const GAS_API_BASE = "https://script.google.com/macros/s/AKfycbxnlAwKJucHmCKcJwv67TWuKV0X74Daag9X9I4NG7DOESREuYdU7BtWBPcEHyoJphoEfg/exec";
-const API_KEY = "300689";
+const API_BASE_URL = "你的 GAS Web App URL"; 
+// 例：https://script.google.com/macros/s/AKfycbxnlAwKJucHmCKcJwv67TWuKV0X74Daag9X9I4NG7DOESREuYdU7BtWBPcEHyoJphoEfg/exec
 
 /**
- * 取得所有產品資料
- * @returns {Promise<Array>} products
+ * 取得所有商品（前台）
  */
 export async function fetchProducts() {
-  const url = `${GAS_API_BASE}?mode=products`;
+  const url = `${API_BASE_URL}?mode=products`;
+
   const res = await fetch(url);
-  if (!res.ok)
-    throw new Error(`fetchProducts 失敗: ${res.status}`);
-  const json = await res.json();
-  return json.products || [];
+  if (!res.ok) throw new Error("API 連線失敗");
+
+  const data = await res.json();
+  return data.products || [];
 }
 
 /**
- * 取得 Orders（後台）
- * @returns {Promise<Array>} orders
+ * ================================
+ * 商品卡專用：計算顯示價格
+ * 規則：
+ * 1. 優先顯示 sale 價
+ * 2. 沒有 sale → 顯示正常價
+ * 3. 多尺寸 → 取最低價
+ * ================================
  */
-export async function fetchOrders() {
-  const url = `${GAS_API_BASE}?mode=orders&api_key=${API_KEY}`;
-  const res = await fetch(url);
-  if (!res.ok)
-    throw new Error(`fetchOrders 失敗: ${res.status}`);
-  const json = await res.json();
-  return json.orders || [];
+export function getDisplayPrice(product) {
+  const priceFields = [
+    product.price_baby_sale || product.price_baby,
+    product.price_kid_sale || product.price_kid,
+    product.price_junior_sale || product.price_junior,
+    product.price_adult_sale || product.price_adult
+  ].filter(p => p && p > 0);
+
+  if (priceFields.length === 0) return 0;
+  return Math.min(...priceFields);
 }
 
 /**
- * POST 訂單狀態操作（confirmPayment / shipOrder / cancelOrder / refundOrder）
- * @param {string} action
- * @param {string} order_id
- * @returns {Promise<Object>}
+ * ================================
+ * 商品卡狀態標籤
+ * ================================
  */
-export async function postOrderAction(action, order_id) {
-  const form = new URLSearchParams();
-  form.append("api_key", API_KEY);
-  form.append("action", action);
-  form.append("order_id", order_id);
+export function getProductBadge(product) {
+  if (product.status) return product.status.toUpperCase();
+  if (product.is_new) return "NEW";
+  return "";
+}
 
-  const res = await fetch(GAS_API_BASE, {
-    method: "POST",
-    body: form
-  });
-
-  if (!res.ok)
-    throw new Error(`postOrderAction 失敗: ${res.status}`);
-
-  return res.json();
+/**
+ * ================================
+ * 色票處理
+ * ================================
+ */
+export function getColorCodes(product) {
+  if (!product.color_code) return [];
+  return product.color_code
+    .split(",")
+    .map(c => c.trim())
+    .filter(c => c.startsWith("#"));
 }
