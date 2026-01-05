@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <title>Product Detail | Aifang Studio</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@100;400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+    <div class="detail-wrapper">
+        <div class="detail-media">
+            <img id="main-image" src="" alt="Product Main Image">
+            <div id="image-gallery" class="gallery-strip"></div>
+        </div>
+
+        <div class="detail-info">
+            <div id="brand-tag" class="brand-black-tag"></div> <h2 id="product-name"></h2>
+            <div class="price-box">
+                <span id="original-price" class="price-strikethrough"></span>
+                <span id="sale-price" class="price-highlight"></span>
+                <span id="discount-label" class="discount-percent"></span>
+            </div>
+
+            <div id="bundle-alert" class="bundle-alert" style="display:none;">
+                <p>💡 1+1 Styling Tips: 搭配指定商品現折 NT$ 100</p>
+                <button id="view-bundle">查看搭配項目</button>
+            </div>
+
+            <div class="selector-section">
+                <label>SIZE</label>
+                <div id="size-options" class="size-buttons">
+                    </div>
+            </div>
+
+            <div class="selector-section">
+                <label>COLOR</label>
+                <div id="color-swatches" class="swatch-list"></div>
+            </div>
+
+            <button id="add-to-cart-btn" class="btn-primary">ADD TO CART</button>
+            
+            <div class="product-description">
+                <h3>Description</h3>
+                <p id="desc-text"></p>
+                <div id="size-chart" class="bellot-table"></div> </div>
+        </div>
+    </div>
+
+    <div id="bundle-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn">&times;</span>
+            <h4>搭配推薦</h4>
+            <div id="bundle-item-content"></div>
+        </div>
+    </div>
+
+    <script type="module" src="js/detail.js"></script>
+</body>
+</html>

@@ -1,22 +1,33 @@
+/* 字體套用 */
 body {
-    font-family: 'Noto Sans KR', sans-serif; [cite: 26]
+    font-family: 'Noto Sans KR', 'ChiuKongGothic-CL-Regular', sans-serif; [cite: 26, 99]
+    font-weight: 400;
+    color: #333;
+}
+
+h1, .brand-tag {
+    font-family: 'Noto Sans KR', sans-serif;
+    font-weight: 100; /* Thin 效果 */ [cite: 26]
 }
 
 /* 三色尺寸按鈕系統 [cite: 74] */
-.btn-size.baby { background-color: #FFD1DC; } /* 粉色 XS, S */
-.btn-size.kids { background-color: #B3E5FC; } /* 藍色 M, L, XL */
-.btn-size.junior { background-color: #C8E6C9; } /* 綠色 JS, JM, J */
+.btn-size-baby { background-color: #fce4ec; border: 1px solid #f8bbd0; } /* 粉色 */
+.btn-size-kid { background-color: #e3f2fd; border: 1px solid #bbdefb; }  /* 藍色 */
+.btn-size-junior { background-color: #e8f5e9; border: 1px solid #c8e6c9; } /* 綠色 */
 
-/* 商品卡品牌標籤 [cite: 55] */
-.brand-tag {
-    border: 1px solid black;
-    background: white;
-    padding: 2px 5px;
-    font-size: 12px;
+/* 商品卡片：黑框標籤 [cite: 55] */
+.product-card .brand-label {
+    border: 1px solid #000;
+    display: inline-block;
+    padding: 2px 8px;
+    font-size: 11px;
+    background: #fff;
 }
 
-/* 售罄樣式 [cite: 55] */
-.sold-out {
-    color: gray;
-    pointer-events: none;
+/* 右下角工具列 [cite: 27, 99] */
+.quick-tools {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 100;
 }
