@@ -1,54 +1,66 @@
-import { calculateOrder } from './cart.js'; // 沿用全站唯一計算函式 [cite: 45, 94]
+import { calculateOrder } from './cart.js';
 
 const GAS_API_URL = 'https://script.google.com/macros/s/AKfycbxnlAwKJucHmCKcJwv67TWuKV0X74Daag9X9I4NG7DOESREuYdU7BtWBPcEHyoJphoEfg/exec';
 
-document.getElementById('checkout-form')?.addEventListener('submit', async (e) => {
-    e.preventDefault();
+const checkoutForm = document.getElementById('checkout-form');
 
-    // 1. 取得購物車內容
-    const cart = JSON.parse(localStorage.getItem('cart')) || [];
-    if (cart.length === 0) {
-        alert("您的購物車是空的");
-        return;
-    }
+if (checkoutForm) {
+    checkoutForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
 
-    // 2. 取得使用者選擇的付款與運送資訊 [cite: 21, 99]
-    const paymentMethod = document.querySelector('input[name="payment"]:checked').value;
-    const shippingMethod = document.getElementById('shipping-method').value;
-    
-    // 3. 執行折扣計算 (1+1 -> 付款折扣 -> 運費) [cite: 30-33, 86-93]
-    const finalOrder = calculateOrder(cart, paymentMethod);
+        // 1. 取得購物車
+        const cart = JSON.parse(localStorage.getItem('cart')) || [];
+        if (cart.length === 0) {
+            alert("購物車是空的，無法結帳");
+            return;
+        }
 
-    // 4. 封裝傳送至 GAS 的資料庫格式 [cite: 22]
-    const payload = {
-        action: 'submitOrder',
-        order_info: {
-            consignee: document.getElementById('consignee').value,
-            phone: document.getElementById('phone').value,
-            address: document.getElementById('address').value,
+        // 2. 獲取表單元素 (增加安全檢查)
+        const consigneeEl = document.getElementById('consignee');
+        const phoneEl = document.getElementById('phone');
+        const addressEl = document.getElementById('address');
+        const paymentEl = document.querySelector('input[name="payment"]:checked');
+
+        if (!consigneeEl || !phoneEl || !addressEl || !paymentEl) {
+            alert("表單欄位不完整，請檢查 HTML 結構");
+            return;
+        }
+
+        const paymentMethod = paymentEl.value;
+
+        // 3. 執行折扣計算
+        const calculation = calculateOrder(cart, paymentMethod);
+
+        // 4. 打包資料
+        const payload = {
+            consignee: consigneeEl.value,
+            phone: phoneEl.value,
+            address: addressEl.value,
             payment: paymentMethod,
-            shipping: shippingMethod,
-            store_id: document.getElementById('store-id')?.value || ''
-        },
-        items: cart, // 包含 code, size, color, quantity
-        calculation: finalOrder, // 包含 subtotal, bundleDiscount, shipping, total
-        timestamp: new Date().toISOString()
-    };
+            items: cart,
+            total_amount: calculation.total,
+            discount_detail: calculation,
+            timestamp: new Date().toLocaleString()
+        };
 
-    try {
-        // 使用 POST 傳送到您的 GAS [cite: 22, 48]
-        const response = await fetch(GAS_API_URL, {
-            method: 'POST',
-            mode: 'no-cors', // 處理 GAS 的跨域限制
-            body: JSON.stringify(payload)
-        });
+        // 5. 送出資料
+        try {
+            const btn = document.getElementById('submit-btn');
+            btn.innerText = "提交中...";
+            btn.disabled = true;
 
-        // 5. 成功後的後續處理 [cite: 23]
-        alert("訂單已提交！我們將盡快與您聯繫。");
-        localStorage.removeItem('cart'); // 清空購物車
-        window.location.href = 'index.html'; // 返回首頁
-    } catch (error) {
-        console.error("Order Submission Error:", error);
-        alert("提交訂單時發生錯誤，請稍後再試。");
-    }
-});
+            await fetch(GAS_API_URL, {
+                method: 'POST',
+                mode: 'no-cors', // 配合 GAS
+                body: JSON.stringify(payload)
+            });
+
+            alert("訂單已成功送出！");
+            localStorage.removeItem('cart');
+            window.location.href = 'index.html';
+        } catch (error) {
+            console.error("提交失敗", error);
+            alert("提交失敗，請檢查網路連線");
+        }
+    });
+}

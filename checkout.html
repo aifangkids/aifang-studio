@@ -2,34 +2,47 @@
 <html lang="zh-Hant">
 <head>
     <meta charset="UTF-8">
-    <title>Checkout | Aifang Studio</title>
+    <title>結帳 | Aifang Studio</title>
     <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
-    <div class="checkout-wrapper">
-        <h2>ORDER INFORMATION</h2>
+    <div class="checkout-container">
+        <h2>訂購人資訊</h2>
         <form id="checkout-form">
-            <div class="form-group">
-                <label>收件人姓名</label>
-                <input type="text" id="consignee" required>
-            </div>
-            <div class="form-group">
-                <label>聯絡電話</label>
-                <input type="tel" id="phone" required>
-            </div>
-            <div class="form-group">
-                <label>收件地址 / 超商門市資訊</label>
-                <textarea id="address" required></textarea>
+            <div class="input-group">
+                <label for="consignee">收件人姓名</label>
+                <input type="text" id="consignee" placeholder="請輸入姓名" required>
             </div>
             
-            <input type="hidden" id="shipping-method" value="standard">
+            <div class="input-group">
+                <label for="phone">聯絡電話</label>
+                <input type="tel" id="phone" placeholder="0912-345-678" required>
+            </div>
             
-            <div id="final-preview" class="final-preview">
+            <div class="input-group">
+                <label for="address">收件地址 / 超商門市</label>
+                <textarea id="address" rows="3" placeholder="請填寫完整地址或超商門市名稱" required></textarea>
+            </div>
+
+            <div class="payment-group">
+                <h4>付款方式</h4>
+                <label>
+                    <input type="radio" name="payment" value="transfer" checked> 銀行匯款 (0.8折)
+                </label>
+                <label>
+                    <input type="radio" name="payment" value="cod"> 貨到付款 (0.9折)
+                </label>
+            </div>
+
+            <input type="hidden" id="shipping-method" value="7-11">
+
+            <div id="checkout-summary" class="checkout-summary">
                 </div>
 
-            <button type="submit" class="btn-primary-large">完成下單</button>
+            <button type="submit" id="submit-btn" class="btn-primary-large">確認並送出訂單</button>
         </form>
     </div>
+
     <script type="module" src="js/checkout.js"></script>
 </body>
 </html>
