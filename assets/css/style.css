@@ -1,33 +1,67 @@
-/* 字體套用 */
+/* 引入您提供的字體 */
+@font-face {
+    font-family: 'NotoSansKR-Light';
+    src: url('../fonts/NotoSansKR-Light.ttf') format('truetype');
+}
+@font-face {
+    font-family: 'ChiuKongGothic';
+    src: url('../fonts/ChiuKongGothic-CL-Regular.otf') format('opentype');
+}
+
 body {
-    font-family: 'Noto Sans KR', 'ChiuKongGothic-CL-Regular', sans-serif; [cite: 26, 99]
-    font-weight: 400;
+    font-family: 'NotoSansKR-Light', 'ChiuKongGothic', sans-serif;
+    margin: 0;
     color: #333;
+    background-color: #fff;
+    line-height: 1.6;
 }
 
-h1, .brand-tag {
-    font-family: 'Noto Sans KR', sans-serif;
-    font-weight: 100; /* Thin 效果 */ [cite: 26]
-}
-
-/* 三色尺寸按鈕系統 [cite: 74] */
-.btn-size-baby { background-color: #fce4ec; border: 1px solid #f8bbd0; } /* 粉色 */
-.btn-size-kid { background-color: #e3f2fd; border: 1px solid #bbdefb; }  /* 藍色 */
-.btn-size-junior { background-color: #e8f5e9; border: 1px solid #c8e6c9; } /* 綠色 */
-
-/* 商品卡片：黑框標籤 [cite: 55] */
-.product-card .brand-label {
-    border: 1px solid #000;
+/* BELLOT 高質感：黑框標籤 */
+.brand-tag {
     display: inline-block;
-    padding: 2px 8px;
+    border: 1px solid #000;
+    padding: 2px 10px;
     font-size: 11px;
-    background: #fff;
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+    text-transform: uppercase;
 }
 
-/* 右下角工具列 [cite: 27, 99] */
+/* 三色尺寸按鈕 */
+.btn-size-baby { background-color: #FFD1DC; border: 1px solid #ffb6c1; cursor: pointer; }
+.btn-size-kid { background-color: #B3E5FC; border: 1px solid #81d4fa; cursor: pointer; }
+.btn-size-junior { background-color: #C8E6C9; border: 1px solid #a5d6a7; cursor: pointer; }
+
+/* 商品網格佈局 */
+.product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 30px;
+    padding: 20px;
+}
+
+.product-card { cursor: pointer; transition: 0.3s; }
+.product-card:hover { opacity: 0.8; }
+.product-card img { width: 100%; height: auto; display: block; }
+
+/* 售罄樣式 */
+.sold-out { opacity: 0.5; filter: grayscale(1); }
+
+/* Quick Tools */
 .quick-tools {
     position: fixed;
-    bottom: 20px;
-    right: 20px;
-    z-index: 100;
+    bottom: 30px;
+    right: 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.tool-btn {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    border: 1px solid #ddd;
+    background: white;
+    cursor: pointer;
+    font-size: 12px;
 }
