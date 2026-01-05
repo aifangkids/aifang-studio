@@ -1,0 +1,22 @@
+body {
+    font-family: 'Noto Sans KR', sans-serif; [cite: 26]
+}
+
+/* 三色尺寸按鈕系統 [cite: 74] */
+.btn-size.baby { background-color: #FFD1DC; } /* 粉色 XS, S */
+.btn-size.kids { background-color: #B3E5FC; } /* 藍色 M, L, XL */
+.btn-size.junior { background-color: #C8E6C9; } /* 綠色 JS, JM, J */
+
+/* 商品卡品牌標籤 [cite: 55] */
+.brand-tag {
+    border: 1px solid black;
+    background: white;
+    padding: 2px 5px;
+    font-size: 12px;
+}
+
+/* 售罄樣式 [cite: 55] */
+.sold-out {
+    color: gray;
+    pointer-events: none;
+}

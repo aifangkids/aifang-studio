@@ -1,49 +1,22 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="zh-Hant">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AiFang Kids</title>
-    <link rel="stylesheet" href="index.css">
-    <link rel="preload" href="./fonts/PetitFormalScript-Regular.ttf" as="font" type="font/ttf" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@100;400&display=swap" rel="stylesheet"> [cite: 26]
+    <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
-    <!-- POPUP -->
-    <div id="popup" class="popup">
-        <div class="popup-content">
-            <span id="popup-close" class="popup-close">&times;</span>
-            <div id="popup-slides" class="popup-slides"></div>
-        </div>
+    <aside id="left-menu">
+        </aside>
+
+    <main id="product-list">
+        </main>
+
+    <aside id="right-cart-sidebar" class="fixed">
+        </aside>
+
+    <div class="quick-tools">
+        <button onclick="scrollToTop()">TOP</button>
+        <a href="https://line.me/R/ti/p/@844bwwjl">LINE</a>
     </div>
-
-    <!-- Header / Hero Banner -->
-    <header id="hero-banner">
-        <img src="./images/banner/hero.jpg" alt="Hero Banner" class="hero-img">
-        <div class="hero-text">
-            <h1>Ai Fang Kids</h1>
-            <p>Childhood should always feel this beautiful.</p>
-            <button id="view-more" class="view-more">VIEW MORE</button>
-        </div>
-    </header>
-
-    <!-- Sidebar -->
-    <aside id="sidebar">
-        <ul id="category-list"></ul>
-        <ul id="brand-list"></ul>
-    </aside>
-
-    <!-- Main Content -->
-    <main id="product-section">
-        <div id="products" class="products"></div>
-    </main>
-
-    <!-- TOP / LINE -->
-    <div id="top-line">
-        <button id="btn-top" class="btn-top">TOP</button>
-        <a href="https://line.me/R/ti/p/@844bwwjl" target="_blank" class="btn-line">LINE</a>
-    </div>
-
-    <script src="./js/api.js"></script>
-    <script src="./js/index.js"></script>
 </body>
 </html>
