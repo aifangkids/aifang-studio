@@ -6,33 +6,32 @@
     <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
-    <div class="checkout-container">
-        <h2>訂購人資訊</h2>
-        <form id="checkout-form">
-            <div class="input-group">
-                <label for="consignee">收件人姓名</label>
-                <input type="text" id="consignee" placeholder="請輸入姓名" required>
-            </div>
-            
-            <div class="input-group">
-                <label for="phone">聯絡電話</label>
-                <input type="tel" id="phone" placeholder="0912-345-678" required>
-            </div>
-            
-            <div class="input-group">
-                <label for="address">收件地址 / 超商門市</label>
-                <textarea id="address" rows="3" placeholder="請填寫完整地址或超商門市名稱" required></textarea>
-            </div>
-
-            <div class="payment-group">
-                <h4>付款方式</h4>
-                <label>
-                    <input type="radio" name="payment" value="transfer" checked> 銀行匯款 (0.8折)
-                </label>
-                <label>
-                    <input type="radio" name="payment" value="cod"> 貨到付款 (0.9折)
-                </label>
-            </div>
+<div class="checkout-form-container">
+    <h2>填寫訂購資訊</h2>
+    <form id="checkout-form">
+        <div class="field">
+            <label>E-mail *</label>
+            <input type="email" id="email" required placeholder="請輸入收件通知 Email">
+        </div>
+        <div class="field">
+            <label>收件人姓名 *</label>
+            <input type="text" id="consignee" required>
+        </div>
+        <div class="field">
+            <label>手機號碼 *</label>
+            <input type="tel" id="phone" required>
+        </div>
+        <div class="field">
+            <label>收件地址/門市 *</label>
+            <textarea id="address" required></textarea>
+        </div>
+        <div class="payment-box">
+            <label><input type="radio" name="payment" value="transfer" checked> 銀行匯款</label>
+            <label><input type="radio" name="payment" value="cod"> 貨到付款</label>
+        </div>
+        <button type="submit" id="submit-btn" class="btn-black">確認送出訂單</button>
+    </form>
+</div>
 
             <input type="hidden" id="shipping-method" value="7-11">
 
