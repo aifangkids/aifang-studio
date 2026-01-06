@@ -1,31 +1,109 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-    <meta charset="UTF-8">
-    <title>Shopping Cart | Aifang Studio</title>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="assets/css/style.css">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopping Cart | AiFang Kids</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        /* 基礎設置 */
+        body { font-family: 'Noto Sans TC', sans-serif; background: #fff; color: #333; margin: 0; padding: 0; line-height: 1.5; }
+        .container { max-width: 1100px; margin: 0 auto; padding: 40px 20px; }
+        
+        /* 標題與進度列 */
+        .titleArea { text-align: center; margin-bottom: 50px; }
+        .titleArea h2 { font-size: 26px; font-weight: 700; letter-spacing: 3px; margin-bottom: 10px; }
+        .titleArea p { font-size: 13px; color: #999; text-transform: uppercase; }
+
+        /* 表格樣式 */
+        .ec-base-table { width: 100%; border-collapse: collapse; border-top: 2px solid #222; }
+        .ec-base-table th { padding: 15px; border-bottom: 1px solid #dfdfdf; background: #fbfafa; font-size: 13px; font-weight: 500; color: #555; }
+        .ec-base-table td { padding: 20px 10px; border-bottom: 1px solid #dfdfdf; text-align: center; font-size: 14px; vertical-align: middle; }
+        
+        /* 商品詳細欄位 */
+        .product-item { display: flex; align-items: center; text-align: left; }
+        .product-item img { width: 90px; height: 110px; object-fit: cover; margin-right: 20px; border: 1px solid #eee; }
+        .product-name { font-weight: 700; color: #222; margin-bottom: 4px; display: block; }
+        .product-option { font-size: 12px; color: #888; }
+
+        /* 數量控制器 */
+        .qty-box { display: flex; justify-content: center; align-items: center; }
+        .qty-box button { background: #fff; border: 1px solid #ddd; width: 30px; height: 30px; cursor: pointer; font-size: 16px; }
+        .qty-box input { width: 40px; height: 28px; text-align: center; border: 1px solid #ddd; border-left: 0; border-right: 0; }
+
+        /* 總結區塊 */
+        .summary-wrapper { border: 1px solid #d7d5d5; background: #fbfafa; margin-top: 40px; display: flex; align-items: center; justify-content: space-around; padding: 40px 20px; }
+        .summary-item { text-align: center; }
+        .summary-item .title { font-size: 13px; color: #757575; display: block; margin-bottom: 15px; }
+        .summary-item .content { font-size: 22px; font-weight: 700; }
+        .summary-item.total .content { color: #d9534f; font-size: 28px; }
+        .summary-symbol { font-size: 20px; color: #ccc; }
+
+        /* 按鈕區 */
+        .btn-area { display: flex; justify-content: center; gap: 15px; margin-top: 40px; }
+        .btn-black { padding: 18px 60px; background: #222; color: #fff; text-decoration: none; font-size: 15px; font-weight: 700; transition: 0.3s; }
+        .btn-white { padding: 18px 60px; background: #fff; color: #222; border: 1px solid #222; text-decoration: none; font-size: 15px; transition: 0.3s; }
+        .btn-black:hover { background: #555; }
+        .btn-white:hover { background: #f9f9f9; }
+
+        @media (max-width: 768px) {
+            .summary-wrapper { flex-direction: column; gap: 20px; }
+            .summary-symbol { transform: rotate(90deg); }
+        }
+    </style>
 </head>
 <body>
-    <div class="cart-page-container">
+
+<div class="container">
+    <div class="titleArea">
         <h2>SHOPPING CART</h2>
-        
-        <div id="cart-list" class="cart-list">
-            </div>
+        <p>Your selected items</p>
+    </div>
 
-        <div class="checkout-section">
-            <div class="options">
-                <h4>PAYMENT METHOD</h4>
-                <label><input type="radio" name="payment" value="transfer" checked> 銀行匯款 (0.8折/免運)</label>
-                <label><input type="radio" name="payment" value="cod"> 貨到付款 (0.9折/滿1500免運)</label>
-            </div>
+    <table class="ec-base-table">
+        <colgroup>
+            <col style="width:auto;">
+            <col style="width:150px;">
+            <col style="width:150px;">
+            <col style="width:150px;">
+            <col style="width:80px;">
+        </colgroup>
+        <thead>
+            <tr>
+                <th>PRODUCT</th>
+                <th>PRICE</th>
+                <th>QUANTITY</th>
+                <th>TOTAL</th>
+                <th>REMOVE</th>
+            </tr>
+        </thead>
+        <tbody id="cart-tbody">
+            </tbody>
+    </table>
 
-            <div id="order-summary" class="order-summary">
-                </div>
-
-            <button id="go-to-checkout" class="btn-primary-large">PROCEED TO CHECKOUT</button>
+    <div class="summary-wrapper">
+        <div class="summary-item">
+            <span class="title">Total (商品小計)</span>
+            <span class="content" id="cart-subtotal">NT$ 0</span>
+        </div>
+        <div class="summary-symbol">+</div>
+        <div class="summary-item">
+            <span class="title">Shipping (預估運費)</span>
+            <span class="content" id="cart-shipping">NT$ 45</span>
+        </div>
+        <div class="summary-symbol">=</div>
+        <div class="summary-item total">
+            <span class="title">Grand Total (預估總額)</span>
+            <span class="content" id="cart-total">NT$ 0</span>
         </div>
     </div>
-    <script type="module" src="js/cart-page.js"></script>
+
+    <div class="btn-area">
+        <a href="index.html" class="btn-white">CONTINUE SHOPPING</a>
+        <a href="checkout.html" class="btn-black">ORDER ALL ITEMS</a>
+    </div>
+</div>
+
+<script src="js/cart.js"></script>
 </body>
 </html>

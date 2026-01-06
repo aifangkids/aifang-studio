@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Success | AiFang Kids</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Noto Sans TC', sans-serif; background: #fff; color: #333; margin: 0; padding: 0; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+        .container { max-width: 500px; width: 90%; text-align: center; padding: 40px 20px; border: 1px solid #eee; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        
+        .icon { font-size: 50px; color: #2ecc71; margin-bottom: 15px; }
+        h1 { font-size: 24px; font-weight: 700; margin: 0 0 10px 0; letter-spacing: 1px; }
+        p { color: #888; font-size: 14px; margin-bottom: 25px; line-height: 1.6; }
+
+        /* 訂單卡片樣式 */
+        .order-card { background: #fbfafa; border: 1px solid #eee; padding: 20px; text-align: left; margin-bottom: 25px; }
+        .order-card div { margin-bottom: 8px; font-size: 14px; color: #555; }
+        .order-card strong { color: #000; font-weight: 700; }
+        .item-list { border-top: 1px solid #ddd; margin-top: 10px; padding-top: 10px; font-size: 12px; color: #777; line-height: 1.8; }
+
+        /* LINE 引導區塊 */
+        .line-box { background: #f0fdf4; border: 1px solid #c6f6d5; padding: 15px; border-radius: 6px; margin-bottom: 25px; }
+        .line-box span { color: #22543d; font-weight: 700; font-size: 14px; }
+
+        /* 按鈕樣式 */
+        .btn-line { display: block; background: #06C755; color: #fff; padding: 18px; text-decoration: none; border-radius: 4px; font-weight: 700; font-size: 16px; margin-bottom: 15px; border: none; width: 100%; cursor: pointer; transition: 0.3s; }
+        .btn-line:hover { background: #05a647; }
+        .btn-home { display: inline-block; color: #999; text-decoration: underline; font-size: 13px; }
+
+        .copy-hint { font-size: 12px; color: #999; margin-top: 8px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="icon">✓</div>
+    <h1>下單成功！</h1>
+    <p>請務必加入 LINE 官方好友完成後續流程</p>
+
+    <div class="line-box">
+        <span>請加入 LINE ID: @844bwwjl</span>
+    </div>
+
+    <div class="order-card">
+        <div>訂單編號：<strong id="o-id">---</strong></div>
+        <div>訂購姓名：<strong id="o-name">---</strong></div>
+        <div>付款方式：<strong id="o-pay">---</strong></div>
+        <div>應付總額：<strong id="o-total">---</strong></div>
+        <div class="item-list" id="o-items">
+            </div>
+    </div>
+
+    <button class="btn-line" onclick="handleLineRedirect()">
+        一鍵複製資訊並開啟 LINE
+    </button>
+    <div class="copy-hint">點擊按鈕將自動複製訂單資訊</div>
+
+    <a href="index.html" class="btn-home">回首頁繼續購物</a>
+</div>
+
+<script>
+    let rawData = null;
+
+    window.onload = function() {
+        // 從暫存取出訂單資訊
+        const info = JSON.parse(localStorage.getItem('last_order_info'));
+        if (!info) {
+            document.querySelector('.container').innerHTML = "<h1>找不到訂單資訊</h1><a href='index.html'>回首頁</a>";
+            return;
+        }
+        rawData = info;
+
+        // 顯示在網頁上
+        document.getElementById('o-id').innerText = info.id;
+        document.getElementById('o-name').innerText = info.name;
+        document.getElementById('o-pay').innerText = info.pay;
+        document.getElementById('o-total').innerText = `NT$ ${info.total.toLocaleString()}`;
+        
+        const itemsHtml = info.items.map(i => `• ${i.name} (${i.color}/${i.size}) x${i.quantity}`).join('<br>');
+        document.getElementById('o-items').innerHTML = itemsHtml;
+    };
+
+    function handleLineRedirect() {
+        if (!rawData) return;
+
+        // 組合純文字格式供 LINE 貼上
+        const itemText = rawData.items.map(i => `• ${i.name} (${i.color}/${i.size}) x${i.quantity}`).join('\n');
+        const textToCopy = `您好，我已下單！\n---\n【訂單資訊】\n編號：${rawData.id}\n姓名：${rawData.name}\n付款方式：${rawData.pay}\n應付總額：NT$ ${rawData.total.toLocaleString()}\n\n【訂購明細】\n${itemText}`;
+
+        // 複製到剪貼簿
+        navigator.clipboard.writeText(textToCopy).then(() => {
+            alert("訂單資訊已複製！請在 LINE 聊天室直接貼上發送。");
+            // 跳轉至 LINE 官方帳號
+            window.location.href = "https://line.me/R/ti/p/@844bwwjl";
+        }).catch(err => {
+            // 防錯處理：如果瀏覽器不支援自動複製，依然強制跳轉
+            window.location.href = "https://line.me/R/ti/p/@844bwwjl";
+        });
+    }
+</script>
+
+</body>
+</html>

@@ -1,72 +1,94 @@
 <!DOCTYPE html>
-<html lang="zh-Hant">
+<html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>Product Detail | Aifang Studio</title>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@100;400&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="assets/css/style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Detail | AiFang Kids</title>
+    <link rel="stylesheet" href="css/style.css"> 
+    <style>
+        /* 直接貼入您提供的 CSS 樣式 */
+        :root { --header-h: 80px; --side-w: 420px; --baby-pink: #f2a6b2; --kids-blue: #8da9c4; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Noto Sans TC', sans-serif; background: #fff; color: #333; overflow-x: hidden; }
+
+        /* Header */
+        .top-header { width: 100%; height: var(--header-h); background: #fff; position: fixed; top: 0; left: 0; z-index: 2000; display: flex; align-items: center; justify-content: space-between; padding: 0 25px; border-bottom: 1px solid #f2f2f2; }
+        .main-logo { height: 30px; cursor: pointer; position: absolute; left: 50%; transform: translateX(-50%); }
+        .header-icon { width: 22px; cursor: pointer; }
+
+        /* Layout */
+        .detail-wrapper { display: flex; max-width: 1400px; margin: var(--header-h) auto 0; position: relative; }
+        .scroll-content { flex: 1; padding: 40px; border-right: 1px solid #f2f2f2; min-height: 100vh; }
+        #primary-img { width: 100%; border-radius: 4px; display: block; }
+        .desc-box { margin-top: 40px; border-top: 1px solid #eee; padding-top: 30px; white-space: pre-line; }
+
+        /* 右側固定區 */
+        .fixed-aside { width: var(--side-w); position: sticky; top: var(--header-h); align-self: flex-start; padding: 30px 40px; background: #fff; display: flex; flex-direction: column; }
+        .brand-tag { font-size: 11px; font-weight: 500; letter-spacing: 1px; text-decoration: underline; margin-bottom: 8px; color: #555; display: block; }
+        .p-title { font-size: 22px; font-weight: 500; margin-bottom: 5px; line-height: 1.3; color: #111; }
+        .p-id { font-size: 10px; color: #bbb; margin-bottom: 25px; }
+        .p-price { font-size: 20px; font-weight: 700; color: #333; margin-bottom: 20px; }
+        .label { font-size: 10px; font-weight: bold; color: #aaa; margin: 20px 0 10px; display: block; letter-spacing: 1px; }
+
+        /* 選項樣式 */
+        .option-list { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+        .opt-btn { border: 1px solid #ddd; background: #fff; padding: 8px 15px; cursor: pointer; font-size: 12px; border-radius: 2px; transition: 0.2s; }
+        .opt-btn.active { border-color: #333; background: #333; color: #fff; }
+
+        /* 數量與按鈕 */
+        .qty-box { display: flex; align-items: center; border: 1px solid #eee; width: fit-content; margin-bottom: 30px; height: 36px; }
+        .qty-btn { width: 36px; height: 100%; background: #fff; border: none; cursor: pointer; font-size: 16px; color: #888; }
+        .qty-input { width: 45px; text-align: center; border: none; font-size: 13px; outline: none; background: transparent; }
+        .add-cart-btn { width: 100%; padding: 18px; background: #111; color: #fff; border: none; font-size: 13px; font-weight: 500; letter-spacing: 2px; cursor: pointer; transition: 0.3s; }
+        .add-cart-btn:hover { background: #333; }
+
+        @media (max-width: 900px) {
+            .detail-wrapper { flex-direction: column; }
+            .fixed-aside { width: 100%; position: relative; top: 0; padding: 30px 20px; border-top: 10px solid #f9f9f9; }
+            .scroll-content { padding: 20px; border-right: none; }
+        }
+    </style>
 </head>
 <body>
+
+    <header class="top-header">
+        <img src="images/ui/back.png" class="header-icon" onclick="history.back()">
+        <img src="images/ui/logo.png" class="main-logo" onclick="location.href='index.html'">
+        <div onclick="location.href='cart.html'" style="cursor:pointer; position:relative;">
+            <img src="images/ui/icon_tcart.png" class="header-icon">
+        </div>
+    </header>
+
     <div class="detail-wrapper">
-        <div class="detail-media">
-            <img id="main-image" src="" alt="Product Main Image">
-            <div id="image-gallery" class="gallery-strip"></div>
-        </div>
+        <main class="scroll-content">
+            <img id="primary-img" src="images/ui/loading.gif" alt="Loading...">
+            <div id="p-desc" class="desc-box"></div>
+            <div id="detail-images-container"></div>
+        </main>
 
-        <div class="detail-info">
-            <div id="brand-tag" class="brand-black-tag"></div> <h2 id="product-name"></h2>
-            <div class="price-box">
-                <span id="original-price" class="price-strikethrough"></span>
-                <span id="sale-price" class="price-highlight"></span>
-                <span id="discount-label" class="discount-percent"></span>
-            
-        <div class="detail-info">
-    <span id="product-code" style="display:none;"></span> 
-    
-    <div id="brand-tag" class="brand-black-tag"></div>
-    <h2 id="product-name"></h2>
-    <p id="korean-name" class="sub-name"></p>
+        <aside class="fixed-aside">
+            <span id="p-brand" class="brand-tag">AiFang Kids</span>
+            <h1 id="p-title" class="p-title">Loading...</h1>
+            <p id="p-id" class="p-id">CODE: -</p>
+            <div id="p-price" class="p-price">NT$ --</div>
 
-    <div class="price-box">
-        <span id="original-price" class="price-strikethrough"></span>
-        <span id="sale-price" class="price-highlight" data-current-price="0"></span>
-    </div>
-    
-    </div>
+            <span class="label">COLOR / 顏色</span>
+            <div id="color-group" class="option-list"></div>
 
-            <div id="bundle-alert" class="bundle-alert" style="display:none;">
-                <p>💡 1+1 Styling Tips: 搭配指定商品現折 NT$ 100</p>
-                <button id="view-bundle">查看搭配項目</button>
+            <span class="label">SIZE / 尺寸</span>
+            <div id="size-group" class="option-list"></div>
+
+            <span class="label">QUANTITY / 數量</span>
+            <div class="qty-box">
+                <button class="qty-btn" onclick="updateQty(-1)">-</button>
+                <input type="text" id="qty" class="qty-input" value="1" readonly>
+                <button class="qty-btn" onclick="updateQty(1)">+</button>
             </div>
 
-            <div class="selector-section">
-                <label>SIZE</label>
-                <div id="size-options" class="size-buttons">
-                    </div>
-            </div>
-
-            <div class="selector-section">
-                <label>COLOR</label>
-                <div id="color-swatches" class="swatch-list"></div>
-            </div>
-
-            <button id="add-to-cart-btn" class="btn-primary">ADD TO CART</button>
-            
-            <div class="product-description">
-                <h3>Description</h3>
-                <p id="desc-text"></p>
-                <div id="size-chart" class="bellot-table"></div> </div>
-        </div>
+            <button class="add-cart-btn" onclick="addToCart()">ADD TO CART</button>
+        </aside>
     </div>
 
-    <div id="bundle-modal" class="modal">
-        <div class="modal-content">
-            <span class="close-btn">&times;</span>
-            <h4>搭配推薦</h4>
-            <div id="bundle-item-content"></div>
-        </div>
-    </div>
-
-    <script type="module" src="js/detail.js"></script>
+    <script src="js/detail.js"></script>
 </body>
 </html>

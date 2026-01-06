@@ -1,72 +1,119 @@
-import { fetchProducts } from './api.js';
+const API_URL = "您的_GAS_API_URL"; // 確保與 index.html 使用同一個
+const urlParams = new URLSearchParams(window.location.search);
+const productCode = urlParams.get('code');
 
 let currentProduct = null;
+let selectedColor = "";
+let selectedSize = "";
 
+// 初始化
 async function initDetail() {
-    const params = new URLSearchParams(window.location.search);
-    const code = params.get('code');
-    const products = await fetchProducts();
-    currentProduct = products.find(p => p.code === code);
+    if (!productCode) {
+        alert("找不到商品編號");
+        location.href = "index.html";
+        return;
+    }
 
-    if (currentProduct) renderDetail(currentProduct);
+    try {
+        const res = await fetch(`${API_URL}?code=${productCode}`);
+        const data = await res.json();
+        
+        // 假設 GAS 回傳的是單一物件，或是一個陣列中的第一個
+        currentProduct = Array.isArray(data) ? data[0] : data;
+        
+        renderProduct(currentProduct);
+    } catch (e) {
+        console.error("載入失敗", e);
+    }
 }
 
-function renderDetail(p) {
-    // 安全地填入內容
-    if(document.getElementById('product-code')) document.getElementById('product-code').innerText = p.code;
-    if(document.getElementById('product-name')) document.getElementById('product-name').innerText = p.name;
-    if(document.getElementById('main-image')) document.getElementById('main-image').src = p.image_main;
+function renderProduct(p) {
+    document.getElementById('p-title').innerText = p.name;
+    document.getElementById('p-brand').innerText = p.brand || "AiFang Kids";
+    document.getElementById('p-id').innerText = `CODE: ${p.code}`;
+    document.getElementById('p-price').innerText = `NT$ ${Number(p.price).toLocaleString()}`;
+    document.getElementById('p-desc').innerText = p.description || "";
+    document.getElementById('primary-img').src = p.image_url;
 
-    const sizeContainer = document.getElementById('size-options');
-    let sizeHtml = '';
+    // 處理顏色按鈕 (假設欄位用逗號分隔，例如: 紅,藍,白)
+    const colorArea = document.getElementById('color-group');
+    if (p.colors) {
+        p.colors.split(',').forEach(c => {
+            const btn = document.createElement('button');
+            btn.className = 'opt-btn';
+            btn.innerText = c.trim();
+            btn.onclick = () => {
+                document.querySelectorAll('#color-group .opt-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                selectedColor = c.trim();
+            };
+            colorArea.appendChild(btn);
+        });
+    }
 
-    // 生成三色按鈕系統
-    if (p.sizes_baby) {
-        p.sizes_baby.split(',').forEach(s => {
-            sizeHtml += `<button class="btn-size-baby" data-price="${p.price_baby_10off}" data-type="baby" onclick="selectSize(this)">${s}</button>`;
+    // 處理尺寸按鈕 (假設欄位用逗號分隔)
+    const sizeArea = document.getElementById('size-group');
+    if (p.sizes) {
+        p.sizes.split(',').forEach(s => {
+            const btn = document.createElement('button');
+            btn.className = 'opt-btn';
+            btn.innerText = s.trim();
+            btn.onclick = () => {
+                document.querySelectorAll('#size-group .opt-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                selectedSize = s.trim();
+            };
+            sizeArea.appendChild(btn);
         });
     }
-    if (p.sizes_kid) {
-        p.sizes_kid.split(',').forEach(s => {
-            sizeHtml += `<button class="btn-size-kid" data-price="${p.price_kid_10off}" data-type="kids" onclick="selectSize(this)">${s}</button>`;
-        });
-    }
-    if (p.sizes_junior) {
-        p.sizes_junior.split(',').forEach(s => {
-            sizeHtml += `<button class="btn-size-junior" data-price="${p.price_junior_10off}" data-type="junior" onclick="selectSize(this)">${s}</button>`;
-        });
-    }
-    sizeContainer.innerHTML = sizeHtml;
 }
 
-// 選擇尺寸並更新價格
-window.selectSize = (btn) => {
-    document.querySelectorAll('.size-buttons button').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    const price = btn.getAttribute('data-price');
-    document.getElementById('sale-price').innerText = `NT$ ${price}`;
-    document.getElementById('sale-price').setAttribute('data-current-price', price);
-};
+// 數量調整
+function updateQty(val) {
+    const qtyInput = document.getElementById('qty');
+    let n = parseInt(qtyInput.value) + val;
+    if (n >= 1) qtyInput.value = n;
+}
 
-// 加入購物車
-document.getElementById('add-to-cart-btn')?.addEventListener('click', () => {
-    const activeSize = document.querySelector('.size-buttons button.active');
-    if (!activeSize) return alert("請先選擇尺寸");
+// 加入購物車核心邏輯
+function addToCart() {
+    if (!selectedColor || !selectedSize) {
+        alert("請選擇顏色與尺寸");
+        return;
+    }
 
-    const cart = JSON.parse(localStorage.getItem('cart')) || [];
-    const newItem = {
-        code: currentProduct.code,
-        name: currentProduct.name,
-        image: currentProduct.image_main,
-        size: activeSize.innerText,
-        price: Number(activeSize.getAttribute('data-price')),
-        styling_with: currentProduct.styling_with, // 1+1 折扣判定用
-        quantity: 1
-    };
+    const qty = parseInt(document.getElementById('qty').value);
+    
+    // 取得現有購物車
+    let cart = JSON.parse(localStorage.getItem('cart')) || [];
 
-    cart.push(newItem);
+    // 檢查是否已有相同商品 (代碼+顏色+尺寸)
+    const existingIndex = cart.findIndex(item => 
+        item.code === currentProduct.code && 
+        item.color === selectedColor && 
+        item.size === selectedSize
+    );
+
+    if (existingIndex > -1) {
+        cart[existingIndex].quantity += qty;
+    } else {
+        cart.push({
+            code: currentProduct.code,
+            name: currentProduct.name,
+            price: currentProduct.price,
+            image: currentProduct.image_url,
+            color: selectedColor,
+            size: selectedSize,
+            quantity: qty,
+            brand: currentProduct.brand
+        });
+    }
+
     localStorage.setItem('cart', JSON.stringify(cart));
-    alert("已加入購物車！");
-});
+    
+    if (confirm("已加入購物車！是否前往結帳？")) {
+        location.href = "cart.html";
+    }
+}
 
-initDetail();
+window.onload = initDetail;
