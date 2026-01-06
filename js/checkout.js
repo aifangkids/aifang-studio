@@ -11,26 +11,26 @@ function initCheckout() {
         window.location.href = "index.html";
         return;
     }
-    // 初始執行一次物流切換與金額計算
     handlePaymentChange();
 }
 
-// 處理付款方式切換：變更運送選項與計算
 function handlePaymentChange() {
-    const payMethod = document.querySelector('input[name="pay_method"]:checked').value;
+    const payMethodEl = document.querySelector('input[name="pay_method"]:checked');
+    if (!payMethodEl) return;
+
+    const payMethod = payMethodEl.value;
     const shipContainer = document.getElementById('ship-method-container');
     const addrLabel = document.getElementById('address-label');
     
     let html = '';
     if (payMethod === 'transfer') {
-        // 匯款：可選宅配、超取
         html = `
             <label class="radio-item"><input type="radio" name="ship_method" value="home" checked onchange="updateSummary()"> 宅配到府</label>
             <label class="radio-item"><input type="radio" name="ship_method" value="store" onchange="updateSummary()"> 7-11 超商取貨</label>
         `;
         addrLabel.innerText = "收件地址 / 門市名稱";
     } else {
-        // 貨付：強制超取
+        // 貨付
         html = `
             <label class="radio-item"><input type="radio" name="ship_method" value="store" checked onchange="updateSummary()"> 7-11 超商取貨</label>
         `;
@@ -40,49 +40,44 @@ function handlePaymentChange() {
     updateSummary();
 }
 
-// 核心計算功能
 function updateSummary() {
     const cart = JSON.parse(localStorage.getItem('cart')) || [];
-    
-    // 1. 計算原始總價 (單價 * 數量)
-    const subtotal = cart.reduce((sum, item) => {
-        const price = parseFloat(item.price) || 0;
-        const qty = parseInt(item.quantity) || 0;
-        return sum + (price * qty);
-    }, 0);
+    const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    const payMethodEl = document.querySelector('input[name="pay_method"]:checked');
+    if (!payMethodEl) return;
 
-    const payMethod = document.querySelector('input[name="pay_method"]:checked').value;
-
-    // 2. 折扣邏輯
+    const payMethod = payMethodEl.value;
     const discountRate = (payMethod === 'transfer') ? 0.8 : 0.9;
     const discountedSubtotal = Math.round(subtotal * discountRate);
     const discountAmount = subtotal - discountedSubtotal;
 
-    // 3. 運費邏輯
-    let shippingFee = 0;
-    if (payMethod === 'transfer') {
-        shippingFee = 0; // 匯款免運
-    } else {
-        shippingFee = (discountedSubtotal >= 1500) ? 0 : 60; // 貨付滿1500免運，否則60
-    }
-
+    let shippingFee = (payMethod === 'transfer') ? 0 : (discountedSubtotal >= 1500 ? 0 : 60);
     const finalTotal = discountedSubtotal + shippingFee;
 
-    // 4. 更新 UI (確保 ID 與 HTML 完全一致)
     document.getElementById('show-subtotal').innerText = `NT$ ${subtotal.toLocaleString()}`;
     document.getElementById('show-discount').innerText = `- NT$ ${discountAmount.toLocaleString()}`;
     document.getElementById('show-shipping').innerText = (shippingFee === 0) ? "免運" : `NT$ ${shippingFee.toLocaleString()}`;
     document.getElementById('show-total').innerText = `NT$ ${finalTotal.toLocaleString()}`;
 
-    // 暫存資料
     window.finalOrderCalc = { subtotal, discountAmount, shippingFee, finalTotal };
 }
 
+// --- 修正報錯的核心位置 ---
 async function submitOrder() {
     const cart = JSON.parse(localStorage.getItem('cart'));
     const calc = window.finalOrderCalc;
-    const payMethod = document.querySelector('input[name="pay_method"]:checked').value;
-    const shipMethod = document.querySelector('input[name="ship_method"]:checked').value;
+
+    // 加入安全性檢查，避免讀取不到 checked 元素
+    const payMethodEl = document.querySelector('input[name="pay_method"]:checked');
+    const shipMethodEl = document.querySelector('input[name="ship_method"]:checked');
+    
+    if (!payMethodEl || !shipMethodEl) {
+        alert("請選擇付款與運送方式");
+        return;
+    }
+
+    const payMethod = payMethodEl.value;
+    const shipMethod = shipMethodEl.value;
     
     const name = document.getElementById('cust_name').value.trim();
     const phone = document.getElementById('cust_phone').value.trim();
@@ -90,13 +85,28 @@ async function submitOrder() {
     const address = document.getElementById('cust_address').value.trim();
 
     if (!name || !phone || !address) {
-        alert("請填寫收件人姓名、電話及地址/門市資訊");
+        alert("請填寫完整收件資訊");
         return;
     }
 
     const submitBtn = document.getElementById('submit-btn');
     submitBtn.disabled = true;
     submitBtn.innerText = "PROCESSING...";
+
+    // 格式化 LINE 訊息
+    let lineMsg = `📦 【AIFANG KIDS 訂單確認】\n`;
+    lineMsg += `━━━━━━━━━━━━━━━\n`;
+    lineMsg += `👤 收件人：${name}\n`;
+    lineMsg += `📞 電話：${phone}\n`;
+    lineMsg += `💳 方式：${payMethod === 'transfer' ? '銀行匯款(8折)' : '貨到付款(9折)'}\n`;
+    lineMsg += `📍 地址：${address}\n`;
+    lineMsg += `━━━━━━━━━━━━━━━\n`;
+    lineMsg += `🛍️ 內容：\n`;
+    cart.forEach((item, i) => {
+        lineMsg += `${i+1}. ${item.name} (${item.color}/${item.size}) x${item.quantity}\n`;
+    });
+    lineMsg += `━━━━━━━━━━━━━━━\n`;
+    lineMsg += `⭐ 應付金額：NT$ ${calc.finalTotal.toLocaleString()}\n`;
 
     const order_payload = {
         mode: "createOrder",
@@ -116,20 +126,31 @@ async function submitOrder() {
     };
 
     try {
-        // 使用 no-cors 模式確保即使跨域也能發送
         await fetch(API_URL, {
             method: 'POST',
             mode: 'no-cors',
             body: JSON.stringify(order_payload)
         });
 
-        // 成功發送後直接導向成功頁面
+        // --- 關鍵修正：將完整資料存入 localStorage 給成功頁面使用 ---
         localStorage.setItem('last_order_info', JSON.stringify({
             id: "AF" + new Date().getTime().toString().slice(-6),
-            name: name,
-            pay: (payMethod === 'transfer' ? "銀行匯款(8折)" : "貨到付款(9折)"),
-            total: calc.finalTotal,
-            items: cart
+            customer_name: name,
+            customer_phone: phone,
+            customer_email: email,
+            customer_address: address,
+            total_amount: calc.finalTotal,
+            pay_method_text: payMethod === 'transfer' ? '銀行匯款(8折)' : '貨到付款(9折)',
+            line_msg: lineMsg,
+            // 處理 items 的欄位對接
+            items: cart.map(item => ({
+                product_name: item.name,
+                product_code: item.id || '', // 若無編號則留空
+                color: item.color,
+                size: item.size,
+                unit_price: item.price,
+                quantity: item.quantity
+            }))
         }));
 
         localStorage.removeItem('cart');
@@ -137,7 +158,7 @@ async function submitOrder() {
 
     } catch (e) {
         console.error(e);
-        alert("訂單送出發生問題，請聯繫官方 LINE 客服");
+        alert("傳送失敗，請聯繫 LINE 客服");
         submitBtn.disabled = false;
         submitBtn.innerText = "PLACE ORDER";
     }

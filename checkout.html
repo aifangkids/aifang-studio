@@ -6,10 +6,16 @@
     <title>Checkout | AiFang Kids</title>
     <style>
         :root { --header-h: 70px; --accent: #111; --gray-bg: #f9f9f9; --border: #eeeeee; }
+        * { box-sizing: border-box; } /* 確保內距不影響寬度 */
         body { font-family: 'Noto Sans TC', sans-serif; margin: 0; padding: 0; background: #fff; color: #333; }
         
-        .checkout-container { max-width: 800px; margin: var(--header-h) auto 50px; padding: 20px; }
-        h2 { text-align: center; letter-spacing: 2px; margin-bottom: 40px; font-weight: 500; }
+        /* Header 保持一致性 */
+        .top-header { width: 100%; height: var(--header-h); background: #fff; position: fixed; top: 0; left: 0; z-index: 2000; display: flex; align-items: center; justify-content: center; padding: 0 25px; border-bottom: 1px solid #f2f2f2; }
+        .main-logo { height: 30px; cursor: pointer; }
+        .back-btn { position: absolute; left: 25px; font-size: 12px; font-weight: bold; text-decoration: none; color: #333; }
+
+        .checkout-container { max-width: 800px; margin: calc(var(--header-h) + 40px) auto 50px; padding: 20px; }
+        h2 { text-align: center; letter-spacing: 2px; margin-bottom: 40px; font-weight: 500; text-transform: uppercase; }
         
         .checkout-section { border: 1px solid var(--border); padding: 25px; margin-bottom: 25px; border-radius: 4px; }
         .checkout-section h3 { font-size: 14px; margin-top: 0; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 10px; color: #888; letter-spacing: 1px; }
@@ -17,25 +23,34 @@
         .input-group { margin-bottom: 20px; }
         .input-group label { display: block; font-size: 12px; font-weight: bold; margin-bottom: 8px; color: #555; }
         .input-group input[type="text"], .input-group input[type="email"] { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 2px; font-size: 14px; outline: none; box-sizing: border-box; }
+        .input-group input:focus { border-color: #333; }
 
         /* Radio Buttons */
-        .radio-group { display: flex; gap: 20px; flex-wrap: wrap; }
-        .radio-item { display: flex; align-items: center; cursor: pointer; font-size: 14px; }
-        .radio-item input { margin-right: 8px; }
+        .radio-group { display: flex; gap: 20px; flex-wrap: wrap; margin-top: 5px; }
+        .radio-item { display: flex; align-items: center; cursor: pointer; font-size: 14px; font-weight: 500; }
+        .radio-item input { margin-right: 8px; width: 16px; height: 16px; accent-color: #111; }
 
         /* Summary Card */
         .order-summary { background: var(--gray-bg); padding: 30px; border-radius: 4px; }
         .summary-line { display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 14px; }
-        .summary-line.total { border-top: 1px solid #ddd; padding-top: 15px; font-size: 18px; font-weight: bold; }
+        .summary-line.total { border-top: 1px solid #ddd; padding-top: 15px; font-size: 18px; font-weight: bold; margin-top: 10px; }
         
-        .btn-place-order { width: 100%; padding: 20px; background: #111; color: #fff; border: none; font-size: 14px; font-weight: bold; letter-spacing: 2px; cursor: pointer; transition: 0.3s; margin-top: 20px; }
+        .btn-place-order { width: 100%; padding: 20px; background: #111; color: #fff; border: none; font-size: 14px; font-weight: bold; letter-spacing: 2px; cursor: pointer; transition: 0.3s; margin-top: 20px; text-transform: uppercase; }
         .btn-place-order:hover { background: #444; }
         .btn-place-order:disabled { background: #ccc; cursor: not-allowed; }
 
-        @media (max-width: 600px) { .radio-group { flex-direction: column; gap: 10px; } }
+        @media (max-width: 600px) { 
+            .radio-group { flex-direction: column; gap: 15px; } 
+            .checkout-container { padding: 15px; }
+        }
     </style>
 </head>
 <body>
+
+<header class="top-header">
+    <a href="cart.html" class="back-btn">← BACK TO BAG</a>
+    <img src="images/ui/logo.png" class="main-logo" alt="AIFANG" onclick="location.href='index.html'">
+</header>
 
 <div class="checkout-container">
     <h2>CHECKOUT</h2>
@@ -46,10 +61,10 @@
             <label>付款方式</label>
             <div class="radio-group">
                 <label class="radio-item">
-                    <input type="radio" name="pay_method" value="transfer" checked onchange="handlePaymentChange()"> 銀行匯款 (8折/免運)
+                    <input type="radio" name="pay_method" value="transfer" checked onchange="handlePaymentChange()"> 銀行匯款 (8折 / 免運)
                 </label>
                 <label class="radio-item">
-                    <input type="radio" name="pay_method" value="cod" onchange="handlePaymentChange()"> 貨到付款 (9折/滿1500免運)
+                    <input type="radio" name="pay_method" value="cod" onchange="handlePaymentChange()"> 貨到付款 (9折 / 滿1500免運)
                 </label>
             </div>
         </div>
@@ -65,19 +80,19 @@
         <h3>02. SHIPPING INFORMATION</h3>
         <div class="input-group">
             <label>E-mail</label>
-            <input type="email" id="cust_email" placeholder="example@mail.com">
+            <input type="email" id="cust_email" placeholder="接收訂單通知信件">
         </div>
         <div class="input-group">
             <label>收件人姓名</label>
-            <input type="text" id="cust_name">
+            <input type="text" id="cust_name" placeholder="請輸入收件人真實姓名">
         </div>
         <div class="input-group">
             <label>手機號碼</label>
-            <input type="text" id="cust_phone">
+            <input type="text" id="cust_phone" placeholder="請輸入手機號碼 (09xxxxxxxx)">
         </div>
         <div class="input-group">
             <label id="address-label">收件地址</label>
-            <input type="text" id="cust_address" placeholder="請輸入完整地址或 7-11 店名店號">
+            <input type="text" id="cust_address" placeholder="完整地址或 7-11 店名及店號">
         </div>
     </div>
 
