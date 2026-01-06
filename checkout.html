@@ -1,122 +1,162 @@
-<!DOCTYPE html>
-<html lang="zh-TW">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Checkout | AiFang Kids</title>
-    <style>
-        :root { --header-h: 70px; --accent: #111; --gray-bg: #f9f9f9; --border: #eeeeee; }
-        * { box-sizing: border-box; } /* 確保內距不影響寬度 */
-        body { font-family: 'Noto Sans TC', sans-serif; margin: 0; padding: 0; background: #fff; color: #333; }
+const API_URL = "https://script.google.com/macros/s/AKfycbxnlAwKJucHmCKcJwv67TWuKV0X74Daag9X9I4NG7DOESREuYdU7BtWBPcEHyoJphoEfg/exec"; 
+
+document.addEventListener('DOMContentLoaded', () => {
+    initCheckout();
+});
+
+function initCheckout() {
+    const cart = JSON.parse(localStorage.getItem('cart')) || [];
+    if (cart.length === 0) {
+        alert("購物車是空的，為您返回首頁");
+        window.location.href = "index.html";
+        return;
+    }
+    handlePaymentChange();
+}
+
+function handlePaymentChange() {
+    const payMethodEl = document.querySelector('input[name="pay_method"]:checked');
+    if (!payMethodEl) return;
+
+    const payMethod = payMethodEl.value;
+    const shipContainer = document.getElementById('ship-method-container');
+    const addrLabel = document.getElementById('address-label');
+    
+    let html = '';
+    if (payMethod === 'transfer') {
+        html = `
+            <label class="radio-item"><input type="radio" name="ship_method" value="home" checked onchange="updateSummary()"> 宅配到府</label>
+            <label class="radio-item"><input type="radio" name="ship_method" value="store" onchange="updateSummary()"> 7-11 超商取貨</label>
+        `;
+        addrLabel.innerText = "收件地址 / 門市名稱";
+    } else {
+        html = `
+            <label class="radio-item"><input type="radio" name="ship_method" value="store" checked onchange="updateSummary()"> 7-11 超商取貨</label>
+        `;
+        addrLabel.innerText = "7-11 門市名稱及店號";
+    }
+    shipContainer.innerHTML = html;
+    updateSummary();
+}
+
+function updateSummary() {
+    const cart = JSON.parse(localStorage.getItem('cart')) || [];
+    const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    const payMethodEl = document.querySelector('input[name="pay_method"]:checked');
+    if (!payMethodEl) return;
+
+    const payMethod = payMethodEl.value;
+    const discountRate = (payMethod === 'transfer') ? 0.8 : 0.9;
+    const discountedSubtotal = Math.round(subtotal * discountRate);
+    const discountAmount = subtotal - discountedSubtotal;
+
+    let shippingFee = (payMethod === 'transfer') ? 0 : (discountedSubtotal >= 1500 ? 0 : 60);
+    const finalTotal = discountedSubtotal + shippingFee;
+
+    document.getElementById('show-subtotal').innerText = `NT$ ${subtotal.toLocaleString()}`;
+    document.getElementById('show-discount').innerText = `- NT$ ${discountAmount.toLocaleString()}`;
+    document.getElementById('show-shipping').innerText = (shippingFee === 0) ? "免運" : `NT$ ${shippingFee.toLocaleString()}`;
+    document.getElementById('show-total').innerText = `NT$ ${finalTotal.toLocaleString()}`;
+
+    window.finalOrderCalc = { subtotal, discountAmount, shippingFee, finalTotal };
+}
+
+async function submitOrder() {
+    const cart = JSON.parse(localStorage.getItem('cart'));
+    const calc = window.finalOrderCalc;
+
+    const payMethodEl = document.querySelector('input[name="pay_method"]:checked');
+    const shipMethodEl = document.querySelector('input[name="ship_method"]:checked');
+    
+    if (!payMethodEl || !shipMethodEl) {
+        alert("請選擇付款與運送方式");
+        return;
+    }
+
+    const payMethod = payMethodEl.value;
+    const shipMethod = shipMethodEl.value;
+    const name = document.getElementById('cust_name').value.trim();
+    const phone = document.getElementById('cust_phone').value.trim();
+    const email = document.getElementById('cust_email').value.trim();
+    const address = document.getElementById('cust_address').value.trim();
+
+    if (!name || !phone || !address) {
+        alert("請填寫完整收件資訊");
+        return;
+    }
+
+    const submitBtn = document.getElementById('submit-btn');
+    submitBtn.disabled = true;
+    submitBtn.innerText = "PROCESSING...";
+
+    const orderId = "AF" + new Date().getTime().toString().slice(-6);
+
+    // 格式化 LINE 訊息
+    let lineMsg = `📦 【AIFANG KIDS 訂單確認】\n`;
+    lineMsg += `━━━━━━━━━━━━━━━\n`;
+    lineMsg += `👤 收件人：${name}\n`;
+    lineMsg += `📞 電話：${phone}\n`;
+    lineMsg += `💳 方式：${payMethod === 'transfer' ? '銀行匯款(8折)' : '貨到付款(9折)'}\n`;
+    lineMsg += `📍 地址：${address}\n`;
+    lineMsg += `━━━━━━━━━━━━━━━\n`;
+    lineMsg += `🛍️ 內容：\n`;
+    cart.forEach((item, i) => {
+        lineMsg += `${i+1}. ${item.name} (${item.color}/${item.size}) x${item.quantity}\n`;
+    });
+    lineMsg += `━━━━━━━━━━━━━━━\n`;
+    lineMsg += `⭐ 應付金額：NT$ ${calc.finalTotal.toLocaleString()}\n`;
+
+    const order_payload = {
+        mode: "createOrder",
+        order_data: {
+            customer_name: name,
+            customer_phone: phone,
+            customer_email: email,
+            customer_address: address,
+            payment_method: payMethod,
+            shipping_method: shipMethod,
+            total_amount: calc.finalTotal
+        },
+        items: cart.map(item => ({
+            product_name: item.name,
+            product_code: item.id || '',
+            color: item.color,
+            size: item.size,
+            unit_price: item.price,
+            quantity: item.quantity
+        }))
+    };
+
+    try {
+        await fetch(API_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            body: JSON.stringify(order_payload)
+        });
+
+        // 重要：完整存入 localStorage 確保成功頁面讀取
+        localStorage.setItem('last_order_info', JSON.stringify({
+            id: orderId,
+            customer_name: name,
+            customer_phone: phone,
+            customer_address: address,
+            total_amount: calc.finalTotal,
+            pay_method_text: payMethod === 'transfer' ? '銀行匯款(8折)' : '貨到付款(9折)',
+            line_msg: lineMsg,
+            items: order_payload.items
+        }));
+
+        localStorage.removeItem('cart');
         
-        /* Header 保持一致性 */
-        .top-header { width: 100%; height: var(--header-h); background: #fff; position: fixed; top: 0; left: 0; z-index: 2000; display: flex; align-items: center; justify-content: center; padding: 0 25px; border-bottom: 1px solid #f2f2f2; }
-        .main-logo { height: 30px; cursor: pointer; }
-        .back-btn { position: absolute; left: 25px; font-size: 12px; font-weight: bold; text-decoration: none; color: #333; }
+        // 給手機瀏覽器 150ms 寫入快取的時間再跳轉
+        setTimeout(() => {
+            window.location.href = "order_success.html";
+        }, 150);
 
-        .checkout-container { max-width: 800px; margin: calc(var(--header-h) + 40px) auto 50px; padding: 20px; }
-        h2 { text-align: center; letter-spacing: 2px; margin-bottom: 40px; font-weight: 500; text-transform: uppercase; }
-        
-        .checkout-section { border: 1px solid var(--border); padding: 25px; margin-bottom: 25px; border-radius: 4px; }
-        .checkout-section h3 { font-size: 14px; margin-top: 0; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 10px; color: #888; letter-spacing: 1px; }
-
-        .input-group { margin-bottom: 20px; }
-        .input-group label { display: block; font-size: 12px; font-weight: bold; margin-bottom: 8px; color: #555; }
-        .input-group input[type="text"], .input-group input[type="email"] { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 2px; font-size: 14px; outline: none; box-sizing: border-box; }
-        .input-group input:focus { border-color: #333; }
-
-        /* Radio Buttons */
-        .radio-group { display: flex; gap: 20px; flex-wrap: wrap; margin-top: 5px; }
-        .radio-item { display: flex; align-items: center; cursor: pointer; font-size: 14px; font-weight: 500; }
-        .radio-item input { margin-right: 8px; width: 16px; height: 16px; accent-color: #111; }
-
-        /* Summary Card */
-        .order-summary { background: var(--gray-bg); padding: 30px; border-radius: 4px; }
-        .summary-line { display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 14px; }
-        .summary-line.total { border-top: 1px solid #ddd; padding-top: 15px; font-size: 18px; font-weight: bold; margin-top: 10px; }
-        
-        .btn-place-order { width: 100%; padding: 20px; background: #111; color: #fff; border: none; font-size: 14px; font-weight: bold; letter-spacing: 2px; cursor: pointer; transition: 0.3s; margin-top: 20px; text-transform: uppercase; }
-        .btn-place-order:hover { background: #444; }
-        .btn-place-order:disabled { background: #ccc; cursor: not-allowed; }
-
-        @media (max-width: 600px) { 
-            .radio-group { flex-direction: column; gap: 15px; } 
-            .checkout-container { padding: 15px; }
-        }
-    </style>
-</head>
-<body>
-
-<header class="top-header">
-    <a href="cart.html" class="back-btn">← BACK TO BAG</a>
-    <img src="images/ui/logo.png" class="main-logo" alt="AIFANG" onclick="location.href='index.html'">
-</header>
-
-<div class="checkout-container">
-    <h2>CHECKOUT</h2>
-
-    <div class="checkout-section">
-        <h3>01. PAYMENT & SHIPPING</h3>
-        <div class="input-group">
-            <label>付款方式</label>
-            <div class="radio-group">
-                <label class="radio-item">
-                    <input type="radio" name="pay_method" value="transfer" checked onchange="handlePaymentChange()"> 銀行匯款 (8折 / 免運)
-                </label>
-                <label class="radio-item">
-                    <input type="radio" name="pay_method" value="cod" onchange="handlePaymentChange()"> 貨到付款 (9折 / 滿1500免運)
-                </label>
-            </div>
-        </div>
-
-        <div class="input-group">
-            <label>運送方式</label>
-            <div class="radio-group" id="ship-method-container">
-                </div>
-        </div>
-    </div>
-
-    <div class="checkout-section">
-        <h3>02. SHIPPING INFORMATION</h3>
-        <div class="input-group">
-            <label>E-mail</label>
-            <input type="email" id="cust_email" placeholder="接收訂單通知信件">
-        </div>
-        <div class="input-group">
-            <label>收件人姓名</label>
-            <input type="text" id="cust_name" placeholder="請輸入收件人真實姓名">
-        </div>
-        <div class="input-group">
-            <label>手機號碼</label>
-            <input type="text" id="cust_phone" placeholder="請輸入手機號碼 (09xxxxxxxx)">
-        </div>
-        <div class="input-group">
-            <label id="address-label">收件地址</label>
-            <input type="text" id="cust_address" placeholder="完整地址或 7-11 店名及店號">
-        </div>
-    </div>
-
-    <div class="order-summary">
-        <div class="summary-line">
-            <span>商品小計 (原價)</span>
-            <span id="show-subtotal">NT$ 0</span>
-        </div>
-        <div class="summary-line">
-            <span>折扣金額</span>
-            <span id="show-discount" style="color: #d9534f;">- NT$ 0</span>
-        </div>
-        <div class="summary-line">
-            <span>運費</span>
-            <span id="show-shipping">NT$ 0</span>
-        </div>
-        <div class="summary-line total">
-            <span>應付總額</span>
-            <span id="show-total">NT$ 0</span>
-        </div>
-        <button id="submit-btn" class="btn-place-order" onclick="submitOrder()">PLACE ORDER</button>
-    </div>
-</div>
-
-<script src="js/checkout.js"></script>
-</body>
-</html>
+    } catch (e) {
+        console.error(e);
+        alert("傳送失敗，請聯繫 LINE 客服");
+        submitBtn.disabled = false;
+        submitBtn.innerText = "PLACE ORDER";
+    }
+}

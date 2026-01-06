@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Order Success | AiFang Kids</title>
     <style>
-        :root { --accent: #06C755; --gray: #f9f9f9; --border: #eeeeee; }
+        :root { --accent: #06C755; --gold: #e2c890; --gray: #f9f9f9; --border: #eeeeee; }
         body { font-family: 'Noto Sans TC', sans-serif; margin: 0; padding: 40px 20px; background: #fff; color: #333; line-height: 1.6; }
         .container { max-width: 600px; margin: 0 auto; border: 1px solid var(--border); padding: 30px; border-radius: 8px; }
         .success-icon { font-size: 50px; color: var(--accent); text-align: center; margin-bottom: 10px; }
@@ -16,8 +16,7 @@
         .item-list { background: var(--gray); padding: 15px; border-radius: 4px; margin: 10px 0; }
         .item-row { font-size: 13px; display: flex; justify-content: space-between; margin-bottom: 5px; }
         .line-notice { background: #e8f9ef; color: #2d5a3f; padding: 15px; border-radius: 4px; font-size: 13px; margin: 30px 0; text-align: center; border: 1px solid #c2e7d0; }
-        .btn-line { display: block; background: var(--accent); color: #fff; text-align: center; padding: 18px; text-decoration: none; border-radius: 4px; font-weight: bold; letter-spacing: 1px; transition: 0.3s; }
-        .btn-line:hover { background: #05b34c; }
+        .btn-line { display: block; background: var(--accent); color: #fff; text-align: center; padding: 18px; text-decoration: none; border-radius: 4px; font-weight: bold; letter-spacing: 1px; }
         .btn-home { display: block; text-align: center; margin-top: 20px; font-size: 13px; color: #aaa; text-decoration: none; }
     </style>
 </head>
@@ -47,7 +46,7 @@
     </div>
 
     <div class="line-notice">
-        💡 <strong>最後一步：</strong>請點擊下方按鈕回報 LINE 客服，<br>完成對帳與出貨安排！
+        💡 <strong>最後一步：</strong>請點擊下方按鈕回報 LINE 客服，<br>我們將立即為您核對訂單並安排出貨！
     </div>
 
     <a href="#" id="line-link" class="btn-line">傳送訂單資訊至 LINE</a>
@@ -56,23 +55,21 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', () => {
-        const rawData = localStorage.getItem('last_order_info');
-        if (!rawData) {
-            console.error("Storage is empty");
+        const orderData = JSON.parse(localStorage.getItem('last_order_info'));
+        
+        if (!orderData) {
+            alert("找不到訂單資訊，請洽客服。");
             return;
         }
 
-        const orderData = JSON.parse(rawData);
-        
-        // 渲染畫面文字
-        document.getElementById('order-id').innerText = orderData.id || "處理中...";
-        document.getElementById('order-pay').innerText = orderData.pay_method_text || "-";
-        document.getElementById('order-total').innerText = "NT$ " + (orderData.total_amount || 0).toLocaleString();
-        document.getElementById('cust-name').innerText = orderData.customer_name || "-";
-        document.getElementById('cust-phone').innerText = orderData.customer_phone || "-";
-        document.getElementById('cust-addr').innerText = orderData.customer_address || "-";
+        // 渲染畫面
+        document.getElementById('order-id').innerText = orderData.id;
+        document.getElementById('order-pay').innerText = orderData.pay_method_text;
+        document.getElementById('order-total').innerText = "NT$ " + orderData.total_amount.toLocaleString();
+        document.getElementById('cust-name').innerText = orderData.customer_name;
+        document.getElementById('cust-phone').innerText = orderData.customer_phone;
+        document.getElementById('cust-addr').innerText = orderData.customer_address;
 
-        // 渲染商品清單
         if (orderData.items) {
             const listHtml = orderData.items.map(item => `
                 <div class="item-row">
@@ -83,19 +80,10 @@
             document.getElementById('item-list').innerHTML = listHtml;
         }
 
-        // --- 重點修正：LINE 連結 ---
-        const lineLink = document.getElementById('line-link');
+        // 傳送 LINE (使用 encodeURIComponent 解決手機顯示問題)
         if (orderData.line_msg) {
-            // 使用更穩定的網址格式
-            const baseUrl = "https://line.me/R/oaMessage/@844bwwjl/"; // 官方帳號建議用 oaMessage 格式
             const encodedMsg = encodeURIComponent(orderData.line_msg);
-            lineLink.href = `${baseUrl}?${encodedMsg}`; 
-            
-            // 如果上述格式無效，換回 ti/p 格式但強制編碼
-            lineLink.href = "https://line.me/R/ti/p/@844bwwjl?text=" + encodedMsg;
-        } else {
-            lineLink.innerText = "重新生成訊息中...";
-            // 備用方案：如果 line_msg 遺失，在這裡手動補救生成 (可選)
+            document.getElementById('line-link').href = "https://line.me/R/ti/p/@844bwwjl?text=" + encodedMsg;
         }
     });
 </script>
