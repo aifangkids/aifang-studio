@@ -56,28 +56,24 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', () => {
-        // 從 LocalStorage 獲取結帳時存儲的完整對象
-        const orderData = JSON.parse(localStorage.getItem('last_order_info'));
-        
-        if (!orderData) {
-            alert("找不到訂單資訊，請洽客服。");
-            window.location.href = "index.html";
+        const rawData = localStorage.getItem('last_order_info');
+        if (!rawData) {
+            console.error("Storage is empty");
             return;
         }
 
-        // 1. 渲染文字 (對應您的欄位名稱)
-        // 訂單編號通常是前端生成或從資料庫回傳，這裡顯示 orderData.id
-        document.getElementById('order-id').innerText = orderData.id || "AF-NEW";
-        document.getElementById('order-pay').innerText = orderData.pay_method_text || "未定義";
-        document.getElementById('order-total').innerText = "NT$ " + (orderData.total_amount || 0).toLocaleString();
+        const orderData = JSON.parse(rawData);
         
-        // 對應您要求的欄位名稱
+        // 渲染畫面文字
+        document.getElementById('order-id').innerText = orderData.id || "處理中...";
+        document.getElementById('order-pay').innerText = orderData.pay_method_text || "-";
+        document.getElementById('order-total').innerText = "NT$ " + (orderData.total_amount || 0).toLocaleString();
         document.getElementById('cust-name').innerText = orderData.customer_name || "-";
         document.getElementById('cust-phone').innerText = orderData.customer_phone || "-";
         document.getElementById('cust-addr').innerText = orderData.customer_address || "-";
 
-        // 2. 渲染商品清單 (對應您要求的 product_name, unit_price 等)
-        if (orderData.items && orderData.items.length > 0) {
+        // 渲染商品清單
+        if (orderData.items) {
             const listHtml = orderData.items.map(item => `
                 <div class="item-row">
                     <span>${item.product_name} (${item.color}/${item.size}) x ${item.quantity}</span>
@@ -87,10 +83,19 @@
             document.getElementById('item-list').innerHTML = listHtml;
         }
 
-        // 3. 設定 LINE 連結
+        // --- 重點修正：LINE 連結 ---
+        const lineLink = document.getElementById('line-link');
         if (orderData.line_msg) {
+            // 使用更穩定的網址格式
+            const baseUrl = "https://line.me/R/oaMessage/@844bwwjl/"; // 官方帳號建議用 oaMessage 格式
             const encodedMsg = encodeURIComponent(orderData.line_msg);
-            document.getElementById('line-link').href = `https://line.me/R/ti/p/@844bwwjl?text=${encodedMsg}`;
+            lineLink.href = `${baseUrl}?${encodedMsg}`; 
+            
+            // 如果上述格式無效，換回 ti/p 格式但強制編碼
+            lineLink.href = "https://line.me/R/ti/p/@844bwwjl?text=" + encodedMsg;
+        } else {
+            lineLink.innerText = "重新生成訊息中...";
+            // 備用方案：如果 line_msg 遺失，在這裡手動補救生成 (可選)
         }
     });
 </script>

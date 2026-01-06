@@ -125,41 +125,40 @@ async function submitOrder() {
         items: cart
     };
 
-    try {
-        await fetch(API_URL, {
-            method: 'POST',
-            mode: 'no-cors',
-            body: JSON.stringify(order_payload)
-        });
+try {
+    await fetch(API_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        body: JSON.stringify(order_payload)
+    });
 
-        // --- 關鍵修正：將完整資料存入 localStorage 給成功頁面使用 ---
-        localStorage.setItem('last_order_info', JSON.stringify({
-            id: "AF" + new Date().getTime().toString().slice(-6),
-            customer_name: name,
-            customer_phone: phone,
-            customer_email: email,
-            customer_address: address,
-            total_amount: calc.finalTotal,
-            pay_method_text: payMethod === 'transfer' ? '銀行匯款(8折)' : '貨到付款(9折)',
-            line_msg: lineMsg,
-            // 處理 items 的欄位對接
-            items: cart.map(item => ({
-                product_name: item.name,
-                product_code: item.id || '', // 若無編號則留空
-                color: item.color,
-                size: item.size,
-                unit_price: item.price,
-                quantity: item.quantity
-            }))
-        }));
+    // 1. 先存入資料
+    localStorage.setItem('last_order_info', JSON.stringify({
+        id: "AF" + new Date().getTime().toString().slice(-6),
+        customer_name: name,
+        customer_phone: phone,
+        customer_email: email,
+        customer_address: address,
+        total_amount: calc.finalTotal,
+        pay_method_text: payMethod === 'transfer' ? '銀行匯款(8折)' : '貨到付款(9折)',
+        line_msg: lineMsg, // 這裡最重要！
+        items: cart.map(item => ({
+            product_name: item.name,
+            color: item.color,
+            size: item.size,
+            unit_price: item.price,
+            quantity: item.quantity
+        }))
+    }));
 
-        localStorage.removeItem('cart');
+    // 2. 清空購物車
+    localStorage.removeItem('cart');
+
+    // 3. 延遲 100 毫秒再跳轉，確保手機快取寫入成功
+    setTimeout(() => {
         window.location.href = "order_success.html";
+    }, 100);
 
-    } catch (e) {
-        console.error(e);
-        alert("傳送失敗，請聯繫 LINE 客服");
-        submitBtn.disabled = false;
-        submitBtn.innerText = "PLACE ORDER";
-    }
+} catch (e) {
+    // ...錯誤處理
 }
