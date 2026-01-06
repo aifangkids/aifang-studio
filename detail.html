@@ -4,47 +4,53 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Product Detail | AiFang Kids</title>
-    <link rel="stylesheet" href="css/style.css"> 
     <style>
-        /* 直接貼入您提供的 CSS 樣式 */
-        :root { --header-h: 80px; --side-w: 420px; --baby-pink: #f2a6b2; --kids-blue: #8da9c4; }
+        :root { --header-h: 70px; --side-w: 420px; --baby-pink: #f2a6b2; --kids-blue: #8da9c4; }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Noto Sans TC', sans-serif; background: #fff; color: #333; overflow-x: hidden; }
 
         /* Header */
         .top-header { width: 100%; height: var(--header-h); background: #fff; position: fixed; top: 0; left: 0; z-index: 2000; display: flex; align-items: center; justify-content: space-between; padding: 0 25px; border-bottom: 1px solid #f2f2f2; }
         .main-logo { height: 30px; cursor: pointer; position: absolute; left: 50%; transform: translateX(-50%); }
-        .header-icon { width: 22px; cursor: pointer; }
+        .header-icon { font-size: 14px; font-weight: bold; cursor: pointer; text-decoration: none; color: #333; }
+        .header-icon img { width: 22px; vertical-align: middle; }
 
         /* Layout */
         .detail-wrapper { display: flex; max-width: 1400px; margin: var(--header-h) auto 0; position: relative; }
         .scroll-content { flex: 1; padding: 40px; border-right: 1px solid #f2f2f2; min-height: 100vh; }
-        #primary-img { width: 100%; border-radius: 4px; display: block; }
-        .desc-box { margin-top: 40px; border-top: 1px solid #eee; padding-top: 30px; white-space: pre-line; }
+        #primary-img { width: 100%; border-radius: 4px; display: block; margin-bottom: 20px; background: #f9f9f9; }
+        .extra-img { width: 100%; margin-bottom: 15px; border-radius: 4px; display: block; }
 
-        /* 右側固定區 */
-        .fixed-aside { width: var(--side-w); position: sticky; top: var(--header-h); align-self: flex-start; padding: 30px 40px; background: #fff; display: flex; flex-direction: column; }
+        /* Fixed Aside */
+        .fixed-aside { width: var(--side-w); position: sticky; top: var(--header-h); align-self: flex-start; padding: 30px 40px; background: #fff; }
         .brand-tag { font-size: 11px; font-weight: 500; letter-spacing: 1px; text-decoration: underline; margin-bottom: 8px; color: #555; display: block; }
-        .p-title { font-size: 22px; font-weight: 500; margin-bottom: 5px; line-height: 1.3; color: #111; }
-        .p-id { font-size: 10px; color: #bbb; margin-bottom: 25px; }
-        .p-price { font-size: 20px; font-weight: 700; color: #333; margin-bottom: 20px; }
-        .label { font-size: 10px; font-weight: bold; color: #aaa; margin: 20px 0 10px; display: block; letter-spacing: 1px; }
+        .p-title { font-size: 24px; font-weight: 500; margin-bottom: 10px; color: #111; }
+        .p-id { font-size: 11px; color: #bbb; margin-bottom: 25px; }
+        .label { font-size: 10px; font-weight: 900; color: #aaa; margin: 25px 0 10px; display: block; letter-spacing: 1px; text-transform: uppercase; }
 
-        /* 選項樣式 */
-        .option-list { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
-        .opt-btn { border: 1px solid #ddd; background: #fff; padding: 8px 15px; cursor: pointer; font-size: 12px; border-radius: 2px; transition: 0.2s; }
-        .opt-btn.active { border-color: #333; background: #333; color: #fff; }
+        /* Swatch */
+        .swatch-item { display: flex; align-items: center; padding: 6px 12px; border: 2px solid #333; border-radius: 20px; width: fit-content; }
+        .swatch-circle { width: 18px; height: 18px; border-radius: 50%; border: 1px solid #eee; margin-right: 8px; }
+        .swatch-name { font-size: 12px; font-weight: 500; }
 
-        /* 數量與按鈕 */
-        .qty-box { display: flex; align-items: center; border: 1px solid #eee; width: fit-content; margin-bottom: 30px; height: 36px; }
-        .qty-btn { width: 36px; height: 100%; background: #fff; border: none; cursor: pointer; font-size: 16px; color: #888; }
-        .qty-input { width: 45px; text-align: center; border: none; font-size: 13px; outline: none; background: transparent; }
-        .add-cart-btn { width: 100%; padding: 18px; background: #111; color: #fff; border: none; font-size: 13px; font-weight: 500; letter-spacing: 2px; cursor: pointer; transition: 0.3s; }
-        .add-cart-btn:hover { background: #333; }
+        /* Size Groups */
+        .size-group { background: #fbfbfb; padding: 15px; border-radius: 4px; margin-bottom: 12px; border: 1px solid #f2f2f2; }
+        .group-header { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 11px; font-weight: bold; }
+        .price-tag { color: #d9534f; }
+        .s-btn { border: 1px solid #ddd; background: #fff; padding: 8px 14px; cursor: pointer; font-size: 11px; margin: 3px; transition: 0.2s; }
+        .s-btn:hover { border-color: #333; }
+        .s-btn.active.babe { background: var(--baby-pink); color: #fff; border-color: var(--baby-pink); }
+        .s-btn.active.kids { background: var(--kids-blue); color: #fff; border-color: var(--kids-blue); }
+
+        /* Qty & Action */
+        .qty-box { display: flex; align-items: center; border: 1px solid #eee; width: fit-content; margin: 30px 0; height: 40px; }
+        .qty-btn { width: 40px; height: 100%; background: #fff; border: none; cursor: pointer; font-size: 18px; }
+        .qty-input { width: 50px; text-align: center; border: none; font-size: 14px; outline: none; }
+        .add-cart-btn { width: 100%; padding: 20px; background: #111; color: #fff; border: none; font-size: 13px; font-weight: 700; letter-spacing: 2px; cursor: pointer; }
 
         @media (max-width: 900px) {
             .detail-wrapper { flex-direction: column; }
-            .fixed-aside { width: 100%; position: relative; top: 0; padding: 30px 20px; border-top: 10px solid #f9f9f9; }
+            .fixed-aside { width: 100%; position: relative; top: 0; border-top: 8px solid #f9f9f9; }
             .scroll-content { padding: 20px; border-right: none; }
         }
     </style>
@@ -52,40 +58,36 @@
 <body>
 
     <header class="top-header">
-        <img src="images/ui/back.png" class="header-icon" onclick="history.back()">
-        <img src="images/ui/logo.png" class="main-logo" onclick="location.href='index.html'">
-        <div onclick="location.href='cart.html'" style="cursor:pointer; position:relative;">
-            <img src="images/ui/icon_tcart.png" class="header-icon">
-        </div>
+        <a href="javascript:history.back()" class="header-icon">BACK</a>
+        <img src="images/ui/logo.png" class="main-logo" alt="LOGO" onerror="this.style.display='none'">
+        <a href="cart.html" class="header-icon">CART</a>
     </header>
 
     <div class="detail-wrapper">
-        <main class="scroll-content">
-            <img id="primary-img" src="images/ui/loading.gif" alt="Loading...">
-            <div id="p-desc" class="desc-box"></div>
-            <div id="detail-images-container"></div>
-        </main>
+        <main class="scroll-content" id="image-main-area">
+            <img id="primary-img" src="" alt="商品圖片載入中...">
+            </main>
 
         <aside class="fixed-aside">
-            <span id="p-brand" class="brand-tag">AiFang Kids</span>
-            <h1 id="p-title" class="p-title">Loading...</h1>
+            <span id="p-brand" class="brand-tag">-</span>
+            <h1 id="p-title" class="p-title">載入中...</h1>
             <p id="p-id" class="p-id">CODE: -</p>
-            <div id="p-price" class="p-price">NT$ --</div>
 
             <span class="label">COLOR / 顏色</span>
-            <div id="color-group" class="option-list"></div>
+            <div id="swatch-group"></div>
 
-            <span class="label">SIZE / 尺寸</span>
-            <div id="size-group" class="option-list"></div>
+            <span class="label">SIZE / 尺寸價格</span>
+            <div id="size-area"></div>
 
             <span class="label">QUANTITY / 數量</span>
             <div class="qty-box">
-                <button class="qty-btn" onclick="updateQty(-1)">-</button>
+                <button class="qty-btn" onclick="changeQty(-1)">-</button>
                 <input type="text" id="qty" class="qty-input" value="1" readonly>
-                <button class="qty-btn" onclick="updateQty(1)">+</button>
+                <button class="qty-btn" onclick="changeQty(1)">+</button>
             </div>
 
             <button class="add-cart-btn" onclick="addToCart()">ADD TO CART</button>
+            <p id="styling-note" style="margin-top:20px; font-size:12px; color:#999; line-height:1.6;"></p>
         </aside>
     </div>
 
