@@ -1,90 +1,105 @@
 <!DOCTYPE html>
-<html lang="zh-Hant">
+<html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Checkout | AiFang Kids</title>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Noto Sans TC', sans-serif; background: #f9f9f9; color: #333; margin: 0; padding: 0; }
-        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
-        h2 { border-bottom: 2px solid #222; padding-bottom: 15px; font-size: 22px; letter-spacing: 1px; }
+        :root { --header-h: 70px; --accent: #111; --gray-bg: #f9f9f9; --border: #eeeeee; }
+        body { font-family: 'Noto Sans TC', sans-serif; margin: 0; padding: 0; background: #fff; color: #333; }
         
-        .section { background: #fff; padding: 25px; border: 1px solid #e5e5e5; margin-bottom: 20px; border-radius: 4px; }
-        .section-title { font-weight: 700; margin-bottom: 20px; font-size: 16px; color: #000; display: block; border-left: 4px solid #222; padding-left: 10px; }
+        .checkout-container { max-width: 800px; margin: var(--header-h) auto 50px; padding: 20px; }
+        h2 { text-align: center; letter-spacing: 2px; margin-bottom: 40px; font-weight: 500; }
         
-        .form-group { margin-bottom: 15px; }
-        .form-group label { display: block; font-size: 13px; margin-bottom: 5px; color: #666; }
-        .form-group input, .form-group textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
-        
-        .payment-option { display: flex; gap: 20px; background: #fbfafa; padding: 15px; border: 1px solid #eee; }
-        .payment-option label { cursor: pointer; font-size: 14px; display: flex; align-items: center; }
-        .payment-option input { margin-right: 8px; }
+        .checkout-section { border: 1px solid var(--border); padding: 25px; margin-bottom: 25px; border-radius: 4px; }
+        .checkout-section h3 { font-size: 14px; margin-top: 0; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 10px; color: #888; letter-spacing: 1px; }
 
-        /* 金額匯總區 */
-        .summary-row { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 14px; }
-        .total-row { display: flex; justify-content: space-between; margin-top: 15px; padding-top: 15px; border-top: 1px solid #eee; font-weight: 700; font-size: 18px; color: #d9534f; }
+        .input-group { margin-bottom: 20px; }
+        .input-group label { display: block; font-size: 12px; font-weight: bold; margin-bottom: 8px; color: #555; }
+        .input-group input[type="text"], .input-group input[type="email"] { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 2px; font-size: 14px; outline: none; box-sizing: border-box; }
 
-        .btn-order { width: 100%; padding: 20px; background: #222; color: #fff; border: none; font-size: 16px; font-weight: 700; cursor: pointer; transition: 0.3s; }
-        .btn-order:hover { background: #555; }
+        /* Radio Buttons */
+        .radio-group { display: flex; gap: 20px; flex-wrap: wrap; }
+        .radio-item { display: flex; align-items: center; cursor: pointer; font-size: 14px; }
+        .radio-item input { margin-right: 8px; }
+
+        /* Summary Card */
+        .order-summary { background: var(--gray-bg); padding: 30px; border-radius: 4px; }
+        .summary-line { display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 14px; }
+        .summary-line.total { border-top: 1px solid #ddd; padding-top: 15px; font-size: 18px; font-weight: bold; }
+        
+        .btn-place-order { width: 100%; padding: 20px; background: #111; color: #fff; border: none; font-size: 14px; font-weight: bold; letter-spacing: 2px; cursor: pointer; transition: 0.3s; margin-top: 20px; }
+        .btn-place-order:hover { background: #444; }
+        .btn-place-order:disabled { background: #ccc; cursor: not-allowed; }
+
+        @media (max-width: 600px) { .radio-group { flex-direction: column; gap: 10px; } }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h2>ORDER CHECKOUT</h2>
+<div class="checkout-container">
+    <h2>CHECKOUT</h2>
 
-    <div class="section">
-        <span class="section-title">SHIPPING INFORMATION</span>
-        <div class="form-group">
-            <label>收件人姓名 *</label>
-            <input type="text" id="cust_name" placeholder="請輸入真實姓名">
-        </div>
-        <div class="form-group">
-            <label>聯絡電話 *</label>
-            <input type="tel" id="cust_phone" placeholder="0912345678">
-        </div>
-        <div class="form-group">
-            <label>收件地址 *</label>
-            <textarea id="cust_address" rows="2" placeholder="請輸入完整地址"></textarea>
-        </div>
-    </div>
-
-    <div class="section">
-        <span class="section-title">PAYMENT & SHIPPING</span>
-        <div class="form-group">
+    <div class="checkout-section">
+        <h3>01. PAYMENT & SHIPPING</h3>
+        <div class="input-group">
             <label>付款方式</label>
-            <div class="payment-option">
-                <label><input type="radio" name="pay_method" value="transfer" checked> 銀行匯款</label>
-                <label><input type="radio" name="pay_method" value="cod"> 貨到付款</label>
+            <div class="radio-group">
+                <label class="radio-item">
+                    <input type="radio" name="pay_method" value="transfer" checked onchange="handlePaymentChange()"> 銀行匯款 (8折/免運)
+                </label>
+                <label class="radio-item">
+                    <input type="radio" name="pay_method" value="cod" onchange="handlePaymentChange()"> 貨到付款 (9折/滿1500免運)
+                </label>
             </div>
         </div>
-        <div class="form-group">
+
+        <div class="input-group">
             <label>運送方式</label>
-            <div class="payment-option">
-                <label><input type="radio" name="ship_method" value="home" checked> 宅配到府</label>
-                <label><input type="radio" name="ship_method" value="store"> 超商取貨</label>
-            </div>
+            <div class="radio-group" id="ship-method-container">
+                </div>
         </div>
     </div>
 
-    <div class="section">
-        <span class="section-title">ORDER SUMMARY</span>
-        <div class="summary-row">
-            <span>商品小計</span>
+    <div class="checkout-section">
+        <h3>02. SHIPPING INFORMATION</h3>
+        <div class="input-group">
+            <label>E-mail</label>
+            <input type="email" id="cust_email" placeholder="example@mail.com">
+        </div>
+        <div class="input-group">
+            <label>收件人姓名</label>
+            <input type="text" id="cust_name">
+        </div>
+        <div class="input-group">
+            <label>手機號碼</label>
+            <input type="text" id="cust_phone">
+        </div>
+        <div class="input-group">
+            <label id="address-label">收件地址</label>
+            <input type="text" id="cust_address" placeholder="請輸入完整地址或 7-11 店名店號">
+        </div>
+    </div>
+
+    <div class="order-summary">
+        <div class="summary-line">
+            <span>商品小計 (原價)</span>
             <span id="show-subtotal">NT$ 0</span>
         </div>
-        <div class="summary-row">
-            <span>運費 (匯款滿1500免運)</span>
-            <span id="show-shipping">NT$ 45</span>
+        <div class="summary-line">
+            <span>折扣金額</span>
+            <span id="show-discount" style="color: #d9534f;">- NT$ 0</span>
         </div>
-        <div class="total-row">
+        <div class="summary-line">
+            <span>運費</span>
+            <span id="show-shipping">NT$ 0</span>
+        </div>
+        <div class="summary-line total">
             <span>應付總額</span>
             <span id="show-total">NT$ 0</span>
         </div>
+        <button id="submit-btn" class="btn-place-order" onclick="submitOrder()">PLACE ORDER</button>
     </div>
-
-    <button class="btn-order" onclick="submitOrder()">PLACE ORDER (確認下單)</button>
 </div>
 
 <script src="js/checkout.js"></script>
