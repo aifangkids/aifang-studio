@@ -5,14 +5,14 @@ const productCode = urlParams.get('code');
 
 let currentProduct = null;
 let selectedColor = { name: "", hex: "" };
-let selectedItems = []; // 儲存樣式的待購清單
+let selectedItems = []; 
 
 // 初始化
 async function init() {
     updateCartCount();
 
     if (!productCode) {
-        console.log("No product code found in URL.");
+        console.log("No product code found.");
         return;
     }
     
@@ -59,10 +59,9 @@ function render(p) {
         });
     }
 
-    // --- 顏色選擇 (第一步) ---
+    // 顏色渲染
     const swatchGroup = document.getElementById('swatch-group');
     selectedColor = { name: p.color, hex: p.color_code || '#eee' };
-    
     swatchGroup.innerHTML = `
         <div class="swatch-item active" onclick="selectColor('${p.color}', '${p.color_code || '#eee'}', this)">
             <div class="swatch-circle" style="background:${p.color_code || '#eee'}"></div>
@@ -70,7 +69,7 @@ function render(p) {
         </div>
     `;
 
-    // --- 尺寸與價格 (第二步) ---
+    // 尺寸與價格渲染
     const sizeArea = document.getElementById('size-area');
     sizeArea.innerHTML = ""; 
     const categories = [
@@ -83,7 +82,6 @@ function render(p) {
     categories.forEach(cat => {
         const sizes = p[`sizes_${cat.key}`];
         const price = p[`price_${cat.key}_10off`] || p[`price_${cat.key}`];
-
         if (sizes && sizes !== "" && price && price !== "FREE") {
             const box = document.createElement('div');
             box.className = 'size-group';
@@ -105,42 +103,34 @@ function render(p) {
     });
 }
 
-// 選擇顏色
-function selectColor(name, hex, el) {
+// 顏色選擇邏輯
+window.selectColor = function(name, hex, el) {
     selectedColor = { name: name, hex: hex };
     document.querySelectorAll('.swatch-item').forEach(item => item.classList.remove('active'));
     el.classList.add('active');
-}
+};
 
-// 新增到待選清單
-function addToList(sizeName, price, type) {
+// 新增到待選清單 (Bellot 樣式)
+window.addToList = function(sizeName, price, type) {
     if (!selectedColor.name) {
         showToast("請先選擇顏色");
         return;
     }
-
     const key = `${selectedColor.name}-${sizeName}`;
     const existing = selectedItems.find(i => i.key === key);
-
     if (existing) {
         existing.quantity += 1;
     } else {
-        selectedItems.push({
-            key: key,
-            color: selectedColor.name,
-            size: sizeName,
-            price: price,
-            quantity: 1
-        });
+        selectedItems.push({ key, color: selectedColor.name, size: sizeName, price, quantity: 1 });
     }
     renderSelectedList();
-}
+    showToast(`已暫存: ${selectedColor.name} / ${sizeName}`);
+};
 
-// 渲染清單內容
+// 渲染選中清單
 function renderSelectedList() {
     const listArea = document.getElementById('selected-list');
     if (!listArea) return;
-
     listArea.innerHTML = selectedItems.map((item, index) => `
         <div class="selected-item">
             <img src="./images/ui/btn_close.jpg" class="sel-close" onclick="removeFromList(${index})">
@@ -157,59 +147,61 @@ function renderSelectedList() {
     `).join('');
 }
 
-function updateListQty(index, delta) {
+window.updateListQty = function(index, delta) {
     if (selectedItems[index].quantity + delta > 0) {
         selectedItems[index].quantity += delta;
         renderSelectedList();
     }
-}
+};
 
-function removeFromList(index) {
+window.removeFromList = function(index) {
     selectedItems.splice(index, 1);
     renderSelectedList();
-}
+};
 
-// --- 功能性函數 ---
+// --- 功能核心：Toast 與 抽屜 ---
 
-// 手機抽屜控制
-function toggleDrawer(isOpen) {
-    const drawer = document.getElementById('product-drawer');
-    const overlay = document.getElementById('overlay');
-    if (!drawer || !overlay) return;
-
-    if (isOpen) {
-        drawer.classList.add('open');
-        overlay.classList.add('active');
-        document.body.style.overflow = 'hidden'; // 禁止底層滾動
-    } else {
-        drawer.classList.remove('open');
-        overlay.classList.remove('active');
-        document.body.style.overflow = ''; 
-    }
-}
-
-// 彈出式訊息 (Toast) 替代 alert
-function showToast(msg) {
+// 彈出提示訊息
+window.showToast = function(msg) {
     let toast = document.getElementById('custom-toast');
     if (!toast) {
+        // 如果 HTML 裡沒寫到 toast 標籤，JS 自動幫你補上
         toast = document.createElement('div');
         toast.id = 'custom-toast';
         document.body.appendChild(toast);
     }
     toast.innerText = msg;
     toast.classList.add('show');
-    setTimeout(() => toast.classList.remove('show'), 2500);
-}
+    
+    // 2.5秒後消失
+    setTimeout(() => {
+        toast.classList.remove('show');
+    }, 2500);
+};
+
+// 抽屜控制
+window.toggleDrawer = function(isOpen) {
+    const drawer = document.getElementById('product-drawer');
+    const overlay = document.getElementById('overlay');
+    if (isOpen) {
+        drawer.classList.add('open');
+        overlay.classList.add('active');
+        document.body.style.overflow = 'hidden'; 
+    } else {
+        drawer.classList.remove('open');
+        overlay.classList.remove('active');
+        document.body.style.overflow = ''; 
+    }
+};
 
 // 加入購物車
-function addAllToCart() {
+window.addAllToCart = function() {
     if (selectedItems.length === 0) {
-        showToast("請先選擇顏色與尺寸");
+        showToast("請先選擇規格");
         return;
     }
 
     let cart = JSON.parse(localStorage.getItem('cart')) || [];
-
     selectedItems.forEach(item => {
         const cartItem = {
             code: currentProduct.code,
@@ -221,7 +213,6 @@ function addAllToCart() {
             quantity: item.quantity,
             image: currentProduct.image_main
         };
-
         const idx = cart.findIndex(i => i.code === cartItem.code && i.size === cartItem.size && i.color === cartItem.color);
         if (idx > -1) cart[idx].quantity += cartItem.quantity;
         else cart.push(cartItem);
@@ -234,10 +225,8 @@ function addAllToCart() {
     renderSelectedList();
 
     if (window.innerWidth <= 900) toggleDrawer(false);
-
-    showToast("商品已加入購物車");
-    // 如果需要跳轉結帳，可在此處加入 setTimeout 引導
-}
+    showToast("已成功加入購物車！");
+};
 
 function updateCartCount() {
     const cart = JSON.parse(localStorage.getItem('cart')) || [];
