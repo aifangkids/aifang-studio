@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AIFANGKIDS | Official</title>
+    <title>AIFANGKIDS | Studio</title>
     <link rel="icon" href="./favicon.ico" type="image/x-icon">
     
     <style>
@@ -17,41 +17,41 @@
             --sidebar-width: 260px; 
             --accent: #d9534f; 
             --new-color: #a29bfe; 
-            --header-h: 80px; 
+            --header-h: 70px; /* 稍微縮小一點點，讓空間更精緻 */
             --cart-w: 380px;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { 
-            font-family: 'NotoSansKR', sans-serif; background: #fff; color: #333; 
+            font-family: 'NotoSansKR', 'Noto Sans TC', sans-serif; background: #fff; color: #333; 
             overflow-x: hidden; -webkit-font-smoothing: antialiased;
         }
 
-        /* --- 2. 頂部導覽 --- */
+        /* --- 2. 頂部導覽 (優化手機陰影) --- */
         .top-header {
             width: 100%; height: var(--header-h); background: #fff;
             position: fixed; top: 0; left: 0; z-index: 1200;
             display: flex; align-items: center; justify-content: space-between;
-            padding: 0 25px; border-bottom: 1px solid #f2f2f2;
+            padding: 0 20px; border-bottom: 1px solid #f2f2f2;
         }
         .header-icon { width: 22px; height: 22px; cursor: pointer; object-fit: contain; }
-        .main-logo { height: 38px; cursor: pointer; position: absolute; left: 50%; transform: translateX(-50%); }
+        .main-logo { height: 32px; cursor: pointer; position: absolute; left: 50%; transform: translateX(-50%); }
 
-        /* --- 3. 側欄佈局  --- */
+        /* --- 3. 側欄佈局 (優化階層與捲動) --- */
         .sidebar {
             width: var(--sidebar-width); height: 100vh; position: fixed;
             left: 0; top: 0; border-right: 1px solid #eee;
             padding: calc(var(--header-h) + 40px) 30px 50px; background: #fff; z-index: 1100; overflow-y: auto;
-            transition: transform 0.4s ease;
+            transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         }
         .filter-title { 
-            font-size: 12px; font-weight: 500; letter-spacing: 2px; 
+            font-size: 11px; font-weight: 700; letter-spacing: 2px; 
             margin-bottom: 20px; text-transform: uppercase; 
-            border-bottom: 1px solid #f0f0f0; padding-bottom: 8px; 
+            border-bottom: 1px solid #f0f0f0; padding-bottom: 8px; color: #111;
         }
         .category-menu { list-style: none; }
         .category-menu li { font-size: 13px; font-weight: 400; margin-bottom: 15px; color: #888; cursor: pointer; transition: 0.3s; }
-        .category-menu li:hover, .category-menu li.active { color: #000; font-weight: 500; }
+        .category-menu li:hover, .category-menu li.active { color: #000; font-weight: 500; text-decoration: underline; }
 
         .brand-panel { max-height: 0; overflow: hidden; transition: max-height 0.5s ease; background: #fafafa; padding: 0 10px; border-radius: 4px; }
         .brand-panel.open { max-height: 500px; padding: 15px 10px; margin-bottom: 20px; }
@@ -59,72 +59,77 @@
             display: block; font-size: 11px; font-weight: 300; 
             color: #999; margin-bottom: 10px; cursor: pointer; transition: 0.2s;
         }
-        .brand-item.selected { color: #000; font-weight: 500; }
+        .brand-item.selected { color: #000; font-weight: 700; }
 
-        /* --- 4. 主內容區與商品卡 --- */
+        /* --- 4. 主內容區與商品卡 (解決溢出問題) --- */
         .main-content { 
             width: 100%; 
-            padding: calc(var(--header-h) + 50px) 50px 80px calc(var(--sidebar-width) + 40px); 
-            transition: opacity 1s ease; opacity: 0; 
+            padding: calc(var(--header-h) + 40px) 40px 80px calc(var(--sidebar-width) + 40px); 
+            transition: opacity 0.8s ease; opacity: 0; 
         }
         .main-content.loaded { opacity: 1; }
 
-        .product-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 40px 20px; }
-        .product-card { cursor: pointer; text-align: center; }
+        .product-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 40px 20px; }
+        .product-card { cursor: pointer; text-align: left; } /* 改回左對齊，更有設計感 */
         
         .img-wrap { 
             width: 100%; aspect-ratio: 3/4; background-size: cover; background-position: center; 
             background-color: #f9f9f9; margin-bottom: 15px; position: relative; overflow: hidden;
+            border-radius: 4px;
         }
         .status-badge { 
             position: absolute; top: 10px; left: 10px; padding: 4px 8px; 
-            font-size: 10px; font-weight: 500; color: #fff; z-index: 10;
+            font-size: 9px; font-weight: 700; color: #fff; z-index: 10;
         }
         .badge-NEW { background: var(--new-color); }
         .badge-SALE { background: var(--accent); }
 
-        .p-name { font-size: 13px; font-weight: 300; color: #555; margin-bottom: 8px; height: 38px; overflow: hidden; line-height: 1.5; }
-        .color-row { display: flex; justify-content: center; gap: 6px; margin: 10px 0; }
-        .color-dot { width: 12px; height: 12px; border: 1px solid #eee; border-radius: 2px; }
-        .p-price { font-size: 14px; font-weight: 500; color: #111; }
+        .p-name { font-size: 12px; font-weight: 400; color: #333; margin-bottom: 6px; height: 36px; overflow: hidden; line-height: 1.5; }
+        .color-row { display: flex; justify-content: flex-start; gap: 4px; margin: 8px 0; }
+        .color-dot { width: 10px; height: 10px; border: 1px solid #eee; border-radius: 2px; }
+        .p-price { font-size: 13px; font-weight: 700; color: #111; }
 
-        /* --- 5. 右側預覽購物車 (依您的需求補上) --- */
+        /* --- 5. 工具組 (方形設計，全站同步) --- */
+        .fixed-tools { position: fixed; bottom: 30px; right: 20px; z-index: 2000; display: flex; flex-direction: column; gap: 0; } /* 緊貼設計 */
+        .tool-btn { 
+            width: 45px; height: 45px; background: #fff; border: 1px solid #333; 
+            display: flex; align-items: center; justify-content: center; 
+            font-size: 11px; font-weight: bold; cursor: pointer; transition: 0.3s;
+            margin-bottom: -1px; /* 邊框重疊設計 */
+        }
+        .tool-btn:hover { background: #333; color: #fff; }
+        .line-btn { background: #fff; color: #06C755; }
+        .line-btn:hover { background: #06C755; color: #fff; border-color: #06C755; }
+
+        /* --- 6. 購物車側欄 (手機滿版處理) --- */
         #cart-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 2999; display: none; }
         .cart-sidebar {
             position: fixed; top: 0; right: calc(var(--cart-w) * -1); width: var(--cart-w); height: 100vh; background: #fff;
-            z-index: 3000; display: flex; flex-direction: column; transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            z-index: 3000; display: flex; flex-direction: column; transition: transform 0.4s ease;
         }
         .cart-sidebar.open { transform: translateX(calc(var(--cart-w) * -1)); }
         .cart-header { padding: 30px 25px; border-bottom: 1px solid #f2f2f2; display: flex; justify-content: space-between; align-items: center; }
         .cart-title { font-size: 13px; font-weight: 700; letter-spacing: 2px; }
-        .cart-close { font-size: 10px; color: #aaa; cursor: pointer; border-bottom: 1px solid #aaa; }
+        .cart-close { font-size: 11px; color: #111; cursor: pointer; text-decoration: underline; font-weight: bold; }
         .cart-body { flex: 1; padding: 25px; overflow-y: auto; }
         .cart-footer { padding: 25px; border-top: 1px solid #f2f2f2; }
-        .checkout-btn { width: 100%; padding: 18px; background: #000; color: #fff; border: none; cursor: pointer; font-size: 12px; font-weight: 700; letter-spacing: 2px; }
+        .checkout-btn { width: 100%; padding: 18px; background: #111; color: #fff; border: none; cursor: pointer; font-size: 12px; font-weight: 700; letter-spacing: 2px; }
 
-        /* --- 6. 工具組 --- */
-        .fixed-tools { position: fixed; bottom: 30px; right: 20px; z-index: 2000; display: flex; flex-direction: column; gap: 10px; }
-        .tool-btn { 
-            width: 45px; height: 45px; background: #fff; border: 1px solid #eee; 
-            display: flex; align-items: center; justify-content: center; 
-            font-size: 10px; font-weight: 500; cursor: pointer; transition: 0.3s;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-        }
-        .tool-btn:hover { background: #000; color: #fff; }
-        .line-btn { background: #06C755; color: #fff; border: none; }
+        /* --- 7. POPUP 彈窗 --- */
+        #popup-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 9999; display: none; justify-content: center; align-items: center; }
+        .popup-box { position: relative; background: #fff; max-width: 380px; width: 85%; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+        .popup-close { position: absolute; bottom: -40px; left: 50%; transform: translateX(-50%); color: #fff; cursor: pointer; font-size: 12px; border: 1px solid #fff; padding: 5px 20px; white-space: nowrap; }
 
-        /* --- 7. POPUP 彈窗與響應式 --- */
-        #popup-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 9999; display: none; justify-content: center; align-items: center; }
-        .popup-box { position: relative; background: #fff; max-width: 400px; width: 85%; }
-        /*  CLOSE [X] 樣式 */
-        .popup-close { position: absolute; bottom: -30px; right: 0; color: #fff; cursor: pointer; font-size: 12px; font-weight: 300; }
-
+        /* --- 8. 手機版響應式 (重點修正) --- */
         @media (max-width: 900px) {
-            .sidebar { transform: translateX(-100%); left: 0; }
-            .sidebar.open { transform: translateX(0); }
+            .sidebar { transform: translateX(-100%); width: 280px; }
+            .sidebar.open { transform: translateX(0); box-shadow: 5px 0 15px rgba(0,0,0,0.1); }
             .main-content { padding: calc(var(--header-h) + 30px) 15px 80px 15px; }
-            .product-grid { grid-template-columns: repeat(2, 1fr); gap: 30px 15px; }
+            .product-grid { grid-template-columns: repeat(2, 1fr); gap: 25px 12px; } /* 間距縮小，讓卡片大一點 */
             .cart-sidebar { width: 100%; right: -100%; }
+            .product-grid { grid-template-columns: repeat(2, 1fr); }
+            .main-logo { height: 28px; }
+            .fixed-tools { bottom: 20px; right: 15px; }
         }
         .sidebar-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.3); z-index: 1050; display: none; }
         .sidebar-overlay.active { display: block; }
@@ -193,7 +198,6 @@
     </main>
 
     <script>
-        // 更新為您的 GAS 網址與數據邏輯
         const API_URL = "https://script.google.com/macros/s/AKfycbxnlAwKJucHmCKcJwv67TWuKV0X74Daag9X9I4NG7DOESREuYdU7BtWBPcEHyoJphoEfg/exec"; 
         let allData = [];
         let activeCat = 'All';
@@ -204,22 +208,23 @@
             try {
                 const res = await fetch(API_URL);
                 const json = await res.json();
-                allData = json.products || []; // 確保對接您 API 的 products 陣列
+                allData = json.products || []; 
                 render(allData);
                 document.getElementById('main-content').classList.add('loaded');
             } catch (e) { console.error("API Error:", e); }
         }
 
-        // 商品卡名稱、金額、色碼點點渲染
         function render(items) {
             const container = document.getElementById('product-list');
             container.innerHTML = "";
+            if(items.length === 0) {
+                container.innerHTML = "<p style='grid-column: 1/-1; text-align:center; padding: 50px; color:#999;'>Coming Soon...</p>";
+                return;
+            }
             items.forEach(item => {
-                // 標籤處理
                 const status = (item.status || "").toUpperCase();
                 const badgeHtml = status ? `<span class="status-badge badge-${status}">${status}</span>` : "";
                 
-                // 色碼處理 (假設欄位為 color_code)
                 const colors = item.color_code ? item.color_code.split(',') : [];
                 let colorHtml = '<div class="color-row">';
                 colors.forEach(c => {
@@ -242,7 +247,6 @@
             });
         }
 
-        // 分類與品牌次分類功能
         function filterByCat(cat) {
             activeCat = cat; activeBrands.clear();
             document.querySelectorAll('.category-menu li').forEach(li => li.classList.toggle('active', li.innerText === cat));
@@ -269,7 +273,6 @@
             render(final);
         }
 
-        // 購物車側欄功能
         function toggleCart() {
             const cartSide = document.getElementById('cart-sidebar');
             const overlay = document.getElementById('cart-overlay');
@@ -282,17 +285,21 @@
             const cartData = JSON.parse(localStorage.getItem('cart')) || [];
             const container = document.getElementById('mini-cart-body');
             let total = 0;
+            if(cartData.length === 0) {
+                container.innerHTML = "<p style='text-align:center; padding:40px; color:#bbb; font-size:12px;'>Bag is empty</p>";
+                document.getElementById('mini-cart-total').innerText = `NT$ 0`;
+                return;
+            }
             container.innerHTML = cartData.map(item => {
                 total += item.price * item.quantity;
-                return `<div style="display:flex; gap:10px; margin-bottom:15px; font-size:12px;">
-                    <img src="${item.image}" width="50">
-                    <div><p>${item.name}</p><p>${item.color}/${item.size} x ${item.quantity}</p></div>
+                return `<div style="display:flex; gap:15px; margin-bottom:20px; font-size:12px; align-items:center;">
+                    <img src="${item.image}" width="60" style="border-radius:2px;">
+                    <div style="flex:1;"><p style="font-weight:700; margin-bottom:3px;">${item.name}</p><p style="color:#888;">${item.color}/${item.size} x ${item.quantity}</p></div>
                 </div>`;
             }).join('');
             document.getElementById('mini-cart-total').innerText = `NT$ ${total.toLocaleString()}`;
         }
 
-        // 選單與彈窗
         function toggleMenu() { 
             document.getElementById('sidebar').classList.add('open'); 
             document.getElementById('overlay').classList.add('active'); 

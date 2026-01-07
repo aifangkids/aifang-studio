@@ -5,50 +5,61 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Checkout | AiFang Kids</title>
     <style>
-        :root { --header-h: 70px; --accent: #111; --gray-bg: #f9f9f9; --border: #eeeeee; }
-        * { box-sizing: border-box; } /* 確保內距不影響寬度 */
-        body { font-family: 'Noto Sans TC', sans-serif; margin: 0; padding: 0; background: #fff; color: #333; }
+        :root { --header-h: 70px; --accent: #d9534f; --gray-bg: #fcfcfc; --border: #eeeeee; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Noto Sans TC', sans-serif; background: #fff; color: #333; line-height: 1.6; }
         
-        /* Header 保持一致性 */
+        /* Header 統一風格 */
         .top-header { width: 100%; height: var(--header-h); background: #fff; position: fixed; top: 0; left: 0; z-index: 2000; display: flex; align-items: center; justify-content: center; padding: 0 25px; border-bottom: 1px solid #f2f2f2; }
-        .main-logo { height: 30px; cursor: pointer; }
-        .back-btn { position: absolute; left: 25px; font-size: 12px; font-weight: bold; text-decoration: none; color: #333; }
+        .main-logo { height: 28px; cursor: pointer; }
+        .back-btn { position: absolute; left: 25px; font-size: 11px; font-weight: bold; text-decoration: none; color: #333; letter-spacing: 1px; }
 
-        .checkout-container { max-width: 800px; margin: calc(var(--header-h) + 40px) auto 50px; padding: 20px; }
-        h2 { text-align: center; letter-spacing: 2px; margin-bottom: 40px; font-weight: 500; text-transform: uppercase; }
+        .checkout-container { max-width: 700px; margin: calc(var(--header-h) + 40px) auto 80px; padding: 0 20px; }
+        h2 { text-align: center; letter-spacing: 3px; margin-bottom: 40px; font-weight: 500; font-size: 20px; }
         
-        .checkout-section { border: 1px solid var(--border); padding: 25px; margin-bottom: 25px; border-radius: 4px; }
-        .checkout-section h3 { font-size: 14px; margin-top: 0; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 10px; color: #888; letter-spacing: 1px; }
+        /* 區塊優化 */
+        .checkout-section { background: #fff; border: 1px solid var(--border); padding: 30px; margin-bottom: 25px; border-radius: 2px; }
+        .checkout-section h3 { font-size: 13px; margin-bottom: 25px; border-bottom: 1px solid #111; padding-bottom: 10px; color: #111; letter-spacing: 2px; text-transform: uppercase; }
 
-        .input-group { margin-bottom: 20px; }
-        .input-group label { display: block; font-size: 12px; font-weight: bold; margin-bottom: 8px; color: #555; }
-        .input-group input[type="text"], .input-group input[type="email"] { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 2px; font-size: 14px; outline: none; box-sizing: border-box; }
-        .input-group input:focus { border-color: #333; }
+        .input-group { margin-bottom: 22px; }
+        .input-group label { display: block; font-size: 12px; font-weight: bold; margin-bottom: 10px; color: #111; letter-spacing: 1px; }
+        .input-group input { width: 100%; padding: 14px; border: 1px solid #ddd; border-radius: 0; font-size: 14px; outline: none; transition: 0.3s; }
+        .input-group input:focus { border-color: #111; background: #fff; }
+        .input-group input::placeholder { color: #ccc; font-size: 13px; }
 
-        /* Radio Buttons */
-        .radio-group { display: flex; gap: 20px; flex-wrap: wrap; margin-top: 5px; }
-        .radio-item { display: flex; align-items: center; cursor: pointer; font-size: 14px; font-weight: 500; }
-        .radio-item input { margin-right: 8px; width: 16px; height: 16px; accent-color: #111; }
-
-        /* Summary Card */
-        .order-summary { background: var(--gray-bg); padding: 30px; border-radius: 4px; }
-        .summary-line { display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 14px; }
-        .summary-line.total { border-top: 1px solid #ddd; padding-top: 15px; font-size: 18px; font-weight: bold; margin-top: 10px; }
+        /* 選項按鈕優化 - 增加點擊區域感 */
+        .radio-group { display: flex; flex-direction: column; gap: 12px; margin-top: 5px; }
+        .radio-item { display: flex; align-items: center; padding: 12px 15px; border: 1px solid #eee; cursor: pointer; font-size: 13px; transition: 0.3s; position: relative; }
+        .radio-item:hover { background: #f9f9f9; }
+        .radio-item input { margin-right: 12px; width: 18px; height: 18px; accent-color: #111; }
         
-        .btn-place-order { width: 100%; padding: 20px; background: #111; color: #fff; border: none; font-size: 14px; font-weight: bold; letter-spacing: 2px; cursor: pointer; transition: 0.3s; margin-top: 20px; text-transform: uppercase; }
-        .btn-place-order:hover { background: #444; }
-        .btn-place-order:disabled { background: #ccc; cursor: not-allowed; }
+        /* 折扣標籤標註 */
+        .discount-tag { margin-left: auto; font-size: 11px; font-weight: bold; color: #fff; background: #111; padding: 2px 8px; border-radius: 2px; }
+        .tag-red { background: var(--accent); }
 
+        /* Summary 摘要區卡片化 */
+        .order-summary { background: #111; color: #fff; padding: 35px; border-radius: 2px; margin-top: 40px; }
+        .summary-line { display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 13px; opacity: 0.8; }
+        .summary-line.total { border-top: 1px solid rgba(255,255,255,0.2); padding-top: 20px; font-size: 20px; font-weight: bold; margin-top: 15px; opacity: 1; }
+        
+        .btn-place-order { width: 100%; padding: 22px; background: #fff; color: #111; border: none; font-size: 15px; font-weight: bold; letter-spacing: 2px; cursor: pointer; transition: 0.3s; margin-top: 25px; text-transform: uppercase; }
+        .btn-place-order:hover { background: #eee; transform: translateY(-2px); }
+        .btn-place-order:disabled { background: #444; color: #888; cursor: not-allowed; transform: none; }
+
+        /* 手機適配修正 */
         @media (max-width: 600px) { 
-            .radio-group { flex-direction: column; gap: 15px; } 
-            .checkout-container { padding: 15px; }
+            .checkout-container { padding: 0 15px; margin-top: calc(var(--header-h) + 20px); }
+            .checkout-section { padding: 20px; }
+            .order-summary { padding: 25px; margin: 30px -15px 0; border-radius: 0; } /* 手機底部摘要滿版 */
+            .back-btn { font-size: 0; } 
+            .back-btn::before { content: "←"; font-size: 18px; }
         }
     </style>
 </head>
 <body>
 
 <header class="top-header">
-    <a href="cart.html" class="back-btn">← BACK TO BAG</a>
+    <a href="cart.html" class="back-btn">BACK TO BAG</a>
     <img src="images/ui/logo.png" class="main-logo" alt="AIFANG" onclick="location.href='index.html'">
 </header>
 
@@ -58,19 +69,23 @@
     <div class="checkout-section">
         <h3>01. PAYMENT & SHIPPING</h3>
         <div class="input-group">
-            <label>付款方式</label>
+            <label>PAYMENT METHOD / 付款方式</label>
             <div class="radio-group">
                 <label class="radio-item">
-                    <input type="radio" name="pay_method" value="transfer" checked onchange="handlePaymentChange()"> 銀行匯款 (8折 / 免運)
+                    <input type="radio" name="pay_method" value="transfer" checked onchange="handlePaymentChange()"> 
+                    銀行匯款 (ATM / 網銀轉帳)
+                    <span class="discount-tag">8 折 / 免運</span>
                 </label>
                 <label class="radio-item">
-                    <input type="radio" name="pay_method" value="cod" onchange="handlePaymentChange()"> 貨到付款 (9折 / 滿1500免運)
+                    <input type="radio" name="pay_method" value="cod" onchange="handlePaymentChange()"> 
+                    貨到付款 (7-11)
+                    <span class="discount-tag tag-red">9 折</span>
                 </label>
             </div>
         </div>
 
         <div class="input-group">
-            <label>運送方式</label>
+            <label>SHIPPING METHOD / 運送方式</label>
             <div class="radio-group" id="ship-method-container">
                 </div>
         </div>
@@ -79,38 +94,38 @@
     <div class="checkout-section">
         <h3>02. SHIPPING INFORMATION</h3>
         <div class="input-group">
-            <label>E-mail</label>
-            <input type="email" id="cust_email" placeholder="接收訂單通知信件">
+            <label>EMAIL ADDRESS / 電子郵件</label>
+            <input type="email" id="cust_email" placeholder="接收訂單確認信">
         </div>
         <div class="input-group">
-            <label>收件人姓名</label>
+            <label>FULL NAME / 收件人姓名</label>
             <input type="text" id="cust_name" placeholder="請輸入收件人真實姓名">
         </div>
         <div class="input-group">
-            <label>手機號碼</label>
-            <input type="text" id="cust_phone" placeholder="請輸入手機號碼 (09xxxxxxxx)">
+            <label>PHONE / 手機號碼</label>
+            <input type="tel" id="cust_phone" placeholder="09xxxxxxxx">
         </div>
         <div class="input-group">
-            <label id="address-label">收件地址</label>
-            <input type="text" id="cust_address" placeholder="完整地址或 7-11 店名及店號">
+            <label id="address-label">ADDRESS / 收件地址</label>
+            <input type="text" id="cust_address" placeholder="完整收件地址 或 7-11 店名店號">
         </div>
     </div>
 
     <div class="order-summary">
         <div class="summary-line">
-            <span>商品小計 (原價)</span>
+            <span>Subtotal / 商品小計</span>
             <span id="show-subtotal">NT$ 0</span>
         </div>
         <div class="summary-line">
-            <span>折扣金額</span>
-            <span id="show-discount" style="color: #d9534f;">- NT$ 0</span>
+            <span>Discount / 折扣金額</span>
+            <span id="show-discount">- NT$ 0</span>
         </div>
         <div class="summary-line">
-            <span>運費</span>
+            <span>Shipping / 運費</span>
             <span id="show-shipping">NT$ 0</span>
         </div>
         <div class="summary-line total">
-            <span>應付總額</span>
+            <span>ORDER TOTAL / 總計</span>
             <span id="show-total">NT$ 0</span>
         </div>
         <button id="submit-btn" class="btn-place-order" onclick="submitOrder()">PLACE ORDER</button>
