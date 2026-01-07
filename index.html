@@ -17,7 +17,7 @@
             --sidebar-width: 260px; 
             --accent: #d9534f; 
             --new-color: #a29bfe; 
-            --header-h: 70px; /* 稍微縮小一點點，讓空間更精緻 */
+            --header-h: 70px; 
             --cart-w: 380px;
         }
 
@@ -27,7 +27,7 @@
             overflow-x: hidden; -webkit-font-smoothing: antialiased;
         }
 
-        /* --- 2. 頂部導覽 (優化手機陰影) --- */
+        /* --- 2. 頂部導覽 --- */
         .top-header {
             width: 100%; height: var(--header-h); background: #fff;
             position: fixed; top: 0; left: 0; z-index: 1200;
@@ -37,7 +37,7 @@
         .header-icon { width: 22px; height: 22px; cursor: pointer; object-fit: contain; }
         .main-logo { height: 32px; cursor: pointer; position: absolute; left: 50%; transform: translateX(-50%); }
 
-        /* --- 3. 側欄佈局 (優化階層與捲動) --- */
+        /* --- 3. 側欄佈局 --- */
         .sidebar {
             width: var(--sidebar-width); height: 100vh; position: fixed;
             left: 0; top: 0; border-right: 1px solid #eee;
@@ -61,7 +61,7 @@
         }
         .brand-item.selected { color: #000; font-weight: 700; }
 
-        /* --- 4. 主內容區與商品卡 (解決溢出問題) --- */
+        /* --- 4. 主內容區與商品卡 --- */
         .main-content { 
             width: 100%; 
             padding: calc(var(--header-h) + 40px) 40px 80px calc(var(--sidebar-width) + 40px); 
@@ -70,7 +70,7 @@
         .main-content.loaded { opacity: 1; }
 
         .product-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 40px 20px; }
-        .product-card { cursor: pointer; text-align: left; } /* 改回左對齊，更有設計感 */
+        .product-card { cursor: pointer; text-align: left; } 
         
         .img-wrap { 
             width: 100%; aspect-ratio: 3/4; background-size: cover; background-position: center; 
@@ -85,23 +85,29 @@
         .badge-SALE { background: var(--accent); }
 
         .p-name { font-size: 12px; font-weight: 400; color: #333; margin-bottom: 6px; height: 36px; overflow: hidden; line-height: 1.5; }
-        .color-row { display: flex; justify-content: flex-start; gap: 4px; margin: 8px 0; }
-        .color-dot { width: 10px; height: 10px; border: 1px solid #eee; border-radius: 2px; }
+        
+        /* 顏色方框優化 */
+        .color-row { display: flex; justify-content: flex-start; gap: 4px; margin: 8px 0; flex-wrap: wrap; min-height: 14px; }
+        .color-dot { 
+            width: 12px; height: 12px; border: 1px solid #eee; border-radius: 2px; 
+            background-size: cover; background-position: center; cursor: help;
+        }
+        
         .p-price { font-size: 13px; font-weight: 700; color: #111; }
 
-        /* --- 5. 工具組 (方形設計，全站同步) --- */
-        .fixed-tools { position: fixed; bottom: 30px; right: 20px; z-index: 2000; display: flex; flex-direction: column; gap: 0; } /* 緊貼設計 */
+        /* --- 5. 工具組 --- */
+        .fixed-tools { position: fixed; bottom: 30px; right: 20px; z-index: 2000; display: flex; flex-direction: column; gap: 0; }
         .tool-btn { 
             width: 45px; height: 45px; background: #fff; border: 1px solid #333; 
             display: flex; align-items: center; justify-content: center; 
             font-size: 11px; font-weight: bold; cursor: pointer; transition: 0.3s;
-            margin-bottom: -1px; /* 邊框重疊設計 */
+            margin-bottom: -1px; 
         }
         .tool-btn:hover { background: #333; color: #fff; }
         .line-btn { background: #fff; color: #06C755; }
         .line-btn:hover { background: #06C755; color: #fff; border-color: #06C755; }
 
-        /* --- 6. 購物車側欄 (手機滿版處理) --- */
+        /* --- 6. 購物車側欄 --- */
         #cart-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 2999; display: none; }
         .cart-sidebar {
             position: fixed; top: 0; right: calc(var(--cart-w) * -1); width: var(--cart-w); height: 100vh; background: #fff;
@@ -120,14 +126,13 @@
         .popup-box { position: relative; background: #fff; max-width: 380px; width: 85%; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
         .popup-close { position: absolute; bottom: -40px; left: 50%; transform: translateX(-50%); color: #fff; cursor: pointer; font-size: 12px; border: 1px solid #fff; padding: 5px 20px; white-space: nowrap; }
 
-        /* --- 8. 手機版響應式 (重點修正) --- */
+        /* --- 8. 手機版響應式 --- */
         @media (max-width: 900px) {
             .sidebar { transform: translateX(-100%); width: 280px; }
             .sidebar.open { transform: translateX(0); box-shadow: 5px 0 15px rgba(0,0,0,0.1); }
             .main-content { padding: calc(var(--header-h) + 30px) 15px 80px 15px; }
-            .product-grid { grid-template-columns: repeat(2, 1fr); gap: 25px 12px; } /* 間距縮小，讓卡片大一點 */
+            .product-grid { grid-template-columns: repeat(2, 1fr); gap: 25px 12px; }
             .cart-sidebar { width: 100%; right: -100%; }
-            .product-grid { grid-template-columns: repeat(2, 1fr); }
             .main-logo { height: 28px; }
             .fixed-tools { bottom: 20px; right: 15px; }
         }
@@ -225,11 +230,28 @@
                 const status = (item.status || "").toUpperCase();
                 const badgeHtml = status ? `<span class="status-badge badge-${status}">${status}</span>` : "";
                 
-                const colors = item.color_code ? item.color_code.split(',') : [];
+                // --- 顏色/花色邏輯優化 ---
+                const names = item.color ? item.color.toString().split(',').filter(Boolean) : [];
+                const codes = item.color_code ? item.color_code.toString().split(',').filter(Boolean) : [];
+                const patterns = item.color_pattern ? item.color_pattern.toString().split(',').filter(Boolean) : [];
+
                 let colorHtml = '<div class="color-row">';
-                colors.forEach(c => {
-                    const hex = c.trim();
-                    if(hex.startsWith('#')) colorHtml += `<div class="color-dot" style="background:${hex}"></div>`;
+                // 以名稱數量為基準
+                names.forEach((name, index) => {
+                    const hex = (codes[index] || "").trim();
+                    const patternImg = (patterns[index] || "").trim();
+                    let style = "";
+
+                    if (patternImg) {
+                        style = `background-image: url('${patternImg}');`;
+                    } else if (hex.startsWith('#')) {
+                        style = `background-color: ${hex};`;
+                    }
+
+                    if (style) {
+                        // 加入 title 以便點選/懸停顯示中文名稱
+                        colorHtml += `<div class="color-dot" title="${name.trim()}" style="${style}"></div>`;
+                    }
                 });
                 colorHtml += '</div>';
 
@@ -292,9 +314,14 @@
             }
             container.innerHTML = cartData.map(item => {
                 total += item.price * item.quantity;
+                // 顯示單一顏色名稱與尺寸
                 return `<div style="display:flex; gap:15px; margin-bottom:20px; font-size:12px; align-items:center;">
-                    <img src="${item.image}" width="60" style="border-radius:2px;">
-                    <div style="flex:1;"><p style="font-weight:700; margin-bottom:3px;">${item.name}</p><p style="color:#888;">${item.color}/${item.size} x ${item.quantity}</p></div>
+                    <img src="${item.image}" width="60" style="border-radius:2px; aspect-ratio:1/1; object-fit:cover;">
+                    <div style="flex:1;">
+                        <p style="font-weight:700; margin-bottom:3px;">${item.name}</p>
+                        <p style="color:#888;">${item.color} / ${item.size}</p>
+                        <p style="margin-top:2px;">${item.quantity} x NT$ ${item.price.toLocaleString()}</p>
+                    </div>
                 </div>`;
             }).join('');
             document.getElementById('mini-cart-total').innerText = `NT$ ${total.toLocaleString()}`;
@@ -310,7 +337,8 @@
         }
         function showRandomPopup() {
             const pops = ['./images/popup/popup_01.jpg', './images/popup/popup_02.jpg', './images/popup/popup_03.jpg'];
-            document.getElementById('popup-img').src = pops[Math.floor(Math.random() * pops.length)];
+            const randomPop = pops[Math.floor(Math.random() * pops.length)];
+            document.getElementById('popup-img').src = randomPop;
             document.getElementById('popup-overlay').style.display = 'flex';
         }
         function closePopup() { document.getElementById('popup-overlay').style.display = 'none'; }

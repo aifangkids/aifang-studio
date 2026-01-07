@@ -12,22 +12,29 @@ function renderCart() {
     const tbody = document.getElementById('cart-tbody');
     
     if (cart.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" style="padding:100px 0; color:#999;">您的購物車是空的</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="5" style="padding:100px 0; color:#999; text-align:center;">您的購物車是空的</td></tr>';
         updateUI(0, 0);
+        // 同步更新頁首計數器為 0
+        updateHeaderCartCount(0);
         return;
     }
 
     let subtotal = 0;
+    let totalQuantity = 0;
 
     tbody.innerHTML = cart.map((item, index) => {
         const itemTotal = item.price * item.quantity;
         subtotal += itemTotal;
+        totalQuantity += item.quantity;
+
+        // 圖片渲染優化：若無圖片則顯示預設佔位圖，確保排版不崩潰
+        const displayImg = item.image ? item.image : './images/ui/no-image.jpg';
 
         return `
             <tr>
                 <td>
                     <div class="product-item">
-                        <img src="${item.image || 'https://via.placeholder.com/90x110?text=No+Image'}" alt="${item.name}">
+                        <img src="${displayImg}" alt="${item.name}" onerror="this.src='https://via.placeholder.com/90x110?text=No+Image'">
                         <div>
                             <span class="product-name">${item.name}</span>
                             <span class="product-option">[規格: ${item.brand || 'AiFang'} / ${item.color || 'F'} / ${item.size || 'F'}]</span>
@@ -50,10 +57,12 @@ function renderCart() {
         `;
     }).join('');
 
+    // 更新頁首的 CART (N) 數量
+    updateHeaderCartCount(totalQuantity);
+
     // --- 運費預估邏輯 ---
-    // 購物車頁面預設顯示「匯款」的最優惠可能，引導客戶前往結帳
-    // 規則：滿 1500 免運，否則 45
-    let shipping = (subtotal >= 1500) ? 0 : 45;
+    // 規則：滿 1500 免運，否則 60
+    let shipping = (subtotal >= 1500) ? 0 : 60;
 
     updateUI(subtotal, shipping);
 }
@@ -61,12 +70,12 @@ function renderCart() {
 // 更改數量
 window.changeQty = function(index, delta) {
     let cart = JSON.parse(localStorage.getItem('cart')) || [];
-    cart[index].quantity += delta;
     
-    if (cart[index].quantity < 1) cart[index].quantity = 1;
-    
-    localStorage.setItem('cart', JSON.stringify(cart));
-    renderCart();
+    if (cart[index].quantity + delta > 0) {
+        cart[index].quantity += delta;
+        localStorage.setItem('cart', JSON.stringify(cart));
+        renderCart();
+    }
 };
 
 // 刪除商品
@@ -80,7 +89,19 @@ window.deleteItem = function(index) {
 
 // 更新畫面金額
 function updateUI(subtotal, shipping) {
-    document.getElementById('cart-subtotal').innerText = `NT$ ${subtotal.toLocaleString()}`;
-    document.getElementById('cart-shipping').innerText = `NT$ ${shipping.toLocaleString()}`;
-    document.getElementById('cart-total').innerText = `NT$ ${(subtotal + shipping).toLocaleString()}`;
+    const subtotalEl = document.getElementById('cart-subtotal');
+    const shippingEl = document.getElementById('cart-shipping');
+    const totalEl = document.getElementById('cart-total');
+
+    if (subtotalEl) subtotalEl.innerText = `NT$ ${subtotal.toLocaleString()}`;
+    if (shippingEl) shippingEl.innerText = `NT$ ${shipping.toLocaleString()}`;
+    if (totalEl) totalEl.innerText = `NT$ ${(subtotal + shipping).toLocaleString()}`;
+}
+
+// 新增：同步更新頁首的購物車計數器
+function updateHeaderCartCount(count) {
+    const countEl = document.getElementById('cart-count');
+    if (countEl) {
+        countEl.innerText = count;
+    }
 }

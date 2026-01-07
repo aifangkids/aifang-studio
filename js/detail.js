@@ -6,6 +6,7 @@ const productCode = urlParams.get('code');
 let currentProduct = null;
 let selectedColor = { name: "", hex: "" };
 let selectedItems = []; 
+let colorImageMap = {}; // 用於儲存解析後的顏色圖片對照表
 
 async function init() {
     updateCartCount();
@@ -24,13 +25,24 @@ async function init() {
 }
 
 function render(p) {
+    // 基礎資訊渲染
     document.getElementById('p-title').innerText = p.name;
     document.getElementById('p-brand').innerText = p.brand || "AIFANG SELECT";
     document.getElementById('p-id').innerText = `CODE: ${p.code}`;
     document.getElementById('styling-note').innerText = p.styling_note || "";
     document.getElementById('primary-img').src = p.image_main;
 
-    // 處理副圖
+    // --- 【優化】解析 JSON 顏色聯動圖片 ---
+    if (p.images_by_color) {
+        try {
+            // 處理從 API 傳來的字串格式 JSON
+            colorImageMap = JSON.parse(p.images_by_color);
+        } catch (e) {
+            console.warn("images_by_color 解析失敗:", e);
+        }
+    }
+
+    // 處理副圖 (原本的副圖列表邏輯)
     const imgArea = document.getElementById('image-main-area');
     if (p.image_extra) {
         p.image_extra.split(',').forEach(url => {
@@ -43,20 +55,64 @@ function render(p) {
         });
     }
 
-    // 顏色
+    // --- 【優化】多顏色方框渲染邏輯 ---
     const swatchGroup = document.getElementById('swatch-group');
-    selectedColor = { name: p.color, hex: p.color_code || '#eee' };
-    swatchGroup.innerHTML = `
-        <div class="swatch-item active" onclick="selectColor('${p.color}', '${p.color_code || '#eee'}', this)">
-            <div class="swatch-circle" style="background:${p.color_code || '#eee'}"></div>
-            <span class="swatch-name">${p.color}</span>
-        </div>
-    `;
+    swatchGroup.innerHTML = ""; 
 
-    // 尺寸與價格
+    const colorNames = p.color ? p.color.toString().split(',').map(s => s.trim()) : [];
+    const colorCodes = p.color_code ? p.color_code.toString().split(',').map(s => s.trim()) : [];
+    const colorPatterns = p.color_pattern ? p.color_pattern.toString().split(',').map(s => s.trim()) : [];
+
+    colorNames.forEach((name, i) => {
+        const hex = colorCodes[i] || '#eee';
+        const pattern = colorPatterns[i] || "";
+        
+        const item = document.createElement('div');
+        item.className = "swatch-item";
+        
+        // 優先顯示花色圖片，其次色碼，最後預設灰色
+        let innerStyle = "";
+        if (pattern) {
+            innerStyle = `background-image: url('${pattern}'); background-size: cover;`;
+        } else {
+            innerStyle = `background: ${hex};`;
+        }
+
+        item.innerHTML = `
+            <div class="swatch-circle" style="${innerStyle}"></div>
+            <span class="swatch-name">${name}</span>
+        `;
+
+        // 點擊事件：切換選取樣式 + 切換聯動圖片
+        item.onclick = () => {
+            selectColor(name, hex, item);
+            
+            // 聯動圖片切換邏輯
+            const mainImg = document.getElementById('primary-img');
+            if (colorImageMap[name]) {
+                mainImg.src = colorImageMap[name];
+            } else {
+                mainImg.src = p.image_main; // 若無對應圖則回歸預設主圖
+            }
+        };
+
+        swatchGroup.appendChild(item);
+
+        // 預設點擊第一個顏色
+        if (i === 0) {
+            item.click();
+        }
+    });
+
+    // --- 【原本邏輯保留】尺寸與價格 ---
     const sizeArea = document.getElementById('size-area');
     sizeArea.innerHTML = ""; 
-    const categories = [{ key: 'baby', label: 'BABY', cls: 'babe' }, { key: 'kid', label: 'KIDS', cls: 'kids' }, { key: 'junior', label: 'JUNIOR', cls: 'kids' }, { key: 'adult', label: 'ADULT', cls: 'kids' }];
+    const categories = [
+        { key: 'baby', label: 'BABY', cls: 'babe' }, 
+        { key: 'kid', label: 'KIDS', cls: 'kids' }, 
+        { key: 'junior', label: 'JUNIOR', cls: 'kids' }, 
+        { key: 'adult', label: 'ADULT', cls: 'kids' }
+    ];
 
     categories.forEach(cat => {
         const sizes = p[`sizes_${cat.key}`];
@@ -64,8 +120,14 @@ function render(p) {
         if (sizes && sizes !== "" && price && price !== "FREE") {
             const box = document.createElement('div');
             box.className = 'size-group';
-            box.innerHTML = `<div class="group-header"><span>${cat.label}</span><span class="price-tag">NT$ ${Number(price).toLocaleString()}</span></div>
-                <div>${sizes.split(',').map(s => `<button class="s-btn" onclick="addToList('${s.trim()}', ${price}, '${cat.cls}')">${s.trim()}</button>`).join('')}</div>`;
+            box.innerHTML = `
+                <div class="group-header">
+                    <span>${cat.label}</span>
+                    <span class="price-tag">NT$ ${Number(price).toLocaleString()}</span>
+                </div>
+                <div class="s-btn-wrap">
+                    ${sizes.split(',').map(s => `<button class="s-btn" onclick="addToList('${s.trim()}', ${price}, '${cat.cls}')">${s.trim()}</button>`).join('')}
+                </div>`;
             sizeArea.appendChild(box);
         }
     });
@@ -78,10 +140,17 @@ function selectColor(name, hex, el) {
 }
 
 function addToList(sizeName, price, type) {
+    if (!selectedColor.name) {
+        showToast("請先選擇顏色");
+        return;
+    }
     const key = `${selectedColor.name}-${sizeName}`;
     const existing = selectedItems.find(i => i.key === key);
-    if (existing) existing.quantity += 1;
-    else selectedItems.push({ key, color: selectedColor.name, size: sizeName, price, quantity: 1 });
+    if (existing) {
+        existing.quantity += 1;
+    } else {
+        selectedItems.push({ key, color: selectedColor.name, size: sizeName, price, quantity: 1 });
+    }
     renderSelectedList();
     showToast(`已選擇 ${selectedColor.name} / ${sizeName}`);
 }
@@ -117,20 +186,40 @@ function removeFromList(index) {
 
 function showToast(msg) {
     const toast = document.getElementById('custom-toast');
-    toast.innerText = msg;
-    toast.classList.add('show');
-    setTimeout(() => toast.classList.remove('show'), 2000);
+    if (toast) {
+        toast.innerText = msg;
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 2000);
+    }
 }
 
 function addAllToCart() {
     if (selectedItems.length === 0) { showToast("請先選擇顏色與尺寸"); return; }
     let cart = JSON.parse(localStorage.getItem('cart')) || [];
+    
     selectedItems.forEach(item => {
-        const cartItem = { code: currentProduct.code, name: currentProduct.name, brand: currentProduct.brand, color: item.color, size: item.size, price: item.price, quantity: item.quantity, image: currentProduct.image_main };
+        // --- 【關鍵優化】判斷要存入哪張圖片 ---
+        // 如果 colorImageMap 裡有當前顏色的圖，就用那張；否則用主圖
+        const colorImg = (colorImageMap && colorImageMap[item.color]) 
+                         ? colorImageMap[item.color] 
+                         : currentProduct.image_main;
+
+        const cartItem = { 
+            code: currentProduct.code, 
+            name: currentProduct.name, 
+            brand: currentProduct.brand, 
+            color: item.color, 
+            size: item.size, 
+            price: item.price, 
+            quantity: item.quantity, 
+            image: colorImg  // <--- 這裡改存顏色對應圖
+        };
+        
         const idx = cart.findIndex(i => i.code === cartItem.code && i.size === cartItem.size && i.color === cartItem.color);
         if (idx > -1) cart[idx].quantity += cartItem.quantity;
         else cart.push(cartItem);
     });
+    
     localStorage.setItem('cart', JSON.stringify(cart));
     updateCartCount();
     selectedItems = [];
