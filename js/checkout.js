@@ -30,7 +30,6 @@ function handlePaymentChange() {
         `;
         addrLabel.innerText = "收件地址 / 門市名稱";
     } else {
-        // 貨付
         html = `
             <label class="radio-item"><input type="radio" name="ship_method" value="store" checked onchange="updateSummary()"> 7-11 超商取貨</label>
         `;
@@ -62,12 +61,10 @@ function updateSummary() {
     window.finalOrderCalc = { subtotal, discountAmount, shippingFee, finalTotal };
 }
 
-// --- 修正報錯的核心位置 ---
 async function submitOrder() {
     const cart = JSON.parse(localStorage.getItem('cart'));
     const calc = window.finalOrderCalc;
 
-    // 加入安全性檢查，避免讀取不到 checked 元素
     const payMethodEl = document.querySelector('input[name="pay_method"]:checked');
     const shipMethodEl = document.querySelector('input[name="ship_method"]:checked');
     
@@ -78,7 +75,6 @@ async function submitOrder() {
 
     const payMethod = payMethodEl.value;
     const shipMethod = shipMethodEl.value;
-    
     const name = document.getElementById('cust_name').value.trim();
     const phone = document.getElementById('cust_phone').value.trim();
     const email = document.getElementById('cust_email').value.trim();
@@ -93,7 +89,9 @@ async function submitOrder() {
     submitBtn.disabled = true;
     submitBtn.innerText = "PROCESSING...";
 
-    // 格式化 LINE 訊息
+    const orderId = "AF" + new Date().getTime().toString().slice(-6);
+
+    // --- 修正1：格式化 LINE 訊息 (整合所有資訊) ---
     let lineMsg = `📦 【AIFANG KIDS 訂單確認】\n`;
     lineMsg += `━━━━━━━━━━━━━━━\n`;
     lineMsg += `👤 收件人：${name}\n`;
@@ -125,40 +123,43 @@ async function submitOrder() {
         items: cart
     };
 
-try {
-    await fetch(API_URL, {
-        method: 'POST',
-        mode: 'no-cors',
-        body: JSON.stringify(order_payload)
-    });
+    try {
+        // 發送至 Google Sheets
+        await fetch(API_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            body: JSON.stringify(order_payload)
+        });
 
-    // 1. 先存入資料
-    localStorage.setItem('last_order_info', JSON.stringify({
-        id: "AF" + new Date().getTime().toString().slice(-6),
-        customer_name: name,
-        customer_phone: phone,
-        customer_email: email,
-        customer_address: address,
-        total_amount: calc.finalTotal,
-        pay_method_text: payMethod === 'transfer' ? '銀行匯款(8折)' : '貨到付款(9折)',
-        line_msg: lineMsg, // 這裡最重要！
-        items: cart.map(item => ({
-            product_name: item.name,
-            color: item.color,
-            size: item.size,
-            unit_price: item.price,
-            quantity: item.quantity
-        }))
-    }));
+        // --- 修正2：存入 localStorage 的完整資訊，供成功頁顯示及跳轉 ---
+        localStorage.setItem('last_order_info', JSON.stringify({
+            id: orderId,
+            customer_name: name,
+            customer_phone: phone,
+            customer_address: address,
+            total_amount: calc.finalTotal,
+            pay_method_text: payMethod === 'transfer' ? '銀行匯款(8折)' : '貨到付款(9折)',
+            line_msg: lineMsg,
+            items: cart.map(item => ({
+                product_name: item.name,
+                color: item.color,
+                size: item.size,
+                unit_price: item.price,
+                quantity: item.quantity
+            }))
+        }));
 
-    // 2. 清空購物車
-    localStorage.removeItem('cart');
+        localStorage.removeItem('cart');
 
-    // 3. 延遲 100 毫秒再跳轉，確保手機快取寫入成功
-    setTimeout(() => {
-        window.location.href = "order_success.html";
-    }, 100);
+        // --- 修正3：延遲跳轉 (關鍵！防止手機瀏覽器在 localStorage 存完前就斷開頁面) ---
+        setTimeout(() => {
+            window.location.href = "order_success.html";
+        }, 200);
 
-} catch (e) {
-    // ...錯誤處理
+    } catch (e) {
+        console.error(e);
+        alert("傳送失敗，請聯繫 LINE 客服");
+        submitBtn.disabled = false;
+        submitBtn.innerText = "PLACE ORDER";
+    }
 }
