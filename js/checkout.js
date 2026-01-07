@@ -91,7 +91,7 @@ async function submitOrder() {
 
     const orderId = "AF" + new Date().getTime().toString().slice(-6);
 
-    // --- 修正1：格式化 LINE 訊息 (整合所有資訊) ---
+    // --- 核心功能：格式化 LINE 訊息 (格式化為易讀的清單) ---
     let lineMsg = `📦 【AIFANG KIDS 訂單確認】\n`;
     lineMsg += `━━━━━━━━━━━━━━━\n`;
     lineMsg += `👤 收件人：${name}\n`;
@@ -124,14 +124,13 @@ async function submitOrder() {
     };
 
     try {
-        // 發送至 Google Sheets
         await fetch(API_URL, {
             method: 'POST',
             mode: 'no-cors',
             body: JSON.stringify(order_payload)
         });
 
-        // --- 修正2：存入 localStorage 的完整資訊，供成功頁顯示及跳轉 ---
+        // 存入 localStorage 以供下一步 order_success.html 使用
         localStorage.setItem('last_order_info', JSON.stringify({
             id: orderId,
             customer_name: name,
@@ -139,7 +138,7 @@ async function submitOrder() {
             customer_address: address,
             total_amount: calc.finalTotal,
             pay_method_text: payMethod === 'transfer' ? '銀行匯款(8折)' : '貨到付款(9折)',
-            line_msg: lineMsg,
+            line_msg: lineMsg, // 傳遞格式化後的訊息
             items: cart.map(item => ({
                 product_name: item.name,
                 color: item.color,
@@ -151,7 +150,7 @@ async function submitOrder() {
 
         localStorage.removeItem('cart');
 
-        // --- 修正3：延遲跳轉 (關鍵！防止手機瀏覽器在 localStorage 存完前就斷開頁面) ---
+        // 延遲跳轉確保快取完整寫入
         setTimeout(() => {
             window.location.href = "order_success.html";
         }, 200);
