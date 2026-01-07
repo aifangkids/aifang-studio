@@ -7,6 +7,7 @@ let currentProduct = null;
 let selectedColor = { name: "", hex: "" };
 let selectedItems = []; // 儲存樣式的待購清單
 
+// 初始化
 async function init() {
     updateCartCount();
 
@@ -35,6 +36,7 @@ async function init() {
     }
 }
 
+// 渲染商品內容
 function render(p) {
     document.getElementById('p-title').innerText = p.name;
     document.getElementById('p-brand').innerText = p.brand || "AIFANG SELECT";
@@ -59,7 +61,6 @@ function render(p) {
 
     // --- 顏色選擇 (第一步) ---
     const swatchGroup = document.getElementById('swatch-group');
-    // 預設選中第一個顏色
     selectedColor = { name: p.color, hex: p.color_code || '#eee' };
     
     swatchGroup.innerHTML = `
@@ -104,17 +105,17 @@ function render(p) {
     });
 }
 
-// 選擇顏色邏輯
+// 選擇顏色
 function selectColor(name, hex, el) {
     selectedColor = { name: name, hex: hex };
     document.querySelectorAll('.swatch-item').forEach(item => item.classList.remove('active'));
     el.classList.add('active');
 }
 
-// 點擊尺寸後，新增到樣式的清單中 (不直接入庫，先列出)
+// 新增到待選清單
 function addToList(sizeName, price, type) {
     if (!selectedColor.name) {
-        alert("請先選擇顏色");
+        showToast("請先選擇顏色");
         return;
     }
 
@@ -135,7 +136,7 @@ function addToList(sizeName, price, type) {
     renderSelectedList();
 }
 
-// 渲染 待選清單
+// 渲染清單內容
 function renderSelectedList() {
     const listArea = document.getElementById('selected-list');
     if (!listArea) return;
@@ -168,23 +169,42 @@ function removeFromList(index) {
     renderSelectedList();
 }
 
-// 手機版抽屜控制
+// --- 功能性函數 ---
+
+// 手機抽屜控制
 function toggleDrawer(isOpen) {
     const drawer = document.getElementById('product-drawer');
     const overlay = document.getElementById('overlay');
+    if (!drawer || !overlay) return;
+
     if (isOpen) {
         drawer.classList.add('open');
         overlay.classList.add('active');
+        document.body.style.overflow = 'hidden'; // 禁止底層滾動
     } else {
         drawer.classList.remove('open');
         overlay.classList.remove('active');
+        document.body.style.overflow = ''; 
     }
 }
 
-// 最終：將清單內所有東西加入購物車
+// 彈出式訊息 (Toast) 替代 alert
+function showToast(msg) {
+    let toast = document.getElementById('custom-toast');
+    if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'custom-toast';
+        document.body.appendChild(toast);
+    }
+    toast.innerText = msg;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2500);
+}
+
+// 加入購物車
 function addAllToCart() {
     if (selectedItems.length === 0) {
-        alert("請先選擇顏色與尺寸");
+        showToast("請先選擇顏色與尺寸");
         return;
     }
 
@@ -210,16 +230,13 @@ function addAllToCart() {
     localStorage.setItem('cart', JSON.stringify(cart));
     updateCartCount();
     
-    // 清空目前選擇清單
     selectedItems = [];
     renderSelectedList();
 
-    // 關閉手機抽屜
     if (window.innerWidth <= 900) toggleDrawer(false);
 
-    if (confirm("已加入購物車！要前往結帳嗎？")) {
-        location.href = 'cart.html';
-    }
+    showToast("商品已加入購物車");
+    // 如果需要跳轉結帳，可在此處加入 setTimeout 引導
 }
 
 function updateCartCount() {
