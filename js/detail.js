@@ -5,7 +5,7 @@ const productCode = urlParams.get('code');
 
 let currentProduct = null;
 let selectedColor = { name: "", hex: "" };
-let selectedItems = []; // 儲存 Bellot 樣式的待購清單
+let selectedItems = []; // 儲存樣式的待購清單
 
 async function init() {
     updateCartCount();
@@ -111,7 +111,7 @@ function selectColor(name, hex, el) {
     el.classList.add('active');
 }
 
-// 點擊尺寸後，新增到 Bellot 樣式的清單中 (不直接入庫，先列出)
+// 點擊尺寸後，新增到樣式的清單中 (不直接入庫，先列出)
 function addToList(sizeName, price, type) {
     if (!selectedColor.name) {
         alert("請先選擇顏色");
@@ -135,7 +135,7 @@ function addToList(sizeName, price, type) {
     renderSelectedList();
 }
 
-// 渲染 Bellot 待選清單
+// 渲染 待選清單
 function renderSelectedList() {
     const listArea = document.getElementById('selected-list');
     if (!listArea) return;
