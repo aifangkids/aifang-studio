@@ -6,7 +6,7 @@ const productCode = urlParams.get('code');
 let currentProduct = null;
 let selectedColor = { name: "", hex: "" };
 let selectedItems = []; 
-let colorImageMap = {}; // 用於儲存解析後的顏色圖片對照表
+let colorImageMap = {}; 
 
 async function init() {
     updateCartCount();
@@ -25,24 +25,20 @@ async function init() {
 }
 
 function render(p) {
-    // 基礎資訊渲染
     document.getElementById('p-title').innerText = p.name;
     document.getElementById('p-brand').innerText = p.brand || "AIFANG SELECT";
     document.getElementById('p-id').innerText = `CODE: ${p.code}`;
     document.getElementById('styling-note').innerText = p.styling_note || "";
     document.getElementById('primary-img').src = p.image_main;
 
-    // --- 【優化】解析 JSON 顏色聯動圖片 ---
     if (p.images_by_color) {
         try {
-            // 處理從 API 傳來的字串格式 JSON
             colorImageMap = JSON.parse(p.images_by_color);
         } catch (e) {
             console.warn("images_by_color 解析失敗:", e);
         }
     }
 
-    // 處理副圖 (原本的副圖列表邏輯)
     const imgArea = document.getElementById('image-main-area');
     if (p.image_extra) {
         p.image_extra.split(',').forEach(url => {
@@ -55,7 +51,6 @@ function render(p) {
         });
     }
 
-    // --- 【優化】多顏色方框渲染邏輯 ---
     const swatchGroup = document.getElementById('swatch-group');
     swatchGroup.innerHTML = ""; 
 
@@ -70,7 +65,6 @@ function render(p) {
         const item = document.createElement('div');
         item.className = "swatch-item";
         
-        // 優先顯示花色圖片，其次色碼，最後預設灰色
         let innerStyle = "";
         if (pattern) {
             innerStyle = `background-image: url('${pattern}'); background-size: cover;`;
@@ -83,28 +77,19 @@ function render(p) {
             <span class="swatch-name">${name}</span>
         `;
 
-        // 點擊事件：切換選取樣式 + 切換聯動圖片
         item.onclick = () => {
-            selectColor(name, hex, item);
+            // 找出對應圖片網址，若無則用主圖
+            const targetImg = colorImageMap[name] || p.image_main;
+            selectColor(name, hex, item, targetImg);
             
-            // 聯動圖片切換邏輯
             const mainImg = document.getElementById('primary-img');
-            if (colorImageMap[name]) {
-                mainImg.src = colorImageMap[name];
-            } else {
-                mainImg.src = p.image_main; // 若無對應圖則回歸預設主圖
-            }
+            mainImg.src = targetImg;
         };
 
         swatchGroup.appendChild(item);
-
-        // 預設點擊第一個顏色
-        if (i === 0) {
-            item.click();
-        }
+        if (i === 0) item.click();
     });
 
-    // --- 【原本邏輯保留】尺寸與價格 ---
     const sizeArea = document.getElementById('size-area');
     sizeArea.innerHTML = ""; 
     const categories = [
@@ -133,10 +118,29 @@ function render(p) {
     });
 }
 
-function selectColor(name, hex, el) {
+/**
+ * 修正後的 selectColor：整合手機版投影顯示框
+ */
+function selectColor(name, hex, el, imageUrl) {
     selectedColor = { name, hex };
+    
+    // 1. 更新 UI 選取狀態
     document.querySelectorAll('.swatch-item').forEach(i => i.classList.remove('active'));
     el.classList.add('active');
+
+    // 2. 更新手機版投影預覽框 (如果有該 HTML 元素)
+    const mobilePreview = document.getElementById('mobile-color-preview-img');
+    const mobileText = document.getElementById('mobile-color-preview-name');
+    
+    if (mobilePreview) {
+        mobilePreview.src = imageUrl;
+        // 加入簡單的視覺反饋效果
+        mobilePreview.style.opacity = "0.5";
+        setTimeout(() => mobilePreview.style.opacity = "1", 100);
+    }
+    if (mobileText) {
+        mobileText.innerText = name;
+    }
 }
 
 function addToList(sizeName, price, type) {
@@ -198,8 +202,6 @@ function addAllToCart() {
     let cart = JSON.parse(localStorage.getItem('cart')) || [];
     
     selectedItems.forEach(item => {
-        // --- 【關鍵優化】判斷要存入哪張圖片 ---
-        // 如果 colorImageMap 裡有當前顏色的圖，就用那張；否則用主圖
         const colorImg = (colorImageMap && colorImageMap[item.color]) 
                          ? colorImageMap[item.color] 
                          : currentProduct.image_main;
@@ -212,7 +214,7 @@ function addAllToCart() {
             size: item.size, 
             price: item.price, 
             quantity: item.quantity, 
-            image: colorImg  // <--- 這裡改存顏色對應圖
+            image: colorImg
         };
         
         const idx = cart.findIndex(i => i.code === cartItem.code && i.size === cartItem.size && i.color === cartItem.color);
