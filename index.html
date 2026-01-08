@@ -27,13 +27,26 @@
             overflow-x: hidden; -webkit-font-smoothing: antialiased;
         }
 
-        /* --- 2. 頂部導覽 --- */
+        /* --- 2. 頂部導覽 (優化搜尋與訂單按鈕) --- */
         .top-header {
             width: 100%; height: var(--header-h); background: #fff;
             position: fixed; top: 0; left: 0; z-index: 1200;
             display: flex; align-items: center; justify-content: space-between;
             padding: 0 20px; border-bottom: 1px solid #f2f2f2;
         }
+        
+        .header-left { display: flex; align-items: center; gap: 15px; flex: 1; }
+        .header-right { display: flex; align-items: center; gap: 20px; flex: 1; justify-content: flex-end; }
+        
+        /* 搜尋框樣式 */
+        .search-wrap { position: relative; display: flex; align-items: center; }
+        #search-input {
+            border: 1px solid #eee; padding: 6px 10px; font-size: 11px;
+            width: 150px; outline: none; transition: 0.3s;
+            font-family: 'NotoSansKR'; letter-spacing: 1px;
+        }
+        #search-input:focus { width: 200px; border-color: #ccc; }
+
         .header-icon { width: 22px; height: 22px; cursor: pointer; object-fit: contain; }
         .main-logo { height: 32px; cursor: pointer; position: absolute; left: 50%; transform: translateX(-50%); }
 
@@ -86,7 +99,6 @@
 
         .p-name { font-size: 12px; font-weight: 400; color: #333; margin-bottom: 6px; height: 36px; overflow: hidden; line-height: 1.5; }
         
-        /* 顏色方框優化 */
         .color-row { display: flex; justify-content: flex-start; gap: 4px; margin: 8px 0; flex-wrap: wrap; min-height: 14px; }
         .color-dot { 
             width: 12px; height: 12px; border: 1px solid #eee; border-radius: 2px; 
@@ -128,6 +140,11 @@
 
         /* --- 8. 手機版響應式 --- */
         @media (max-width: 900px) {
+            .header-left { flex: 1.5; }
+            #search-input { width: 100px; font-size: 10px; }
+            #search-input:focus { width: 120px; }
+            .header-right { gap: 12px; }
+            
             .sidebar { transform: translateX(-100%); width: 280px; }
             .sidebar.open { transform: translateX(0); box-shadow: 5px 0 15px rgba(0,0,0,0.1); }
             .main-content { padding: calc(var(--header-h) + 30px) 15px 80px 15px; }
@@ -143,9 +160,19 @@
 <body>
 
     <header class="top-header">
-        <img src="./images/ui/menu.png" class="header-icon" onclick="toggleMenu()" alt="Menu">
+        <div class="header-left">
+            <img src="./images/ui/menu.png" class="header-icon" onclick="toggleMenu()" alt="Menu">
+            <div class="search-wrap">
+                <input type="text" id="search-input" placeholder="SEARCH CODE / NAME" oninput="handleSearch(this.value)">
+            </div>
+        </div>
+
         <img src="./images/ui/logo.png" class="main-logo" onclick="location.reload()" alt="AIFANGKIDS">
-        <img src="./images/ui/icon_tcart.png" class="header-icon" onclick="toggleCart()" alt="Cart">
+        
+        <div class="header-right">
+            <img src="./images/ui/order.png" class="header-icon" onclick="location.href='order_query.html'" alt="Order">
+            <img src="./images/ui/icon_tcart.png" class="header-icon" onclick="toggleCart()" alt="Cart">
+        </div>
     </header>
 
     <div id="overlay" class="sidebar-overlay" onclick="closeMenu()"></div>
@@ -219,6 +246,23 @@
             } catch (e) { console.error("API Error:", e); }
         }
 
+        // --- 搜尋邏輯整合 ---
+        function handleSearch(query) {
+            const q = query.toLowerCase().trim();
+            if (!q) {
+                // 如果搜尋框清空，回復到目前分類的顯示狀態
+                const currentFiltered = activeCat === 'All' ? allData : allData.filter(p => p.category === activeCat);
+                render(currentFiltered);
+                return;
+            }
+            // 搜尋所有商品中的 code 或 name
+            const filtered = allData.filter(p => 
+                (p.code && p.code.toLowerCase().includes(q)) || 
+                (p.name && p.name.toLowerCase().includes(q))
+            );
+            render(filtered);
+        }
+
         function render(items) {
             const container = document.getElementById('product-list');
             container.innerHTML = "";
@@ -230,26 +274,21 @@
                 const status = (item.status || "").toUpperCase();
                 const badgeHtml = status ? `<span class="status-badge badge-${status}">${status}</span>` : "";
                 
-                // --- 顏色/花色邏輯優化 ---
                 const names = item.color ? item.color.toString().split(',').filter(Boolean) : [];
                 const codes = item.color_code ? item.color_code.toString().split(',').filter(Boolean) : [];
                 const patterns = item.color_pattern ? item.color_pattern.toString().split(',').filter(Boolean) : [];
 
                 let colorHtml = '<div class="color-row">';
-                // 以名稱數量為基準
                 names.forEach((name, index) => {
                     const hex = (codes[index] || "").trim();
                     const patternImg = (patterns[index] || "").trim();
                     let style = "";
-
                     if (patternImg) {
                         style = `background-image: url('${patternImg}');`;
                     } else if (hex.startsWith('#')) {
                         style = `background-color: ${hex};`;
                     }
-
                     if (style) {
-                        // 加入 title 以便點選/懸停顯示中文名稱
                         colorHtml += `<div class="color-dot" title="${name.trim()}" style="${style}"></div>`;
                     }
                 });
@@ -271,6 +310,7 @@
 
         function filterByCat(cat) {
             activeCat = cat; activeBrands.clear();
+            document.getElementById('search-input').value = ""; // 切換分類時清空搜尋
             document.querySelectorAll('.category-menu li').forEach(li => li.classList.toggle('active', li.innerText === cat));
             const filtered = cat === 'All' ? allData : allData.filter(p => p.category === cat);
             const area = document.getElementById('brand-area');
@@ -314,7 +354,6 @@
             }
             container.innerHTML = cartData.map(item => {
                 total += item.price * item.quantity;
-                // 顯示單一顏色名稱與尺寸
                 return `<div style="display:flex; gap:15px; margin-bottom:20px; font-size:12px; align-items:center;">
                     <img src="${item.image}" width="60" style="border-radius:2px; aspect-ratio:1/1; object-fit:cover;">
                     <div style="flex:1;">
@@ -338,8 +377,11 @@
         function showRandomPopup() {
             const pops = ['./images/popup/popup_01.jpg', './images/popup/popup_02.jpg', './images/popup/popup_03.jpg'];
             const randomPop = pops[Math.floor(Math.random() * pops.length)];
-            document.getElementById('popup-img').src = randomPop;
-            document.getElementById('popup-overlay').style.display = 'flex';
+            const popImg = document.getElementById('popup-img');
+            if(popImg) {
+                popImg.src = randomPop;
+                document.getElementById('popup-overlay').style.display = 'flex';
+            }
         }
         function closePopup() { document.getElementById('popup-overlay').style.display = 'none'; }
 

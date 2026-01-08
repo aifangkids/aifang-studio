@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Lookup | AiFang Kids</title>
+    <link rel="icon" href="./favicon.ico" type="image/x-icon">
+    <style>
+        :root { --header-h: 70px; --accent: #d9534f; --gray-bg: #f9f9f9; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Noto Sans TC', sans-serif; background: #fff; color: #333; line-height: 1.6; }
+
+        /* Header */
+        .top-header {
+            width: 100%; height: var(--header-h); background: #fff;
+            position: fixed; top: 0; left: 0; z-index: 2000;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 25px; border-bottom: 1px solid #f2f2f2;
+        }
+        .main-logo { height: 30px; cursor: pointer; position: absolute; left: 50%; transform: translateX(-50%); }
+        .header-icon { font-size: 13px; font-weight: bold; cursor: pointer; text-decoration: none; color: #333; letter-spacing: 1px; }
+
+        .container { max-width: 800px; margin: calc(var(--header-h) + 50px) auto 80px; padding: 0 20px; }
+        .page-title { font-size: 18px; font-weight: 700; letter-spacing: 3px; text-align: center; margin-bottom: 40px; }
+
+        /* 搜尋 */
+        .search-section { background: var(--gray-bg); padding: 30px; border-radius: 8px; text-align: center; margin-bottom: 40px; }
+        .search-group { display: flex; gap: 10px; max-width: 500px; margin: 0 auto; }
+        .query-input { flex: 1; padding: 12px 15px; border: 1px solid #ddd; outline: none; font-size: 14px; border-radius: 4px; }
+        .query-btn { padding: 12px 25px; background: #111; color: #fff; border: none; cursor: pointer; font-weight: bold; border-radius: 4px; }
+        .query-btn:disabled { background: #999; cursor: not-allowed; }
+
+        /* 結果區域 */
+        #result-area { display: none; }
+        .order-meta { border-bottom: 2px solid #111; padding-bottom: 15px; margin-bottom: 20px; }
+        .meta-row { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 5px; }
+
+        /* 商品項目 */
+        .order-item { display: flex; padding: 20px 0; border-bottom: 1px solid #eee; align-items: center; }
+        .item-img { width: 80px; height: 105px; object-fit: cover; background: #f5f5f5; border-radius: 2px; }
+        .item-info { flex: 1; padding-left: 20px; }
+        .item-name { font-size: 14px; font-weight: 700; margin-bottom: 5px; }
+        .item-spec { font-size: 12px; color: #888; margin-bottom: 8px; }
+        .item-price-qty { font-size: 13px; }
+
+        /* 價格計算 */
+        .summary-box { margin-top: 30px; background: #fff; border: 1px solid #eee; padding: 20px; }
+        .summary-line { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 14px; }
+        .summary-line.total { border-top: 1px solid #eee; padding-top: 15px; margin-top: 15px; font-size: 18px; font-weight: 700; }
+
+        #error-msg { display: none; color: var(--accent); text-align: center; margin-top: 20px; font-size: 14px; background: #fff5f5; padding: 10px; border-radius: 4px; }
+    </style>
+</head>
+<body>
+
+    <header class="top-header">
+        <a href="index.html" class="header-icon">BACK</a>
+        <img src="images/ui/logo.png" class="main-logo" alt="AIFANG" onclick="location.href='index.html'">
+        <div style="width: 40px;"></div>
+    </header>
+
+    <div class="container">
+        <h1 class="page-title">ORDER LOOKUP</h1>
+
+        <div class="search-section">
+            <div class="search-group">
+                <input type="text" id="order-id-input" class="query-input" placeholder="請輸入訂單編號 (例如: AF20240101)">
+                <button class="query-btn" id="q-btn" onclick="handleQuery()">查詢</button>
+            </div>
+        </div>
+
+        <div id="result-area">
+            <div class="order-meta">
+                <div class="meta-row"><span>ORDER ID / 訂單編號</span><span id="res-order-id" style="font-weight:700;"></span></div>
+                <div class="meta-row"><span>ORDER DATE / 下單日期</span><span id="res-order-date"></span></div>
+                <div class="meta-row"><span>CUSTOMER / 顧客姓名</span><span id="res-customer-name"></span></div>
+            </div>
+
+            <div id="order-items-container"></div>
+
+            <div class="summary-box">
+                <div class="summary-line"><span>Subtotal / 小計</span><span id="res-subtotal"></span></div>
+                <div class="summary-line"><span>Shipping / 運費</span><span id="res-shipping"></span></div>
+                <div class="summary-line" style="color:var(--accent);"><span>Discount / 折扣</span><span id="res-discount"></span></div>
+                <div class="summary-line total"><span>Total / 總計</span><span id="res-total-amount"></span></div>
+            </div>
+        </div>
+
+        <div id="error-msg">找不到此訂單編號，請重新確認。</div>
+    </div>
+
+    <script>
+        const API_URL = "https://script.google.com/macros/s/AKfycbxnlAwKJucHmCKcJwv67TWuKV0X74Daag9X9I4NG7DOESREuYdU7BtWBPcEHyoJphoEfg/exec";
+
+        async function handleQuery() {
+            const input = document.getElementById('order-id-input');
+            const orderId = input.value.trim();
+            const btn = document.getElementById('q-btn');
+            const resultArea = document.getElementById('result-area');
+            const errorMsg = document.getElementById('error-msg');
+
+            if(!orderId) {
+                alert("請輸入訂單編號");
+                return;
+            }
+
+            // UI 狀態重設
+            btn.disabled = true;
+            btn.innerText = "查詢中...";
+            resultArea.style.display = 'none';
+            errorMsg.style.display = 'none';
+
+            try {
+                const response = await fetch(`${API_URL}?mode=order_query&orderId=${encodeURIComponent(orderId)}`);
+                const data = await response.json();
+
+                if (data.success) {
+                    showResult(data.order);
+                } else {
+                    errorMsg.innerText = data.message || "找不到此訂單編號";
+                    errorMsg.style.display = 'block';
+                }
+            } catch (e) {
+                console.error(e);
+                errorMsg.innerText = "網路通訊失敗或系統錯誤，請稍後再試。";
+                errorMsg.style.display = 'block';
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "查詢";
+            }
+        }
+
+        function showResult(order) {
+            document.getElementById('result-area').style.display = 'block';
+
+            document.getElementById('res-order-id').innerText = order.order_id || "-";
+            document.getElementById('res-order-date').innerText = order.order_date || "-";
+            document.getElementById('res-customer-name').innerText = order.customer_name || "-";
+
+            const formatNT = (num) => `NT$ ${Math.abs(Number(num) || 0).toLocaleString()}`;
+            
+            document.getElementById('res-subtotal').innerText = formatNT(order.subtotal);
+            document.getElementById('res-shipping').innerText = formatNT(order.shipping_fee);
+            document.getElementById('res-discount').innerText = `- NT$ ${Math.abs(Number(order.discount_total) || 0).toLocaleString()}`;
+            document.getElementById('res-total-amount').innerText = formatNT(order.total_amount);
+
+            const container = document.getElementById('order-items-container');
+            container.innerHTML = (order.items || []).map(item => {
+                // 清洗網址路徑，防止 JSON 殘留引號
+                let finalImg = "./images/ui/no-image.jpg";
+                if (item.image && typeof item.image === 'string') {
+                    finalImg = item.image.replace(/["{}]/g, "").trim();
+                }
+
+                return `
+                    <div class="order-item">
+                        <img src="${finalImg}" 
+                             class="item-img" 
+                             onerror="this.onerror=null; this.src='./images/ui/no-image.jpg';">
+                        <div class="item-info">
+                            <div class="item-name">${item.product_name}</div>
+                            <div class="item-spec">CODE: ${item.product_code} / ${item.color} / ${item.size}</div>
+                            <div class="item-price-qty">NT$ ${Number(item.unit_price).toLocaleString()} × ${item.quantity}</div>
+                        </div>
+                        <div style="font-weight:700;">NT$ ${(Number(item.unit_price) * Number(item.quantity)).toLocaleString()}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+    </script>
+</body>
+</html>
