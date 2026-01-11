@@ -11,7 +11,6 @@
         
         .container { max-width: 500px; margin: 0 auto; }
         
-        /* 頂部圖示 */
         .header-status { text-align: center; margin-bottom: 40px; }
         .success-icon { 
             width: 60px; height: 60px; background: var(--accent); color: #fff; 
@@ -19,34 +18,26 @@
             font-size: 30px; margin: 0 auto 15px; 
             box-shadow: 0 10px 20px rgba(6, 199, 85, 0.2);
         }
-        h1 { font-size: 20px; letter-spacing: 3px; font-weight: 600; }
+        h1 { font-size: 20px; letter-spacing: 3px; font-weight: 600; text-transform: uppercase; }
         .sub-msg { font-size: 13px; color: #888; margin-top: 5px; }
 
-        /* 訂單收據風格 */
         .receipt { 
             background: var(--gray); border: 1px solid var(--border); 
-            padding: 30px; position: relative; border-radius: 4px; 
+            padding: 30px; position: relative; border-radius: 4px; overflow: hidden;
         }
-        /* 裝飾性鋸齒邊緣 */
-        .receipt::after {
-            content: ""; position: absolute; bottom: -5px; left: 0; width: 100%; height: 10px;
-            background-image: radial-gradient(circle at 5px 10px, transparent 5px, var(--gray) 5px);
-            background-size: 10px 10px;
-        }
-
+        
         .info-section { margin-bottom: 25px; padding-bottom: 20px; border-bottom: 1px solid #eee; }
-        .info-section:last-of-type { border-bottom: none; margin-bottom: 0; }
+        .info-section:last-of-type { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
         
         .info-title { font-size: 11px; font-weight: bold; color: #bbb; margin-bottom: 15px; display: block; text-transform: uppercase; letter-spacing: 1px; }
         .info-row { display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 8px; }
         .info-row span:first-child { color: #777; }
-        .info-row .val { font-weight: 500; text-align: right; }
+        .info-row .val { font-weight: 500; text-align: right; color: #111; }
 
         .item-list { margin-top: 10px; background: #fff; border: 1px solid #f0f0f0; padding: 15px; border-radius: 2px; }
-        .item-row { font-size: 13px; display: flex; justify-content: space-between; margin-bottom: 6px; }
+        .item-row { font-size: 13px; display: flex; justify-content: space-between; margin-bottom: 10px; line-height: 1.4; }
         .item-row:last-child { margin-bottom: 0; }
 
-        /* LINE 通知區 */
         .line-notice { 
             background: #f0fdf4; border: 1px solid #dcfce7; color: #166534; 
             padding: 20px; border-radius: 4px; font-size: 13px; margin: 30px 0; 
@@ -69,6 +60,7 @@
         @media (max-width: 480px) {
             .receipt { padding: 20px; }
             .info-row { font-size: 13px; }
+            h1 { font-size: 18px; }
         }
     </style>
 </head>
@@ -78,44 +70,43 @@
     <div class="header-status">
         <div class="success-icon">✓</div>
         <h1>ORDER RECEIVED</h1>
-        <p class="sub-msg">感謝您的訂購，我們已收到訂單！</p>
+        <p class="sub-msg">感謝您的訂購，我們已收到訂單需求！</p>
     </div>
 
     <div class="receipt">
         <div class="info-section">
-            <span class="info-title">Summary 訂單資訊</span>
+            <span class="info-title">Summary 訂單摘要</span>
             <div class="info-row"><span>訂單編號:</span> <span class="val" id="order-id">-</span></div>
             <div class="info-row"><span>付款方式:</span> <span class="val" id="order-pay">-</span></div>
             <div class="info-row"><span>應付總額:</span> <span class="val" id="order-total" style="color: #d9534f; font-weight: 700;">-</span></div>
         </div>
 
         <div class="info-section">
-            <span class="info-title">Shipping To 收件資訊</span>
+            <span class="info-title">Shipping 收件資訊</span>
             <div class="info-row"><span>收件人:</span> <span class="val" id="cust-name">-</span></div>
-            <div class="info-row"><span>手機號碼:</span> <span class="val" id="cust-phone">-</span></div>
-            <div class="info-row"><span>配送地址:</span> <span class="val" id="cust-addr" style="max-width: 60%;">-</span></div>
+            <div class="info-row"><span>配送地址:</span> <span class="val" id="cust-addr" style="max-width: 65%;"> -</span></div>
         </div>
 
         <div class="info-section">
-            <span class="info-title">Items 訂購明細</span>
+            <span class="info-title">Details 訂購明細</span>
             <div id="item-list" class="item-list"></div>
         </div>
     </div>
 
     <div class="line-notice">
-        <strong>💡 最後一步完成下單</strong><br>
-        點擊下方按鈕將「自動複製」訂單內容並開啟 LINE，<br>請在對話框「貼上並傳送」給我們。
+        <strong>💡 最後一步：完成通知</strong><br>
+        請點擊下方按鈕，系統將自動複製訂單內容並開啟 LINE，<br>請在對話框「貼上並傳送」即可完成！
     </div>
 
     <button id="line-link" class="btn-line">
         <img src="https://upload.wikimedia.org/wikipedia/commons/4/41/LINE_logo.svg" alt="LINE">
-        複製訂單並開啟 LINE 客服
+        點我複製訂單並聯絡 LINE 客服
     </button>
     
     <a href="index.html" class="btn-home">← BACK TO SHOPPING 繼續購物</a>
 </div>
 
-<textarea id="copy-helper" style="position: absolute; left: -9999px; top: 0;"></textarea>
+<textarea id="copy-helper" style="position: absolute; left: -9999px; top: 0;" readonly></textarea>
 
 <script>
     document.addEventListener('DOMContentLoaded', () => {
@@ -127,26 +118,25 @@
             return;
         }
 
-        // 1. 填入基本資訊
+        // 1. 填入資訊
         document.getElementById('order-id').innerText = orderData.id || "-";
         document.getElementById('order-pay').innerText = orderData.pay_method_text || "-";
         document.getElementById('order-total').innerText = "NT$ " + (orderData.total_amount || 0).toLocaleString();
         document.getElementById('cust-name').innerText = orderData.customer_name || "-";
-        document.getElementById('cust-phone').innerText = orderData.customer_phone || "-";
         document.getElementById('cust-addr').innerText = orderData.customer_address || "-";
 
-        // 2. 渲染商品明細
+        // 2. 渲染明細
         if (orderData.items) {
             const listHtml = orderData.items.map(item => `
                 <div class="item-row">
-                    <span>${item.product_name} (${item.color}/${item.size}) x ${item.quantity}</span>
-                    <span style="color: #111;">$${(item.unit_price * item.quantity).toLocaleString()}</span>
+                    <span style="color:#666;">${item.product_name} <br><small>${item.color}/${item.size} x ${item.quantity}</small></span>
+                    <span style="color: #111; font-weight:500;">$${(item.unit_price * item.quantity).toLocaleString()}</span>
                 </div>
             `).join('');
             document.getElementById('item-list').innerHTML = listHtml;
         }
 
-        // 3. 處理複製與跳轉
+        // 3. 處理複製跳轉
         const lineBtn = document.getElementById('line-link');
         const copyHelper = document.getElementById('copy-helper');
         
@@ -154,7 +144,6 @@
             const msg = orderData.line_msg;
             copyHelper.value = msg;
 
-            // 執行複製動作
             try {
                 if (navigator.clipboard && navigator.clipboard.writeText) {
                     await navigator.clipboard.writeText(msg);
@@ -164,26 +153,23 @@
                 }
                 
                 // 視覺回饋
-                const originalText = lineBtn.innerHTML;
-                lineBtn.innerText = "✅ 訂單已複製！正在跳轉...";
+                const originalContent = lineBtn.innerHTML;
+                lineBtn.innerHTML = "✅ 已複製！正在開啟 LINE...";
                 lineBtn.style.background = "#333";
 
                 setTimeout(() => {
-                    // LINE 官方帳號跳轉 (OA 訊息格式)
                     const encodedMsg = encodeURIComponent(msg);
                     const lineUrl = "https://line.me/R/oaMessage/@844bwwjl/?" + encodedMsg;
                     window.location.href = lineUrl;
                     
-                    // 恢復按鈕（防止用戶跳回時狀態卡死）
                     setTimeout(() => {
-                        lineBtn.innerHTML = originalText;
+                        lineBtn.innerHTML = originalContent;
                         lineBtn.style.background = "var(--accent)";
-                    }, 2000);
-                }, 800);
+                    }, 3000);
+                }, 1000);
 
             } catch (err) {
-                alert("自動複製失敗，請手動截圖給客服。");
-                console.error('Copy failed', err);
+                alert("複製失敗，請手動截圖給客服。");
             }
         });
     });

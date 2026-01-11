@@ -91,9 +91,10 @@ async function submitOrder() {
 
     const orderId = "AF" + new Date().getTime().toString().slice(-6);
 
-    // --- 核心功能：格式化 LINE 訊息 (格式化為易讀的清單) ---
+    // --- 核心功能：格式化 LINE 訊息 ---
     let lineMsg = `📦 【AIFANG KIDS 訂單確認】\n`;
     lineMsg += `━━━━━━━━━━━━━━━\n`;
+    lineMsg += `🆔 訂單編號：${orderId}\n`;
     lineMsg += `👤 收件人：${name}\n`;
     lineMsg += `📞 電話：${phone}\n`;
     lineMsg += `💳 方式：${payMethod === 'transfer' ? '銀行匯款(8折)' : '貨到付款(9折)'}\n`;
@@ -104,11 +105,13 @@ async function submitOrder() {
         lineMsg += `${i+1}. ${item.name} (${item.color}/${item.size}) x${item.quantity}\n`;
     });
     lineMsg += `━━━━━━━━━━━━━━━\n`;
-    lineMsg += `⭐ 應付金額：NT$ ${calc.finalTotal.toLocaleString()}\n`;
+    lineMsg += `⭐ 應付金額：NT$ ${calc.finalTotal.toLocaleString()}\n\n`;
+    lineMsg += `(請直接貼上此訊息並送出，客服將儘速為您處理)`;
 
     const order_payload = {
         mode: "createOrder",
         order_data: {
+            order_id: orderId, // 傳送預生成的 ID 給 Code.gs
             customer_name: name,
             customer_phone: phone,
             customer_email: email,
@@ -124,6 +127,7 @@ async function submitOrder() {
     };
 
     try {
+        // 使用 fetch 發送到 Google Apps Script
         await fetch(API_URL, {
             method: 'POST',
             mode: 'no-cors',
@@ -138,7 +142,7 @@ async function submitOrder() {
             customer_address: address,
             total_amount: calc.finalTotal,
             pay_method_text: payMethod === 'transfer' ? '銀行匯款(8折)' : '貨到付款(9折)',
-            line_msg: lineMsg, // 傳遞格式化後的訊息
+            line_msg: lineMsg, 
             items: cart.map(item => ({
                 product_name: item.name,
                 color: item.color,
@@ -157,7 +161,7 @@ async function submitOrder() {
 
     } catch (e) {
         console.error(e);
-        alert("傳送失敗，請聯繫 LINE 客服");
+        alert("系統傳送失敗，請聯繫 LINE 客服");
         submitBtn.disabled = false;
         submitBtn.innerText = "PLACE ORDER";
     }

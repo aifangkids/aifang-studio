@@ -23,7 +23,7 @@
         .container { max-width: 800px; margin: calc(var(--header-h) + 50px) auto 80px; padding: 0 20px; }
         .page-title { font-size: 18px; font-weight: 700; letter-spacing: 3px; text-align: center; margin-bottom: 40px; }
 
-        /* 搜尋 */
+        /* 搜尋區塊 */
         .search-section { background: var(--gray-bg); padding: 30px; border-radius: 8px; text-align: center; margin-bottom: 40px; }
         .search-group { display: flex; gap: 10px; max-width: 500px; margin: 0 auto; }
         .query-input { flex: 1; padding: 12px 15px; border: 1px solid #ddd; outline: none; font-size: 14px; border-radius: 4px; }
@@ -43,7 +43,7 @@
         .item-spec { font-size: 12px; color: #888; margin-bottom: 8px; }
         .item-price-qty { font-size: 13px; }
 
-        /* 價格計算 */
+        /* 價格計算區塊 */
         .summary-box { margin-top: 30px; background: #fff; border: 1px solid #eee; padding: 20px; }
         .summary-line { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 14px; }
         .summary-line.total { border-top: 1px solid #eee; padding-top: 15px; margin-top: 15px; font-size: 18px; font-weight: 700; }
@@ -132,23 +132,20 @@
         function showResult(order) {
             document.getElementById('result-area').style.display = 'block';
 
-            // 基礎資訊填入
+            // 填入基本資訊
             document.getElementById('res-order-id').innerText = order.order_id || "-";
             document.getElementById('res-order-date').innerText = order.order_date || "-";
             document.getElementById('res-customer-name').innerText = order.customer_name || "-";
 
-            // 金額格式化工具
+            // 金額格式化函數
             const formatNT = (num) => `NT$ ${Math.floor(Number(num) || 0).toLocaleString()}`;
             
-            // 計算小計 (避免後端 subtotal 欄位名稱不一)
-            let calculatedSubtotal = 0;
+            // 處理商品清單
             const container = document.getElementById('order-items-container');
-            
             container.innerHTML = (order.items || []).map(item => {
-                const itemQty = Number(item.quantity) || 0;
-                const itemPrice = Number(item.unit_price) || 0;
-                const lineTotal = itemPrice * itemQty;
-                calculatedSubtotal += lineTotal;
+                const qty = Number(item.quantity) || 0;
+                const price = Number(item.unit_price) || 0;
+                const lineTotal = price * qty;
 
                 let finalImg = "./images/ui/no-image.jpg";
                 if (item.image && typeof item.image === 'string') {
@@ -157,25 +154,24 @@
 
                 return `
                     <div class="order-item">
-                        <img src="${finalImg}" 
-                             class="item-img" 
-                             onerror="this.onerror=null; this.src='./images/ui/no-image.jpg';">
+                        <img src="${finalImg}" class="item-img" onerror="this.onerror=null; this.src='./images/ui/no-image.jpg';">
                         <div class="item-info">
                             <div class="item-name">${item.product_name}</div>
                             <div class="item-spec">CODE: ${item.product_code} / ${item.color} / ${item.size}</div>
-                            <div class="item-price-qty">NT$ ${itemPrice.toLocaleString()} × ${itemQty}</div>
+                            <div class="item-price-qty">NT$ ${price.toLocaleString()} × ${qty}</div>
                         </div>
                         <div style="font-weight:700;">NT$ ${lineTotal.toLocaleString()}</div>
                     </div>
                 `;
             }).join('');
 
-            // 渲染總額區塊 - 使用後端回傳值或前端計算值
-            const subtotal = order.subtotal || calculatedSubtotal;
-            const shipping = order.shipping_fee || 0;
+            // --- 精準對接您的後端名稱 ---
+            const subtotal = Number(order.subtotal) || 0;
+            const shipping = Number(order.shipping_fee) || 0;
             const discount = Math.abs(Number(order.discount_total) || 0);
-            const total = order.total_amount || (subtotal + shipping - discount);
+            const total = Number(order.total_amount) || 0;
 
+            // 填入金額區塊
             document.getElementById('res-subtotal').innerText = formatNT(subtotal);
             document.getElementById('res-shipping').innerText = formatNT(shipping);
             document.getElementById('res-discount').innerText = `- NT$ ${discount.toLocaleString()}`;
