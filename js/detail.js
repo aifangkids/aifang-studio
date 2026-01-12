@@ -8,6 +8,9 @@ let selectedColor = { name: "", hex: "" };
 let selectedItems = []; 
 let colorImageMap = {}; 
 
+/**
+ * 初始化頁面
+ */
 async function init() {
     updateCartCount();
     if (!productCode) return;
@@ -24,6 +27,9 @@ async function init() {
     }
 }
 
+/**
+ * 渲染商品資料
+ */
 function render(p) {
     document.getElementById('p-title').innerText = p.name;
     document.getElementById('p-brand').innerText = p.brand || "AIFANG SELECT";
@@ -78,12 +84,9 @@ function render(p) {
         `;
 
         item.onclick = () => {
-            // 找出對應圖片網址，若無則用主圖
             const targetImg = colorImageMap[name] || p.image_main;
             selectColor(name, hex, item, targetImg);
-            
-            const mainImg = document.getElementById('primary-img');
-            mainImg.src = targetImg;
+            document.getElementById('primary-img').src = targetImg;
         };
 
         swatchGroup.appendChild(item);
@@ -119,27 +122,32 @@ function render(p) {
 }
 
 /**
- * 修正後的 selectColor：整合手機版投影顯示框
+ * 選擇顏色邏輯
  */
 function selectColor(name, hex, el, imageUrl) {
     selectedColor = { name, hex };
     
-    // 1. 更新 UI 選取狀態
     document.querySelectorAll('.swatch-item').forEach(i => i.classList.remove('active'));
     el.classList.add('active');
 
-    // 2. 更新手機版投影預覽框 (如果有該 HTML 元素)
     const mobilePreview = document.getElementById('mobile-color-preview-img');
     const mobileText = document.getElementById('mobile-color-preview-name');
     
     if (mobilePreview) {
         mobilePreview.src = imageUrl;
-        // 加入簡單的視覺反饋效果
         mobilePreview.style.opacity = "0.5";
         setTimeout(() => mobilePreview.style.opacity = "1", 100);
     }
     if (mobileText) {
         mobileText.innerText = name;
+    }
+
+    // --- 優化：手機版選完顏色後自動引導滑動至尺寸區 ---
+    if (window.innerWidth <= 900) {
+        const sizeArea = document.getElementById('size-area');
+        if (sizeArea) {
+            sizeArea.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
     }
 }
 
@@ -235,4 +243,38 @@ function updateCartCount() {
     if (countEl) countEl.innerText = cart.reduce((sum, item) => sum + item.quantity, 0);
 }
 
-window.onload = init;
+/**
+ * 視窗載入後初始化
+ */
+window.onload = () => {
+    init();
+
+    // 處理手機版導航按鈕的顯示邏輯
+    const trigger = document.getElementById('scroll-trigger');
+    const aside = document.getElementById('product-info');
+    
+    window.addEventListener('scroll', () => {
+        if (window.innerWidth <= 900 && trigger && aside) {
+            // 當 aside 的頂部距離視窗頂部不到 150px 時（快要滑到選單了），按鈕淡出
+            const rect = aside.getBoundingClientRect();
+            if (rect.top < 150) {
+                trigger.style.opacity = '0';
+                trigger.style.pointerEvents = 'none';
+            } else {
+                trigger.style.opacity = '1';
+                trigger.style.pointerEvents = 'auto';
+            }
+        }
+    });
+};
+
+/**
+ * 手機版：平滑滾動至規格選擇區
+ */
+function scrollToOptions() {
+    const aside = document.getElementById('product-info');
+    if (aside) {
+        const offset = aside.offsetTop - 70;
+        window.scrollTo({ top: offset, behavior: 'smooth' });
+    }
+}
