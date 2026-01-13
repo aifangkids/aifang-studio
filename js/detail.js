@@ -1,3 +1,8 @@
+/**
+ * AiFang Kids - detail.js 完整優化版
+ * 修正重點：補全 status 欄位傳遞，解決結帳頁 SALE 折扣排除失效問題
+ */
+
 const API_URL = "https://script.google.com/macros/s/AKfycbxnlAwKJucHmCKcJwv67TWuKV0X74Daag9X9I4NG7DOESREuYdU7BtWBPcEHyoJphoEfg/exec"; 
 
 const urlParams = new URLSearchParams(window.location.search);
@@ -18,12 +23,15 @@ async function init() {
     try {
         const response = await fetch(`${API_URL}?code=${productCode}`);
         const data = await response.json();
+        // 兼容多種 API 回傳格式
         currentProduct = data.products ? data.products.find(p => p.code === productCode) : (Array.isArray(data) ? data[0] : data);
+        
         if (!currentProduct) throw new Error("找不到商品");
         render(currentProduct);
     } catch (e) {
         console.error("載入失敗:", e);
-        document.getElementById('p-title').innerText = "商品載入失敗";
+        const titleEl = document.getElementById('p-title');
+        if (titleEl) titleEl.innerText = "商品載入失敗";
     }
 }
 
@@ -37,6 +45,7 @@ function render(p) {
     document.getElementById('styling-note').innerText = p.styling_note || "";
     document.getElementById('primary-img').src = p.image_main;
 
+    // 解析顏色對應圖片地圖
     if (p.images_by_color) {
         try {
             colorImageMap = JSON.parse(p.images_by_color);
@@ -45,8 +54,10 @@ function render(p) {
         }
     }
 
+    // 渲染額外細節圖片
     const imgArea = document.getElementById('image-main-area');
-    if (p.image_extra) {
+    if (p.image_extra && imgArea) {
+        imgArea.innerHTML = ""; // 清空舊圖
         p.image_extra.split(',').forEach(url => {
             const cleanUrl = url.trim();
             if(cleanUrl) {
@@ -57,68 +68,69 @@ function render(p) {
         });
     }
 
+    // 渲染顏色選項
     const swatchGroup = document.getElementById('swatch-group');
-    swatchGroup.innerHTML = ""; 
+    if (swatchGroup) {
+        swatchGroup.innerHTML = ""; 
+        const colorNames = p.color ? p.color.toString().split(',').map(s => s.trim()) : [];
+        const colorCodes = p.color_code ? p.color_code.toString().split(',').map(s => s.trim()) : [];
+        const colorPatterns = p.color_pattern ? p.color_pattern.toString().split(',').map(s => s.trim()) : [];
 
-    const colorNames = p.color ? p.color.toString().split(',').map(s => s.trim()) : [];
-    const colorCodes = p.color_code ? p.color_code.toString().split(',').map(s => s.trim()) : [];
-    const colorPatterns = p.color_pattern ? p.color_pattern.toString().split(',').map(s => s.trim()) : [];
+        colorNames.forEach((name, i) => {
+            const hex = colorCodes[i] || '#eee';
+            const pattern = colorPatterns[i] || "";
+            const item = document.createElement('div');
+            item.className = "swatch-item";
+            
+            let innerStyle = pattern 
+                ? `background-image: url('${pattern}'); background-size: cover;` 
+                : `background: ${hex};`;
 
-    colorNames.forEach((name, i) => {
-        const hex = colorCodes[i] || '#eee';
-        const pattern = colorPatterns[i] || "";
-        
-        const item = document.createElement('div');
-        item.className = "swatch-item";
-        
-        let innerStyle = "";
-        if (pattern) {
-            innerStyle = `background-image: url('${pattern}'); background-size: cover;`;
-        } else {
-            innerStyle = `background: ${hex};`;
-        }
+            item.innerHTML = `
+                <div class="swatch-circle" style="${innerStyle}"></div>
+                <span class="swatch-name">${name}</span>
+            `;
 
-        item.innerHTML = `
-            <div class="swatch-circle" style="${innerStyle}"></div>
-            <span class="swatch-name">${name}</span>
-        `;
+            item.onclick = () => {
+                const targetImg = colorImageMap[name] || p.image_main;
+                selectColor(name, hex, item, targetImg);
+                document.getElementById('primary-img').src = targetImg;
+            };
 
-        item.onclick = () => {
-            const targetImg = colorImageMap[name] || p.image_main;
-            selectColor(name, hex, item, targetImg);
-            document.getElementById('primary-img').src = targetImg;
-        };
+            swatchGroup.appendChild(item);
+            if (i === 0) item.click(); // 預設選取第一個
+        });
+    }
 
-        swatchGroup.appendChild(item);
-        if (i === 0) item.click();
-    });
-
+    // 渲染尺寸選項與價格
     const sizeArea = document.getElementById('size-area');
-    sizeArea.innerHTML = ""; 
-    const categories = [
-        { key: 'baby', label: 'BABY', cls: 'babe' }, 
-        { key: 'kid', label: 'KIDS', cls: 'kids' }, 
-        { key: 'junior', label: 'JUNIOR', cls: 'kids' }, 
-        { key: 'adult', label: 'ADULT', cls: 'kids' }
-    ];
+    if (sizeArea) {
+        sizeArea.innerHTML = ""; 
+        const categories = [
+            { key: 'baby', label: 'BABY', cls: 'babe' }, 
+            { key: 'kid', label: 'KIDS', cls: 'kids' }, 
+            { key: 'junior', label: 'JUNIOR', cls: 'kids' }, 
+            { key: 'adult', label: 'ADULT', cls: 'kids' }
+        ];
 
-    categories.forEach(cat => {
-        const sizes = p[`sizes_${cat.key}`];
-        const price = p[`price_${cat.key}_10off`] || p[`price_${cat.key}`];
-        if (sizes && sizes !== "" && price && price !== "FREE") {
-            const box = document.createElement('div');
-            box.className = 'size-group';
-            box.innerHTML = `
-                <div class="group-header">
-                    <span>${cat.label}</span>
-                    <span class="price-tag">NT$ ${Number(price).toLocaleString()}</span>
-                </div>
-                <div class="s-btn-wrap">
-                    ${sizes.split(',').map(s => `<button class="s-btn" onclick="addToList('${s.trim()}', ${price}, '${cat.cls}')">${s.trim()}</button>`).join('')}
-                </div>`;
-            sizeArea.appendChild(box);
-        }
-    });
+        categories.forEach(cat => {
+            const sizes = p[`sizes_${cat.key}`];
+            const price = p[`price_${cat.key}_10off`] || p[`price_${cat.key}`];
+            if (sizes && sizes !== "" && price && price !== "FREE") {
+                const box = document.createElement('div');
+                box.className = 'size-group';
+                box.innerHTML = `
+                    <div class="group-header">
+                        <span>${cat.label}</span>
+                        <span class="price-tag">NT$ ${Number(price).toLocaleString()}</span>
+                    </div>
+                    <div class="s-btn-wrap">
+                        ${sizes.split(',').map(s => `<button class="s-btn" onclick="addToList('${s.trim()}', ${price}, '${cat.cls}')">${s.trim()}</button>`).join('')}
+                    </div>`;
+                sizeArea.appendChild(box);
+            }
+        });
+    }
 }
 
 /**
@@ -126,7 +138,6 @@ function render(p) {
  */
 function selectColor(name, hex, el, imageUrl) {
     selectedColor = { name, hex };
-    
     document.querySelectorAll('.swatch-item').forEach(i => i.classList.remove('active'));
     el.classList.add('active');
 
@@ -138,19 +149,18 @@ function selectColor(name, hex, el, imageUrl) {
         mobilePreview.style.opacity = "0.5";
         setTimeout(() => mobilePreview.style.opacity = "1", 100);
     }
-    if (mobileText) {
-        mobileText.innerText = name;
-    }
+    if (mobileText) mobileText.innerText = name;
 
-    // --- 優化：手機版選完顏色後自動引導滑動至尺寸區 ---
+    // 手機版自動引導
     if (window.innerWidth <= 900) {
         const sizeArea = document.getElementById('size-area');
-        if (sizeArea) {
-            sizeArea.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        }
+        if (sizeArea) sizeArea.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
 }
 
+/**
+ * 加入暫存清單 (尚未進入購物車)
+ */
 function addToList(sizeName, price, type) {
     if (!selectedColor.name) {
         showToast("請先選擇顏色");
@@ -167,8 +177,12 @@ function addToList(sizeName, price, type) {
     showToast(`已選擇 ${selectedColor.name} / ${sizeName}`);
 }
 
+/**
+ * 渲染暫存清單
+ */
 function renderSelectedList() {
     const listArea = document.getElementById('selected-list');
+    if (!listArea) return;
     listArea.innerHTML = selectedItems.map((item, index) => `
         <div class="selected-item">
             <img src="./images/ui/btn_close.jpg" class="sel-close" onclick="removeFromList(${index})">
@@ -205,8 +219,15 @@ function showToast(msg) {
     }
 }
 
+/**
+ * 正式加入購物車 (儲存至 localStorage)
+ */
 function addAllToCart() {
-    if (selectedItems.length === 0) { showToast("請先選擇顏色與尺寸"); return; }
+    if (selectedItems.length === 0) { 
+        showToast("請先選擇顏色與尺寸"); 
+        return; 
+    }
+    
     let cart = JSON.parse(localStorage.getItem('cart')) || [];
     
     selectedItems.forEach(item => {
@@ -214,6 +235,7 @@ function addAllToCart() {
                          ? colorImageMap[item.color] 
                          : currentProduct.image_main;
 
+        // 【核心修正】補上 status 欄位，確保 SALE 屬性傳遞至結帳頁
         const cartItem = { 
             code: currentProduct.code, 
             name: currentProduct.name, 
@@ -222,21 +244,37 @@ function addAllToCart() {
             size: item.size, 
             price: item.price, 
             quantity: item.quantity, 
-            image: colorImg
+            image: colorImg,
+            status: currentProduct.status // <-- 關鍵排除折扣標記
         };
         
-        const idx = cart.findIndex(i => i.code === cartItem.code && i.size === cartItem.size && i.color === cartItem.color);
-        if (idx > -1) cart[idx].quantity += cartItem.quantity;
-        else cart.push(cartItem);
+        // 檢查購物車內是否有完全相同的商品(代碼+顏色+尺寸)
+        const idx = cart.findIndex(i => 
+            i.code === cartItem.code && 
+            i.size === cartItem.size && 
+            i.color === cartItem.color
+        );
+
+        if (idx > -1) {
+            cart[idx].quantity += cartItem.quantity;
+            cart[idx].status = currentProduct.status; // 更新時確保 status 存在
+        } else {
+            cart.push(cartItem);
+        }
     });
     
     localStorage.setItem('cart', JSON.stringify(cart));
     updateCartCount();
+    
+    // 清空暫存清單
     selectedItems = [];
     renderSelectedList();
     showToast("商品已加入購物車");
 }
 
+/**
+ * 更新購物車圖示數量
+ */
 function updateCartCount() {
     const cart = JSON.parse(localStorage.getItem('cart')) || [];
     const countEl = document.getElementById('cart-count');
@@ -249,13 +287,12 @@ function updateCartCount() {
 window.onload = () => {
     init();
 
-    // 處理手機版導航按鈕的顯示邏輯
+    // 處理手機版浮動按鈕淡出邏輯
     const trigger = document.getElementById('scroll-trigger');
     const aside = document.getElementById('product-info');
     
     window.addEventListener('scroll', () => {
         if (window.innerWidth <= 900 && trigger && aside) {
-            // 當 aside 的頂部距離視窗頂部不到 150px 時（快要滑到選單了），按鈕淡出
             const rect = aside.getBoundingClientRect();
             if (rect.top < 150) {
                 trigger.style.opacity = '0';

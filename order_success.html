@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Order Success | AiFang Kids</title>
     <style>
-        :root { --accent: #06C755; --dark: #111; --gray: #fcfcfc; --border: #eeeeee; }
+        :root { --accent: #06C755; --dark: #111; --gray: #fcfcfc; --border: #eeeeee; --sale-red: #e74c3c; }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Noto Sans TC', sans-serif; background: #fff; color: #333; line-height: 1.6; padding: 40px 20px; }
         
@@ -34,9 +34,23 @@
         .info-row span:first-child { color: #777; }
         .info-row .val { font-weight: 500; text-align: right; color: #111; }
 
+        /* SALE 標籤樣式 */
+        .sale-badge {
+            background: var(--sale-red); color: #fff; font-size: 9px; 
+            padding: 1px 4px; border-radius: 2px; margin-right: 4px;
+            font-weight: bold; vertical-align: middle;
+        }
+
+        /* 鎖死金額提醒 */
+        #sale-alert-box {
+            display: none; background: #fff5f5; border: 1px solid #ffe3e3;
+            color: var(--sale-red); padding: 10px; border-radius: 4px;
+            font-size: 11px; margin-bottom: 15px; text-align: center;
+        }
+
         .item-list { margin-top: 10px; background: #fff; border: 1px solid #f0f0f0; padding: 15px; border-radius: 2px; }
-        .item-row { font-size: 13px; display: flex; justify-content: space-between; margin-bottom: 10px; line-height: 1.4; }
-        .item-row:last-child { margin-bottom: 0; }
+        .item-row { font-size: 13px; display: flex; justify-content: space-between; margin-bottom: 12px; line-height: 1.4; border-bottom: 1px dotted #f0f0f0; padding-bottom: 8px; }
+        .item-row:last-child { margin-bottom: 0; border-bottom: none; padding-bottom: 0; }
 
         .line-notice { 
             background: #f0fdf4; border: 1px solid #dcfce7; color: #166534; 
@@ -70,10 +84,12 @@
     <div class="header-status">
         <div class="success-icon">✓</div>
         <h1>ORDER RECEIVED</h1>
-        <p class="sub-msg">感謝您的訂購，我們已收到訂單需求！</p>
+        <p class="sub-msg">感謝您的訂購，我們已收到您的需求！</p>
     </div>
 
     <div class="receipt">
+        <div id="sale-alert-box">💡 提醒：您的訂單包含 SALE 商品，金額已為最終特惠價。</div>
+
         <div class="info-section">
             <span class="info-title">Summary 訂單摘要</span>
             <div class="info-row"><span>訂單編號:</span> <span class="val" id="order-id">-</span></div>
@@ -113,35 +129,63 @@
         const orderData = JSON.parse(localStorage.getItem('last_order_info'));
         
         if (!orderData) {
-            alert("找不到訂單資訊，請回首頁。");
+            alert("找不到訂單資訊，將為您返回首頁。");
             window.location.href = 'index.html';
             return;
         }
 
-        // 1. 填入資訊
+        // 1. 填入基本資訊 (修正：加入數值強制轉換)
         document.getElementById('order-id').innerText = orderData.id || "-";
         document.getElementById('order-pay').innerText = orderData.pay_method_text || "-";
-        document.getElementById('order-total').innerText = "NT$ " + (orderData.total_amount || 0).toLocaleString();
+        
+        // 強制轉換總額為數字以防出現 NaN
+        const totalAmt = Number(orderData.total_amount) || 0;
+        document.getElementById('order-total').innerText = "NT$ " + totalAmt.toLocaleString();
+        
         document.getElementById('cust-name').innerText = orderData.customer_name || "-";
         document.getElementById('cust-addr').innerText = orderData.customer_address || "-";
 
-        // 2. 渲染明細
+        // 2. 渲染明細與偵測 SALE 狀態
         if (orderData.items) {
-            const listHtml = orderData.items.map(item => `
-                <div class="item-row">
-                    <span style="color:#666;">${item.product_name} <br><small>${item.color}/${item.size} x ${item.quantity}</small></span>
-                    <span style="color: #111; font-weight:500;">$${(item.unit_price * item.quantity).toLocaleString()}</span>
-                </div>
-            `).join('');
+            let hasSale = false;
+            const listHtml = orderData.items.map(item => {
+                // 檢查是否為 SALE 商品
+                const isSale = (item.status || "").toString().trim().toUpperCase() === 'SALE';
+                if (isSale) hasSale = true;
+
+                // 修正：確保單價與數量為數字，避免計算出非數值
+                const price = Number(item.unit_price) || 0;
+                const qty = Number(item.quantity) || 0;
+                const rowTotal = price * qty;
+
+                return `
+                    <div class="item-row">
+                        <div style="color:#666;">
+                            <div style="margin-bottom:2px; color:#111; font-weight:500;">
+                                ${isSale ? '<span class="sale-badge">SALE</span>' : ''}
+                                ${item.product_name || item.name}
+                            </div>
+                            <small>${item.color} / ${item.size} x ${qty}</small>
+                        </div>
+                        <div style="color: #111; font-weight:700;">NT$ ${rowTotal.toLocaleString()}</div>
+                    </div>
+                `;
+            }).join('');
+            
             document.getElementById('item-list').innerHTML = listHtml;
+
+            // 如果有 SALE 商品，顯示提醒區塊
+            if (hasSale) {
+                document.getElementById('sale-alert-box').style.display = 'block';
+            }
         }
 
-        // 3. 處理複製跳轉
+        // 3. 處理 LINE 複製跳轉邏輯
         const lineBtn = document.getElementById('line-link');
         const copyHelper = document.getElementById('copy-helper');
         
         lineBtn.addEventListener('click', async () => {
-            const msg = orderData.line_msg;
+            const msg = orderData.line_msg || "";
             copyHelper.value = msg;
 
             try {
@@ -152,9 +196,8 @@
                     document.execCommand('copy');
                 }
                 
-                // 視覺回饋
                 const originalContent = lineBtn.innerHTML;
-                lineBtn.innerHTML = "✅ 已複製！正在開啟 LINE...";
+                lineBtn.innerHTML = "✅ 訂單內容已複製！正在開啟 LINE...";
                 lineBtn.style.background = "#333";
 
                 setTimeout(() => {
@@ -169,7 +212,7 @@
                 }, 1000);
 
             } catch (err) {
-                alert("複製失敗，請手動截圖給客服。");
+                alert("複製失敗，請手動截圖此頁面傳送給客服。");
             }
         });
     });

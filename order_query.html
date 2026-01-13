@@ -6,7 +6,7 @@
     <title>Order Lookup | AiFang Kids</title>
     <link rel="icon" href="./favicon.ico" type="image/x-icon">
     <style>
-        :root { --header-h: 70px; --accent: #d9534f; --gray-bg: #f9f9f9; }
+        :root { --header-h: 70px; --accent: #d9534f; --gray-bg: #f9f9f9; --sale-red: #e74c3c; }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Noto Sans TC', sans-serif; background: #fff; color: #333; line-height: 1.6; }
 
@@ -41,8 +41,12 @@
         .step-text { font-size: 10px; color: #aaa; font-weight: bold; display: block; white-space: nowrap; transform: scale(0.9); }
         .step-node.active .step-text { color: #111; }
 
-        /* 特殊狀態橫幅 */
-        #special-status-box { background: #fff5f5; color: var(--accent); padding: 15px; text-align: center; font-weight: bold; margin-bottom: 30px; border-radius: 4px; letter-spacing: 2px; border: 1px solid #ffe3e3; display: none; }
+        /* 特殊狀態與 SALE 提醒 */
+        #special-status-box { background: #fff5f5; color: var(--accent); padding: 15px; text-align: center; font-weight: bold; margin-bottom: 20px; border-radius: 4px; letter-spacing: 2px; border: 1px solid #ffe3e3; display: none; }
+        #sale-alert-box { background: #fff9e6; color: #856404; border: 1px solid #ffeeba; padding: 12px; text-align: center; font-size: 13px; margin-bottom: 20px; border-radius: 4px; display: none; }
+
+        /* SALE 標籤 */
+        .sale-badge { background: var(--sale-red); color: #fff; font-size: 9px; padding: 2px 5px; border-radius: 2px; margin-right: 6px; font-weight: bold; vertical-align: middle; }
 
         /* 結果區域 */
         #result-area { display: none; }
@@ -53,14 +57,14 @@
         .order-item { display: flex; padding: 20px 0; border-bottom: 1px solid #eee; align-items: center; }
         .item-img { width: 80px; height: 105px; object-fit: cover; background: #f5f5f5; border-radius: 2px; }
         .item-info { flex: 1; padding-left: 20px; }
-        .item-name { font-size: 14px; font-weight: 700; margin-bottom: 5px; }
+        .item-name { font-size: 14px; font-weight: 700; margin-bottom: 5px; display: flex; align-items: center; }
         .item-spec { font-size: 12px; color: #888; margin-bottom: 8px; }
         .item-price-qty { font-size: 13px; }
 
         /* 價格計算 */
         .summary-box { margin-top: 30px; background: #fff; border: 1px solid #eee; padding: 20px; }
         .summary-line { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 14px; }
-        .summary-line.total { border-top: 1px solid #eee; padding-top: 15px; margin-top: 15px; font-size: 18px; font-weight: 700; }
+        .summary-line.total { border-top: 1px solid #eee; padding-top: 15px; margin-top: 15px; font-size: 18px; font-weight: 700; color: #111; }
 
         /* 物流按鈕 */
         #shipping-action-area { display: none; margin-top: 20px; }
@@ -69,14 +73,12 @@
 
         #error-msg { display: none; color: var(--accent); text-align: center; margin-top: 20px; font-size: 14px; background: #fff5f5; padding: 10px; border-radius: 4px; }
 
-        /* 手機版適配 */
         @media (max-width: 600px) {
             .search-group { flex-direction: column; }
             .query-btn { width: 100%; }
-            .order-item { flex-direction: column; align-items: flex-start; }
-            .item-info { padding-left: 0; padding-top: 15px; }
-            .item-img { width: 100px; height: 130px; }
-            .step-text { transform: scale(0.8); }
+            .order-item { align-items: flex-start; }
+            .item-img { width: 70px; height: 90px; }
+            .step-text { transform: scale(0.85); }
         }
     </style>
 </head>
@@ -99,6 +101,7 @@
         </div>
 
         <div id="special-status-box"></div>
+        <div id="sale-alert-box">💡 提醒：此訂單包含 SALE 商品，該品項已為最終優惠價，不參與其他折扣。</div>
 
         <div id="result-area">
             <div class="progress-container">
@@ -147,6 +150,7 @@
             const resultArea = document.getElementById('result-area');
             const errorMsg = document.getElementById('error-msg');
             const specialBox = document.getElementById('special-status-box');
+            const saleBox = document.getElementById('sale-alert-box');
 
             if(!orderId) { alert("請輸入訂單編號"); return; }
 
@@ -155,6 +159,7 @@
             resultArea.style.display = 'none';
             errorMsg.style.display = 'none';
             specialBox.style.display = 'none';
+            saleBox.style.display = 'none';
 
             try {
                 const response = await fetch(`${API_URL}?mode=order_query&orderId=${encodeURIComponent(orderId)}`);
@@ -173,6 +178,7 @@
         function showResult(order) {
             const resultArea = document.getElementById('result-area');
             const specialBox = document.getElementById('special-status-box');
+            const saleBox = document.getElementById('sale-alert-box');
             const progressContainer = document.querySelector('.progress-container');
             resultArea.style.display = 'block';
 
@@ -192,20 +198,33 @@
 
             const formatNT = (num) => `NT$ ${Math.floor(Number(num) || 0).toLocaleString()}`;
             const container = document.getElementById('order-items-container');
+            
+            let hasSale = false;
+
             container.innerHTML = (order.items || []).map(item => {
+                const isSale = (item.status || "").toString().trim().toUpperCase() === 'SALE';
+                if (isSale) hasSale = true;
+
                 let finalImg = "./images/ui/no-image.jpg";
                 if (item.image && typeof item.image === 'string') finalImg = item.image.replace(/["{}]/g, "").trim();
+                
                 return `
                     <div class="order-item">
                         <img src="${finalImg}" class="item-img" onerror="this.src='./images/ui/no-image.jpg';">
                         <div class="item-info">
-                            <div class="item-name">${item.product_name}</div>
+                            <div class="item-name">
+                                ${isSale ? '<span class="sale-badge">SALE</span>' : ''}
+                                ${item.product_name}
+                            </div>
                             <div class="item-spec">CODE: ${item.product_code} / ${item.color} / ${item.size}</div>
-                            <div class="item-price-qty">NT$ ${item.unit_price.toLocaleString()} × ${item.quantity}</div>
+                            <div class="item-price-qty">NT$ ${Number(item.unit_price).toLocaleString()} × ${item.quantity}</div>
                         </div>
-                        <div style="font-weight:700;">NT$ ${(item.unit_price * item.quantity).toLocaleString()}</div>
+                        <div style="font-weight:700;">NT$ ${(Number(item.unit_price) * Number(item.quantity)).toLocaleString()}</div>
                     </div>`;
             }).join('');
+
+            // 如果有 SALE 商品，顯示頂部提示
+            if (hasSale) saleBox.style.display = 'block';
 
             document.getElementById('res-subtotal').innerText = formatNT(order.subtotal);
             document.getElementById('res-shipping').innerText = formatNT(order.shipping_fee);
@@ -231,27 +250,19 @@
             }
         }
 
-        // --- 優化：7-11 跳轉到 Shopmore 並自動複製單號 ---
         async function goToTracking() {
             const no = window.currentTrackingNo;
             if (!no) return;
             const cleanNo = String(no).trim();
-            
-            // 判斷是否為黑貓 (10或12碼純數字)
             const isBlackCat = /^\d{10}$|^\d{12}$/.test(cleanNo);
 
             if (!isBlackCat) {
-                // 1. 自動複製單號 (Shopmore/7-11 專屬流程)
                 try {
                     await navigator.clipboard.writeText(cleanNo);
                     alert("【單號已自動複製】\n網頁跳轉後，請長按搜尋框並「貼上」單號即可！\n單號：" + cleanNo);
-                } catch (err) {
-                    console.error('無法複製', err);
-                }
-                // 2. 跳轉到 Shopmore 7-11 物流查詢頁面
+                } catch (err) { console.error('無法複製', err); }
                 window.open(`https://tracking.shopmore.com.tw/`, '_blank');
             } else {
-                // 黑貓官網通常不擋單號直接顯示
                 window.open(`https://www.t-cat.com.tw/inquire/TraceDetail.aspx?queryNo=${cleanNo}`, '_blank');
             }
         }
