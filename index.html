@@ -104,10 +104,9 @@
             background-size: cover; background-position: center; cursor: help;
         }
         
-        /* 價格樣式優化 */
-        .p-price { font-size: 13px; font-weight: 700; color: #111; display: flex; gap: 8px; align-items: baseline; }
-        .original-price { text-decoration: line-through; color: #bbb; font-weight: 400; font-size: 11px; }
-        .sale-price { color: var(--accent); font-weight: 700; }
+        /* 價格樣式：一般黑色，特價紅色 */
+        .p-price { font-size: 13px; font-weight: 700; color: #111; }
+        .p-price.on-sale { color: var(--accent); } /* 變更顏色但不更動數值 */
 
         /* --- 5. 工具組 --- */
         .fixed-tools { position: fixed; bottom: 30px; right: 20px; z-index: 2000; display: flex; flex-direction: column; gap: 0; }
@@ -261,7 +260,7 @@
             render(filtered);
         }
 
-        // --- 核心優化：Render 函數處理 SALE 價格 ---
+        // --- 核心改動：僅變更顏色，不變更數值 ---
         function render(items) {
             const container = document.getElementById('product-list');
             container.innerHTML = "";
@@ -274,19 +273,11 @@
                 const isSale = status === "SALE";
                 const badgeHtml = status ? `<span class="status-badge badge-${status}">${status}</span>` : "";
                 
-                // 價格計算邏輯
-                const originalPrice = Number(item.price_kid || 0);
-                const salePrice = Math.ceil(originalPrice * 0.7); // 7折並進位
+                // 抓取原始價格（以 kid 價格作為列表顯示基準，若無則顯示 0）
+                const displayPrice = Number(item.price_kid || 0);
                 
-                let priceHtml = "";
-                if (isSale) {
-                    priceHtml = `
-                        <span class="sale-price">NT$ ${salePrice.toLocaleString()}</span>
-                        <span class="original-price">NT$ ${originalPrice.toLocaleString()}</span>
-                    `;
-                } else {
-                    priceHtml = `<span>NT$ ${originalPrice.toLocaleString()}</span>`;
-                }
+                // 如果是 SALE，套用紅色 Class，但數值維持原樣
+                const priceClass = isSale ? "p-price on-sale" : "p-price";
 
                 // 顏色圓點邏輯
                 const names = item.color ? item.color.toString().split(',').filter(Boolean) : [];
@@ -315,7 +306,7 @@
                     <div class="info-wrap">
                         <p class="p-name">${item.name}</p>
                         ${colorHtml}
-                        <div class="p-price">${priceHtml}</div>
+                        <div class="${priceClass}">NT$ ${displayPrice.toLocaleString()}</div>
                     </div>`;
                 container.appendChild(card);
             });

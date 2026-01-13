@@ -1,3 +1,4 @@
+// js/checkout.js
 const API_URL = "https://script.google.com/macros/s/AKfycbxnlAwKJucHmCKcJwv67TWuKV0X74Daag9X9I4NG7DOESREuYdU7BtWBPcEHyoJphoEfg/exec"; 
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -11,7 +12,40 @@ function initCheckout() {
         window.location.href = "index.html";
         return;
     }
+    renderOrderItems(cart); // 新增：渲染商品並檢查 SALE 狀態
     handlePaymentChange();
+}
+
+// 渲染商品區塊並標記 SALE
+function renderOrderItems(cart) {
+    const listContainer = document.getElementById('checkout-items-list');
+    if (!listContainer) return;
+
+    let hasSaleItem = false;
+    listContainer.innerHTML = cart.map(item => {
+        const isSale = item.status === 'SALE';
+        if (isSale) hasSaleItem = true;
+
+        return `
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; padding-bottom:10px; border-bottom:1px solid #f9f9f9; font-size:13px;">
+                <div style="display:flex; align-items:center; gap:12px;">
+                    <img src="${item.image}" width="50" height="50" style="object-fit:cover; border-radius:2px;">
+                    <div>
+                        <div style="font-weight:bold;">
+                            ${isSale ? '<span class="cart-sale-badge">SALE</span>' : ''}
+                            ${item.name}
+                        </div>
+                        <div style="color:#888; font-size:11px;">${item.color} / ${item.size} x ${item.quantity}</div>
+                    </div>
+                </div>
+                <div style="font-weight:bold;">NT$ ${(item.price * item.quantity).toLocaleString()}</div>
+            </div>
+        `;
+    }).join('');
+
+    // 智能提醒：只有存在 SALE 商品時才顯示「( SALE品除外 )」
+    const note = document.getElementById('sale-exclude-note');
+    if (note) note.style.display = hasSaleItem ? 'block' : 'none';
 }
 
 function handlePaymentChange() {
@@ -39,17 +73,31 @@ function handlePaymentChange() {
     updateSummary();
 }
 
+// 核心計算優化：排除 SALE 商品的折扣計算
 function updateSummary() {
     const cart = JSON.parse(localStorage.getItem('cart')) || [];
-    const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
     const payMethodEl = document.querySelector('input[name="pay_method"]:checked');
     if (!payMethodEl) return;
 
     const payMethod = payMethodEl.value;
-    const discountRate = (payMethod === 'transfer') ? 0.8 : 0.9;
-    const discountedSubtotal = Math.round(subtotal * discountRate);
-    const discountAmount = subtotal - discountedSubtotal;
+    
+    let subtotal = 0;
+    let discountAmount = 0;
 
+    cart.forEach(item => {
+        const itemTotal = item.price * item.quantity;
+        subtotal += itemTotal;
+
+        // 鎖定邏輯：非 SALE 商品才計算折扣
+        if (item.status !== 'SALE') {
+            const rate = (payMethod === 'transfer') ? 0.2 : 0.1; // 8折代表折掉20%，9折代表折掉10%
+            discountAmount += Math.round(itemTotal * rate);
+        }
+    });
+
+    const discountedSubtotal = subtotal - discountAmount;
+    
+    // 運費邏輯：匯款免運；貨到付款滿 1500 免運，否則 60
     let shippingFee = (payMethod === 'transfer') ? 0 : (discountedSubtotal >= 1500 ? 0 : 60);
     const finalTotal = discountedSubtotal + shippingFee;
 
@@ -93,25 +141,26 @@ async function submitOrder() {
 
     // --- 核心功能：格式化 LINE 訊息 ---
     let lineMsg = `📦 【AIFANG KIDS 訂單確認】\n`;
-    lineMsg += `━━━━━━━━━━━━━━━\n`;
+    lineMsg += `━━━━━━━━━━\n`;
     lineMsg += `🆔 訂單編號：${orderId}\n`;
     lineMsg += `👤 收件人：${name}\n`;
     lineMsg += `📞 電話：${phone}\n`;
     lineMsg += `💳 方式：${payMethod === 'transfer' ? '銀行匯款(8折)' : '貨到付款(9折)'}\n`;
     lineMsg += `📍 地址：${address}\n`;
-    lineMsg += `━━━━━━━━━━━━━━━\n`;
+    lineMsg += `━━━━━━━━━━\n`;
     lineMsg += `🛍️ 內容：\n`;
     cart.forEach((item, i) => {
-        lineMsg += `${i+1}. ${item.name} (${item.color}/${item.size}) x${item.quantity}\n`;
+        const saleTag = item.status === 'SALE' ? '[SALE] ' : '';
+        lineMsg += `${i+1}. ${saleTag}${item.name} (${item.color}/${item.size}) x${item.quantity}\n`;
     });
     lineMsg += `━━━━━━━━━━━━━━━\n`;
     lineMsg += `⭐ 應付金額：NT$ ${calc.finalTotal.toLocaleString()}\n\n`;
-    lineMsg += `(請直接貼上此訊息並送出，客服將儘速為您處理)`;
+  
 
     const order_payload = {
         mode: "createOrder",
         order_data: {
-            order_id: orderId, // 傳送預生成的 ID 給 Code.gs
+            order_id: orderId,
             customer_name: name,
             customer_phone: phone,
             customer_email: email,
@@ -127,14 +176,12 @@ async function submitOrder() {
     };
 
     try {
-        // 使用 fetch 發送到 Google Apps Script
         await fetch(API_URL, {
             method: 'POST',
             mode: 'no-cors',
             body: JSON.stringify(order_payload)
         });
 
-        // 存入 localStorage 以供下一步 order_success.html 使用
         localStorage.setItem('last_order_info', JSON.stringify({
             id: orderId,
             customer_name: name,
@@ -148,13 +195,13 @@ async function submitOrder() {
                 color: item.color,
                 size: item.size,
                 unit_price: item.price,
-                quantity: item.quantity
+                quantity: item.quantity,
+                status: item.status // 傳遞 status 以便後續追蹤
             }))
         }));
 
         localStorage.removeItem('cart');
 
-        // 延遲跳轉確保快取完整寫入
         setTimeout(() => {
             window.location.href = "order_success.html";
         }, 200);
