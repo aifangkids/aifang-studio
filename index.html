@@ -27,7 +27,7 @@
             overflow-x: hidden; -webkit-font-smoothing: antialiased;
         }
 
-        /* --- 2. 頂部導覽 (優化搜尋與訂單按鈕) --- */
+        /* --- 2. 頂部導覽 --- */
         .top-header {
             width: 100%; height: var(--header-h); background: #fff;
             position: fixed; top: 0; left: 0; z-index: 1200;
@@ -38,7 +38,6 @@
         .header-left { display: flex; align-items: center; gap: 15px; flex: 1; }
         .header-right { display: flex; align-items: center; gap: 20px; flex: 1; justify-content: flex-end; }
         
-        /* 搜尋框樣式 */
         .search-wrap { position: relative; display: flex; align-items: center; }
         #search-input {
             border: 1px solid #eee; padding: 6px 10px; font-size: 11px;
@@ -105,7 +104,10 @@
             background-size: cover; background-position: center; cursor: help;
         }
         
-        .p-price { font-size: 13px; font-weight: 700; color: #111; }
+        /* 價格樣式優化 */
+        .p-price { font-size: 13px; font-weight: 700; color: #111; display: flex; gap: 8px; align-items: baseline; }
+        .original-price { text-decoration: line-through; color: #bbb; font-weight: 400; font-size: 11px; }
+        .sale-price { color: var(--accent); font-weight: 700; }
 
         /* --- 5. 工具組 --- */
         .fixed-tools { position: fixed; bottom: 30px; right: 20px; z-index: 2000; display: flex; flex-direction: column; gap: 0; }
@@ -144,7 +146,6 @@
             #search-input { width: 100px; font-size: 10px; }
             #search-input:focus { width: 120px; }
             .header-right { gap: 12px; }
-            
             .sidebar { transform: translateX(-100%); width: 280px; }
             .sidebar.open { transform: translateX(0); box-shadow: 5px 0 15px rgba(0,0,0,0.1); }
             .main-content { padding: calc(var(--header-h) + 30px) 15px 80px 15px; }
@@ -246,16 +247,13 @@
             } catch (e) { console.error("API Error:", e); }
         }
 
-        // --- 搜尋邏輯整合 ---
         function handleSearch(query) {
             const q = query.toLowerCase().trim();
             if (!q) {
-                // 如果搜尋框清空，回復到目前分類的顯示狀態
                 const currentFiltered = activeCat === 'All' ? allData : allData.filter(p => p.category === activeCat);
                 render(currentFiltered);
                 return;
             }
-            // 搜尋所有商品中的 code 或 name
             const filtered = allData.filter(p => 
                 (p.code && p.code.toLowerCase().includes(q)) || 
                 (p.name && p.name.toLowerCase().includes(q))
@@ -263,6 +261,7 @@
             render(filtered);
         }
 
+        // --- 核心優化：Render 函數處理 SALE 價格 ---
         function render(items) {
             const container = document.getElementById('product-list');
             container.innerHTML = "";
@@ -272,8 +271,24 @@
             }
             items.forEach(item => {
                 const status = (item.status || "").toUpperCase();
+                const isSale = status === "SALE";
                 const badgeHtml = status ? `<span class="status-badge badge-${status}">${status}</span>` : "";
                 
+                // 價格計算邏輯
+                const originalPrice = Number(item.price_kid || 0);
+                const salePrice = Math.ceil(originalPrice * 0.7); // 7折並進位
+                
+                let priceHtml = "";
+                if (isSale) {
+                    priceHtml = `
+                        <span class="sale-price">NT$ ${salePrice.toLocaleString()}</span>
+                        <span class="original-price">NT$ ${originalPrice.toLocaleString()}</span>
+                    `;
+                } else {
+                    priceHtml = `<span>NT$ ${originalPrice.toLocaleString()}</span>`;
+                }
+
+                // 顏色圓點邏輯
                 const names = item.color ? item.color.toString().split(',').filter(Boolean) : [];
                 const codes = item.color_code ? item.color_code.toString().split(',').filter(Boolean) : [];
                 const patterns = item.color_pattern ? item.color_pattern.toString().split(',').filter(Boolean) : [];
@@ -283,11 +298,9 @@
                     const hex = (codes[index] || "").trim();
                     const patternImg = (patterns[index] || "").trim();
                     let style = "";
-                    if (patternImg) {
-                        style = `background-image: url('${patternImg}');`;
-                    } else if (hex.startsWith('#')) {
-                        style = `background-color: ${hex};`;
-                    }
+                    if (patternImg) style = `background-image: url('${patternImg}');`;
+                    else if (hex.startsWith('#')) style = `background-color: ${hex};`;
+                    
                     if (style) {
                         colorHtml += `<div class="color-dot" title="${name.trim()}" style="${style}"></div>`;
                     }
@@ -302,7 +315,7 @@
                     <div class="info-wrap">
                         <p class="p-name">${item.name}</p>
                         ${colorHtml}
-                        <p class="p-price">NT$ ${Number(item.price_kid || 0).toLocaleString()}</p>
+                        <div class="p-price">${priceHtml}</div>
                     </div>`;
                 container.appendChild(card);
             });
@@ -310,7 +323,7 @@
 
         function filterByCat(cat) {
             activeCat = cat; activeBrands.clear();
-            document.getElementById('search-input').value = ""; // 切換分類時清空搜尋
+            document.getElementById('search-input').value = ""; 
             document.querySelectorAll('.category-menu li').forEach(li => li.classList.toggle('active', li.innerText === cat));
             const filtered = cat === 'All' ? allData : allData.filter(p => p.category === cat);
             const area = document.getElementById('brand-area');
