@@ -1,6 +1,8 @@
 /**
  * AiFang Kids - detail.js 完整優化版
- * 修正重點：補全 status 欄位傳遞，解決結帳頁 SALE 折扣排除失效問題
+ * 修正重點：
+ * 1. 補全 status 欄位傳遞，解決結帳頁 SALE 折扣排除失效問題。
+ * 2. 修正圖片渲染邏輯，防止 innerHTML 清空導致主圖切換功能失效。
  */
 
 const API_URL = "https://script.google.com/macros/s/AKfycbxnlAwKJucHmCKcJwv67TWuKV0X74Daag9X9I4NG7DOESREuYdU7BtWBPcEHyoJphoEfg/exec"; 
@@ -43,7 +45,10 @@ function render(p) {
     document.getElementById('p-brand').innerText = p.brand || "AIFANG SELECT";
     document.getElementById('p-id').innerText = `CODE: ${p.code}`;
     document.getElementById('styling-note').innerText = p.styling_note || "";
-    document.getElementById('primary-img').src = p.image_main;
+    
+    // 設定主圖初始來源
+    const primaryImg = document.getElementById('primary-img');
+    if (primaryImg) primaryImg.src = p.image_main;
 
     // 解析顏色對應圖片地圖
     if (p.images_by_color) {
@@ -57,12 +62,18 @@ function render(p) {
     // 渲染額外細節圖片
     const imgArea = document.getElementById('image-main-area');
     if (p.image_extra && imgArea) {
-        imgArea.innerHTML = ""; // 清空舊圖
+        // 【優化核心】不要用 innerHTML = ""，這會刪掉 HTML 裡寫好的 primary-img
+        // 我們只移除除了 primary-img 以外的所有細節圖
+        const existingExtras = imgArea.querySelectorAll('img:not(#primary-img)');
+        existingExtras.forEach(el => el.remove());
+
         p.image_extra.split(',').forEach(url => {
             const cleanUrl = url.trim();
             if(cleanUrl) {
                 const img = document.createElement('img');
                 img.src = cleanUrl;
+                img.style.width = "100%"; // 確保寬度撐滿
+                img.style.display = "block";
                 imgArea.appendChild(img);
             }
         });
@@ -94,7 +105,10 @@ function render(p) {
             item.onclick = () => {
                 const targetImg = colorImageMap[name] || p.image_main;
                 selectColor(name, hex, item, targetImg);
-                document.getElementById('primary-img').src = targetImg;
+                
+                // 【切換核心】重新抓取主圖標籤並賦值
+                const mainImg = document.getElementById('primary-img');
+                if (mainImg) mainImg.src = targetImg;
             };
 
             swatchGroup.appendChild(item);
@@ -235,7 +249,6 @@ function addAllToCart() {
                          ? colorImageMap[item.color] 
                          : currentProduct.image_main;
 
-        // 【核心修正】補上 status 欄位，確保 SALE 屬性傳遞至結帳頁
         const cartItem = { 
             code: currentProduct.code, 
             name: currentProduct.name, 
@@ -245,10 +258,9 @@ function addAllToCart() {
             price: item.price, 
             quantity: item.quantity, 
             image: colorImg,
-            status: currentProduct.status // <-- 關鍵排除折扣標記
+            status: currentProduct.status 
         };
         
-        // 檢查購物車內是否有完全相同的商品(代碼+顏色+尺寸)
         const idx = cart.findIndex(i => 
             i.code === cartItem.code && 
             i.size === cartItem.size && 
@@ -257,7 +269,7 @@ function addAllToCart() {
 
         if (idx > -1) {
             cart[idx].quantity += cartItem.quantity;
-            cart[idx].status = currentProduct.status; // 更新時確保 status 存在
+            cart[idx].status = currentProduct.status;
         } else {
             cart.push(cartItem);
         }
@@ -266,7 +278,6 @@ function addAllToCart() {
     localStorage.setItem('cart', JSON.stringify(cart));
     updateCartCount();
     
-    // 清空暫存清單
     selectedItems = [];
     renderSelectedList();
     showToast("商品已加入購物車");
@@ -287,7 +298,6 @@ function updateCartCount() {
 window.onload = () => {
     init();
 
-    // 處理手機版浮動按鈕淡出邏輯
     const trigger = document.getElementById('scroll-trigger');
     const aside = document.getElementById('product-info');
     
@@ -305,9 +315,6 @@ window.onload = () => {
     });
 };
 
-/**
- * 手機版：平滑滾動至規格選擇區
- */
 function scrollToOptions() {
     const aside = document.getElementById('product-info');
     if (aside) {
