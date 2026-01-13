@@ -30,6 +30,17 @@
         .query-btn { padding: 12px 25px; background: #111; color: #fff; border: none; cursor: pointer; font-weight: bold; border-radius: 4px; }
         .query-btn:disabled { background: #999; cursor: not-allowed; }
 
+        /* --- 新增：進度條樣式 --- */
+        .progress-container { margin: 20px 0 40px; padding: 0 10px; position: relative; }
+        .progress-track { position: absolute; top: 6px; left: 10%; right: 10%; height: 2px; background: #eee; z-index: 1; }
+        #progress-bar-fill { position: absolute; top: 0; left: 0; height: 100%; background: #111; width: 0%; transition: width 0.8s ease; }
+        .progress-steps { display: flex; justify-content: space-between; position: relative; z-index: 2; }
+        .step-node { text-align: center; flex: 1; }
+        .step-dot { width: 12px; height: 12px; background: #eee; border-radius: 50%; margin: 0 auto 8px; transition: 0.3s; }
+        .step-node.active .step-dot { background: #111; box-shadow: 0 0 0 4px rgba(0,0,0,0.05); }
+        .step-text { font-size: 10px; color: #aaa; font-weight: bold; display: block; white-space: nowrap; transform: scale(0.9); }
+        .step-node.active .step-text { color: #111; }
+
         /* 結果區域 */
         #result-area { display: none; }
         .order-meta { border-bottom: 2px solid #111; padding-bottom: 15px; margin-bottom: 20px; }
@@ -48,7 +59,25 @@
         .summary-line { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 14px; }
         .summary-line.total { border-top: 1px solid #eee; padding-top: 15px; margin-top: 15px; font-size: 18px; font-weight: 700; }
 
+        /* --- 新增：物流查詢按鈕 --- */
+        #shipping-action-area { display: none; margin-top: 20px; }
+        .shipping-btn { 
+            width: 100%; padding: 15px; background: #555; color: #fff; border: none; border-radius: 4px; 
+            font-size: 13px; font-weight: bold; cursor: pointer; transition: 0.3s;
+        }
+        .shipping-btn:hover { background: #333; }
+
         #error-msg { display: none; color: var(--accent); text-align: center; margin-top: 20px; font-size: 14px; background: #fff5f5; padding: 10px; border-radius: 4px; }
+
+        /* --- 手機版 RWD 優化 --- */
+        @media (max-width: 600px) {
+            .search-group { flex-direction: column; }
+            .query-btn { width: 100%; }
+            .order-item { flex-direction: column; align-items: flex-start; }
+            .item-info { padding-left: 0; padding-top: 15px; }
+            .item-img { width: 100px; height: 130px; }
+            .step-text { transform: scale(0.8); }
+        }
     </style>
 </head>
 <body>
@@ -70,6 +99,17 @@
         </div>
 
         <div id="result-area">
+            <div class="progress-container">
+                <div class="progress-track"><div id="progress-bar-fill"></div></div>
+                <div class="progress-steps">
+                    <div class="step-node" id="step-1"><div class="step-dot"></div><span class="step-text">未付款</span></div>
+                    <div class="step-node" id="step-2"><div class="step-dot"></div><span class="step-text">已登記</span></div>
+                    <div class="step-node" id="step-3"><div class="step-dot"></div><span class="step-text">已付款</span></div>
+                    <div class="step-node" id="step-4"><div class="step-dot"></div><span class="step-text">已運送</span></div>
+                    <div class="step-node" id="step-5"><div class="step-dot"></div><span class="step-text">已完成</span></div>
+                </div>
+            </div>
+
             <div class="order-meta">
                 <div class="meta-row"><span>ORDER ID / 訂單編號</span><span id="res-order-id" style="font-weight:700;"></span></div>
                 <div class="meta-row"><span>ORDER DATE / 下單日期</span><span id="res-order-date"></span></div>
@@ -83,6 +123,12 @@
                 <div class="summary-line"><span>Shipping / 運費</span><span id="res-shipping"></span></div>
                 <div class="summary-line" style="color:var(--accent);"><span>Discount / 折扣</span><span id="res-discount"></span></div>
                 <div class="summary-line total"><span>Total / 總計</span><span id="res-total-amount"></span></div>
+            </div>
+
+            <div id="shipping-action-area">
+                <button class="shipping-btn" onclick="goToTracking()">
+                    📦 貨態查詢：<span id="display-shipping-no"></span> (點此跳轉)
+                </button>
             </div>
         </div>
 
@@ -165,17 +211,58 @@
                 `;
             }).join('');
 
-            // --- 精準對接您的後端名稱 ---
             const subtotal = Number(order.subtotal) || 0;
             const shipping = Number(order.shipping_fee) || 0;
             const discount = Math.abs(Number(order.discount_total) || 0);
             const total = Number(order.total_amount) || 0;
 
-            // 填入金額區塊
             document.getElementById('res-subtotal').innerText = formatNT(subtotal);
             document.getElementById('res-shipping').innerText = formatNT(shipping);
             document.getElementById('res-discount').innerText = `- NT$ ${discount.toLocaleString()}`;
             document.getElementById('res-total-amount').innerText = formatNT(total);
+
+            // --- 新增：進度條與貨運單號智慧判斷 ---
+            const statusMap = { "NEW": 1, "REGISTERED": 2, "PAID": 3, "SHIPPED": 4, "COMPLETED": 5 };
+            let currentLevel = statusMap[order.order_status] || 1;
+            
+            const shippingNo = order.shipping_no || ""; // 從 API 讀取單號
+            const actionArea = document.getElementById('shipping-action-area');
+            const displayNo = document.getElementById('display-shipping-no');
+
+            if (shippingNo.trim() !== "") {
+                currentLevel = Math.max(currentLevel, 4); // 只要有單號，至少是已運送
+                actionArea.style.display = 'block';
+                displayNo.innerText = shippingNo;
+                window.currentTrackingNo = shippingNo;
+            } else {
+                actionArea.style.display = 'none';
+            }
+
+            // 更新進度條 UI
+            const fillWidth = ((currentLevel - 1) / 4) * 100;
+            document.getElementById('progress-bar-fill').style.width = fillWidth + "%";
+            for (let i = 1; i <= 5; i++) {
+                const step = document.getElementById(`step-${i}`);
+                if (i <= currentLevel) step.classList.add('active');
+                else step.classList.remove('active');
+            }
+        }
+
+        // --- 新增：物流跳轉邏輯 ---
+        function goToTracking() {
+            const no = window.currentTrackingNo;
+            if (!no) return;
+            
+            let url = "";
+            // 智慧判斷：10碼通常是黑貓，其他可能為 7-11
+            if (no.length === 10 || no.length === 12) {
+                // 黑貓宅急便
+                url = `https://www.t-cat.com.tw/inquire/TraceDetail.aspx?queryNo=${no}`;
+            } else {
+                // 7-11 E-Tracking (這通常需要進入頁面後手動輸入，或使用賣貨便連結)
+                url = "https://eservice.7-11.com.tw/E-Tracking/search.aspx";
+            }
+            window.open(url, '_blank');
         }
     </script>
 </body>
