@@ -1,36 +1,36 @@
 /**
  * AiFang Kids - detail.js 2026 最終版本
  * 優化重點：
- * 1. 修正 split() 錯誤：透過 String() 強制轉型，防止數值型態導致當機。
- * 2. 移除前端韓文顯示：韓文名稱與顏色僅保留在後端資料傳遞中，不顯示於 UI。
- * 3. 補全 status 欄位：確保結帳頁面能識別 SALE 商品，正確排除折扣。
- * 4. 支援多重分段定價：BABY / KID / JUNIOR 不同尺寸對應不同價格。
+ * 1. 支援快取 (Cache)：透過 ApiService 優先讀取暫存資料，大幅提升頁面開啟速度。
+ * 2. 背景韓文保留：korean_name 與 korean_color 僅存在於資料流中，UI 純中文顯示。
+ * 3. 金額鎖死支援：傳遞 status 欄位，確保 SALE 商品在結帳頁不參與折扣。
+ * 4. 異常處理：強化 String 轉型，防止 GAS 欄位格式錯誤導致 split 失敗。
  */
-
-const API_URL = "https://script.google.com/macros/s/AKfycbxnlAwKJucHmCKcJwv67TWuKV0X74Daag9X9I4NG7DOESREuYdU7BtWBPcEHyoJphoEfg/exec"; 
 
 const urlParams = new URLSearchParams(window.location.search);
 const productCode = urlParams.get('code');
 
 let currentProduct = null;
-let selectedColor = { name: "", hex: "", krColor: "" }; // 增加背景韓文顏色變數
+let selectedColor = { name: "", hex: "", krColor: "" }; // 背景儲存韓文顏色
 let selectedItems = []; 
 let colorImageMap = {}; 
 
 /**
- * 1. 初始化頁面
+ * 1. 初始化頁面 (包含快取讀取邏輯)
  */
 async function init() {
     updateCartCount();
     if (!productCode) return;
     
     try {
-        const response = await fetch(`${API_URL}?code=${productCode}`);
-        const data = await response.json();
-        // 兼容多種 API 回傳格式
-        currentProduct = data.products ? data.products.find(p => String(p.code) === String(productCode)) : (Array.isArray(data) ? data[0] : data);
+        // --- 【快取讀取核心】 ---
+        // ApiService.getProductByCode 內部已實作快取邏輯：
+        // 1. 檢查 sessionStorage 是否有此 code 的資料
+        // 2. 若有則 return，若無則 fetch 並存入快取
+        const product = await ApiService.getProductByCode(productCode);
         
-        if (!currentProduct) throw new Error("找不到商品");
+        if (!product) throw new Error("找不到商品");
+        currentProduct = product;
         render(currentProduct);
     } catch (e) {
         console.error("載入失敗:", e);
@@ -43,22 +43,25 @@ async function init() {
  * 2. 渲染商品資料
  */
 function render(p) {
+    // UI 只顯示中文，韓文 korean_name 鎖在變數中
     document.getElementById('p-title').innerText = p.name;
     document.getElementById('p-brand').innerText = p.brand || "AIFANG SELECT";
     document.getElementById('p-id').innerText = `CODE: ${p.code}`;
     document.getElementById('styling-note').innerText = p.styling_note || "";
     
-    // 【隱藏韓文】不顯示 p.korean_name
-
-    // 設定主圖與圖片地圖
+    // 設定主圖與顏色映射圖
     const primaryImg = document.getElementById('primary-img');
     if (primaryImg) primaryImg.src = p.image_main;
 
     if (p.images_by_color) {
-        try { colorImageMap = JSON.parse(p.images_by_color); } catch (e) { console.warn("顏色圖解析失敗"); }
+        try { 
+            colorImageMap = typeof p.images_by_color === 'string' ? JSON.parse(p.images_by_color) : p.images_by_color; 
+        } catch (e) { 
+            console.warn("顏色對應圖解析失敗"); 
+        }
     }
 
-    // 渲染額外細節圖
+    // 渲染細節圖 (處理 image_extra 多圖)
     const imgArea = document.getElementById('image-main-area');
     if (p.image_extra && imgArea) {
         const existingExtras = imgArea.querySelectorAll('img:not(#primary-img)');
@@ -76,24 +79,23 @@ function render(p) {
         });
     }
 
-    // 渲染顏色選項 (整合韓文對應邏輯)
+    // 渲染顏色選項 (隱藏韓文顯示，僅存入變數)
     const swatchGroup = document.getElementById('swatch-group');
     if (swatchGroup) {
         swatchGroup.innerHTML = ""; 
         const colorNames = String(p.color || "").split(',').map(s => s.trim());
         const colorCodes = String(p.color_code || "").split(',').map(s => s.trim());
         const colorPatterns = String(p.color_pattern || "").split(',').map(s => s.trim());
-        const krColors = String(p.korean_color || "").split(',').map(s => s.trim()); // 準備背景資料
+        const krColors = String(p.korean_color || "").split(',').map(s => s.trim());
 
         colorNames.forEach((name, i) => {
             if (!name) return;
             const hex = colorCodes[i] || '#eee';
             const pattern = colorPatterns[i] || "";
-            const krColor = krColors[i] || ""; // 背景韓文
+            const krColor = krColors[i] || ""; // 背景保留
 
             const item = document.createElement('div');
             item.className = "swatch-item";
-            
             let innerStyle = pattern ? `background-image: url('${pattern}'); background-size: cover;` : `background: ${hex};`;
 
             item.innerHTML = `
@@ -113,20 +115,20 @@ function render(p) {
         });
     }
 
-    // 渲染分段尺寸與價格 (重點修正：強制轉型)
+    // 渲染分段尺寸價格 (BABY/KIDS/JUNIOR)
     const sizeArea = document.getElementById('size-area');
     if (sizeArea) {
         sizeArea.innerHTML = ""; 
         const categories = [
-            { key: 'baby', label: 'BABY', cls: 'babe' }, 
-            { key: 'kid', label: 'KIDS', cls: 'kids' }, 
-            { key: 'junior', label: 'JUNIOR', cls: 'kids' }, 
-            { key: 'adult', label: 'ADULT', cls: 'kids' }
+            { key: 'baby', label: 'BABY' }, 
+            { key: 'kid', label: 'KIDS' }, 
+            { key: 'junior', label: 'JUNIOR' }, 
+            { key: 'adult', label: 'ADULT' }
         ];
 
         categories.forEach(cat => {
             const rawSizes = p[`sizes_${cat.key}`];
-            const price = p[`price_${cat.key}_10off`] || p[`price_${cat.key}`];
+            const price = p[`price_${cat.key}`];
             
             if (rawSizes && rawSizes !== "" && price && price !== "FREE") {
                 const box = document.createElement('div');
@@ -138,7 +140,7 @@ function render(p) {
                     </div>
                     <div class="s-btn-wrap">
                         ${String(rawSizes).split(',').map(s => `
-                            <button class="s-btn" onclick="addToList('${s.trim()}', ${price}, '${cat.cls}')">${s.trim()}</button>
+                            <button class="s-btn" onclick="addToList('${s.trim()}', ${price})">${s.trim()}</button>
                         `).join('')}
                     </div>`;
                 sizeArea.appendChild(box);
@@ -148,24 +150,21 @@ function render(p) {
 }
 
 /**
- * 3. 顏色選取邏輯 (隱藏韓文)
+ * 3. 顏色選取 (UI 純中文)
  */
 function selectColor(name, hex, krColor, el, imageUrl) {
-    selectedColor = { name, hex, krColor }; // krColor 僅存於變數
+    selectedColor = { name, hex, krColor }; 
     document.querySelectorAll('.swatch-item').forEach(i => i.classList.remove('active'));
     el.classList.add('active');
 
-    const mobilePreview = document.getElementById('mobile-color-preview-img');
     const mobileText = document.getElementById('mobile-color-preview-name');
-    
-    if (mobilePreview) mobilePreview.src = imageUrl;
-    if (mobileText) mobileText.innerText = name; // UI 只顯示中文名
+    if (mobileText) mobileText.innerText = name; 
 }
 
 /**
- * 4. 暫存清單與購物車處理
+ * 4. 購物暫存清單
  */
-function addToList(sizeName, price, type) {
+function addToList(sizeName, price) {
     if (!selectedColor.name) {
         showToast("請先選擇顏色");
         return;
@@ -178,14 +177,13 @@ function addToList(sizeName, price, type) {
         selectedItems.push({ 
             key, 
             color: selectedColor.name, 
-            krColor: selectedColor.krColor, // 存入暫存
+            krColor: selectedColor.krColor, // 背景存入韓文
             size: sizeName, 
             price, 
             quantity: 1 
         });
     }
     renderSelectedList();
-    showToast(`已選擇 ${selectedColor.name} / ${sizeName}`);
 }
 
 function renderSelectedList() {
@@ -206,6 +204,9 @@ function renderSelectedList() {
         </div>`).join('');
 }
 
+/**
+ * 5. 加入購物車 (傳遞背景韓文與 SALE 狀態)
+ */
 function addAllToCart() {
     if (selectedItems.length === 0) { 
         showToast("請先選擇顏色與尺寸"); 
@@ -226,7 +227,7 @@ function addAllToCart() {
             price: item.price, 
             quantity: item.quantity, 
             image: colorImg,
-            status: currentProduct.status, // 重要：SALE 排除邏輯依據
+            status: currentProduct.status, // 結帳打折判定用
             korean_name: currentProduct.korean_name || "", // 背景韓文
             korean_color: item.krColor // 背景韓文
         };
@@ -248,7 +249,7 @@ function addAllToCart() {
 }
 
 /**
- * 5. 通用工具與滾動監聽
+ * 通用工具
  */
 function updateListQty(index, delta) {
     if (selectedItems[index].quantity + delta > 0) {
@@ -277,29 +278,5 @@ function updateCartCount() {
     if (countEl) countEl.innerText = cart.reduce((sum, item) => sum + item.quantity, 0);
 }
 
-window.onload = () => {
-    init();
-    const trigger = document.getElementById('scroll-trigger');
-    const aside = document.getElementById('product-info');
-    
-    window.addEventListener('scroll', () => {
-        if (window.innerWidth <= 900 && trigger && aside) {
-            const rect = aside.getBoundingClientRect();
-            if (rect.top < 150) {
-                trigger.style.opacity = '0';
-                trigger.style.pointerEvents = 'none';
-            } else {
-                trigger.style.opacity = '1';
-                trigger.style.pointerEvents = 'auto';
-            }
-        }
-    });
-};
-
-function scrollToOptions() {
-    const aside = document.getElementById('product-info');
-    if (aside) {
-        const offset = aside.offsetTop - 70;
-        window.scrollTo({ top: offset, behavior: 'smooth' });
-    }
-}
+// 監聽載入
+window.addEventListener('load', init);
