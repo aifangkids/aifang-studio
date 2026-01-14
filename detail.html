@@ -18,7 +18,7 @@
         /* Layout */
         .detail-wrapper { display: flex; max-width: 1400px; margin: var(--header-h) auto 0; position: relative; }
         .scroll-content { flex: 1; padding: 40px; border-right: 1px solid #f2f2f2; min-height: 100vh; }
-        #image-main-area img { width: 100%; border-radius: 4px; display: block; margin-bottom: 20px; background: #f9f9f9; height: auto; }
+        #image-main-area img { width: 100%; border-radius: 4px; display: block; margin-bottom: 20px; background: #f9f9f9; height: auto; transition: opacity 0.3s; }
 
         /* Fixed Aside Info */
         .fixed-aside { 
@@ -30,17 +30,15 @@
             background: #fff; 
         }
 
-        /* --- 優化：電腦版右側選單獨立捲動且隱藏捲軸 --- */
+        /* --- 電腦版右側選單獨立捲動且隱藏捲軸 --- */
         @media (min-width: 901px) {
             .fixed-aside {
                 max-height: calc(100vh - var(--header-h));
                 overflow-y: auto;
-                -ms-overflow-style: none;  /* IE/Edge */
-                scrollbar-width: none;  /* Firefox */
+                -ms-overflow-style: none;
+                scrollbar-width: none;
             }
-            .fixed-aside::-webkit-scrollbar {
-                display: none; /* Chrome/Safari */
-            }
+            .fixed-aside::-webkit-scrollbar { display: none; }
         }
 
         .brand-tag { font-size: 11px; font-weight: 500; letter-spacing: 1px; text-decoration: underline; margin-bottom: 8px; color: #555; display: block; }
@@ -60,14 +58,14 @@
             margin-bottom: 15px;
             animation: fadeIn 0.4s ease;
         }
-        #mobile-color-preview-img { width: 60px; height: 60px; object-fit: cover; border-radius: 4px; border: 1px solid #f0f0f0; transition: opacity 0.2s; }
+        #mobile-color-preview-img { width: 60px; height: 60px; object-fit: cover; border-radius: 4px; border: 1px solid #f0f0f0; }
         .preview-info-text { display: flex; flex-direction: column; }
         .preview-info-text .hint { font-size: 9px; color: #aaa; letter-spacing: 1px; }
         #mobile-color-preview-name { font-size: 14px; font-weight: 700; color: #333; }
 
         /* 顏色與尺寸選擇 */
         .swatch-group { display: flex; flex-wrap: wrap; gap: 8px; }
-        .swatch-item { cursor: pointer; display: flex; align-items: center; padding: 6px 12px; border: 1px solid #ddd; border-radius: 20px; transition: 0.2s; }
+        .swatch-item { cursor: pointer; display: flex; align-items: center; padding: 6px 12px; border: 1px solid #ddd; border-radius: 20px; transition: 0.2s; background: #fff; }
         .swatch-item.active { border: 2px solid #333; font-weight: bold; }
         .swatch-circle { width: 14px; height: 14px; border-radius: 50%; border: 1px solid #eee; margin-right: 6px; }
         
@@ -106,7 +104,7 @@
         }
         .tool-btn:hover { background: #333; color: #fff; }
 
-        /* --- 新增：手機版專用「直接下單」按鈕 --- */
+        /* 手機版專用「直接下單」按鈕 */
         .mobile-order-trigger {
             display: none;
             position: fixed;
@@ -138,7 +136,7 @@
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* --- 手機版響應式優化 --- */
+        /* 手機版響應式優化 */
         @media (max-width: 900px) {
             .detail-wrapper { flex-direction: column; }
             .scroll-content { order: 1; padding: 15px; border-right: none; min-height: auto; }
@@ -161,8 +159,8 @@
 
     <div class="detail-wrapper">
         <main class="scroll-content" id="image-main-area">
-            <img id="primary-img" src="" alt="Loading...">
-        </main>
+            <img id="primary-img" src="" alt="Product Image">
+            </main>
 
         <aside class="fixed-aside" id="product-info">
             <span id="p-brand" class="brand-tag">-</span>
@@ -172,7 +170,7 @@
             <span class="label">COLOR / 顏色</span>
             
             <div id="mobile-preview-area" class="mobile-preview-box">
-                <img id="mobile-color-preview-img" src="" alt="Color Preview">
+                <img id="mobile-color-preview-img" src="images/ui/placeholder.jpg" alt="Color Preview">
                 <div class="preview-info-text">
                     <span class="hint">SELECTED COLOR</span>
                     <span id="mobile-color-preview-name">請選擇花色</span>
@@ -199,22 +197,24 @@
 
     <div id="custom-toast"></div>
 
+    <script src="js/api.js"></script>
     <script src="js/detail.js"></script>
 
     <script>
-        // 1. 手機版：點擊按鈕滑動至選單區
+        // 手機版：點擊按鈕滑動至選單區
         function scrollToOptions() {
             const aside = document.getElementById('product-info');
-            const offset = aside.offsetTop - 80;
-            window.scrollTo({ top: offset, behavior: 'smooth' });
+            if (aside) {
+                const offset = aside.offsetTop - 80;
+                window.scrollTo({ top: offset, behavior: 'smooth' });
+            }
         }
 
-        // 2. 手機版：滾動監聽，當用戶已經滑到選單區時，隱藏浮動按鈕
+        // 手機版：滾動監聽，當用戶已經滑到選單區時，隱藏浮動按鈕
         window.addEventListener('scroll', () => {
             const trigger = document.getElementById('scroll-trigger');
             const aside = document.getElementById('product-info');
             if (window.innerWidth <= 900 && trigger && aside) {
-                // 如果滑動超過選單區上方 300px，就隱藏按鈕
                 if (window.pageYOffset > (aside.offsetTop - 300)) {
                     trigger.style.opacity = '0';
                     trigger.style.pointerEvents = 'none';

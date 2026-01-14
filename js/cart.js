@@ -107,10 +107,6 @@ async function handleCheckout() {
     const payment_method = document.querySelector('input[name="payment"]:checked')?.value || 'transfer';
     const shipping_method = document.querySelector('input[name="shipping"]:checked')?.value || '7-11';
 
-    if (!customer_name || !customer_phone) {
-        alert("請填寫完整的收件人姓名與電話。");
-        return;
-    }
 
     const result = calculateOrder(cart);
 

@@ -1,17 +1,13 @@
 /**
- * AiFang Kids - detail.js 2026 最終版本
- * 優化重點：
- * 1. 支援快取 (Cache)：透過 ApiService 優先讀取暫存資料，大幅提升頁面開啟速度。
- * 2. 背景韓文保留：korean_name 與 korean_color 僅存在於資料流中，UI 純中文顯示。
- * 3. 金額鎖死支援：傳遞 status 欄位，確保 SALE 商品在結帳頁不參與折扣。
- * 4. 異常處理：強化 String 轉型，防止 GAS 欄位格式錯誤導致 split 失敗。
+ * AiFang Kids - detail.js 2026 最終版本 (優化更新版)
+ * 保留快取、背景韓文、金額鎖死，並強化手機版投影框與 SALE 標籤顯示
  */
 
 const urlParams = new URLSearchParams(window.location.search);
 const productCode = urlParams.get('code');
 
 let currentProduct = null;
-let selectedColor = { name: "", hex: "", krColor: "" }; // 背景儲存韓文顏色
+let selectedColor = { name: "", hex: "", krColor: "", image: "" }; // 背景儲存韓文與當前圖片
 let selectedItems = []; 
 let colorImageMap = {}; 
 
@@ -23,10 +19,7 @@ async function init() {
     if (!productCode) return;
     
     try {
-        // --- 【快取讀取核心】 ---
-        // ApiService.getProductByCode 內部已實作快取邏輯：
-        // 1. 檢查 sessionStorage 是否有此 code 的資料
-        // 2. 若有則 return，若無則 fetch 並存入快取
+        // ApiService 內部實作快取邏輯
         const product = await ApiService.getProductByCode(productCode);
         
         if (!product) throw new Error("找不到商品");
@@ -43,16 +36,17 @@ async function init() {
  * 2. 渲染商品資料
  */
 function render(p) {
-    // UI 只顯示中文，韓文 korean_name 鎖在變數中
+    // UI 純中文顯示
     document.getElementById('p-title').innerText = p.name;
     document.getElementById('p-brand').innerText = p.brand || "AIFANG SELECT";
     document.getElementById('p-id').innerText = `CODE: ${p.code}`;
     document.getElementById('styling-note').innerText = p.styling_note || "";
     
-    // 設定主圖與顏色映射圖
+    // 設定主圖
     const primaryImg = document.getElementById('primary-img');
     if (primaryImg) primaryImg.src = p.image_main;
 
+    // 解析顏色映射物件
     if (p.images_by_color) {
         try { 
             colorImageMap = typeof p.images_by_color === 'string' ? JSON.parse(p.images_by_color) : p.images_by_color; 
@@ -61,7 +55,7 @@ function render(p) {
         }
     }
 
-    // 渲染細節圖 (處理 image_extra 多圖)
+    // 渲染額外細節圖
     const imgArea = document.getElementById('image-main-area');
     if (p.image_extra && imgArea) {
         const existingExtras = imgArea.querySelectorAll('img:not(#primary-img)');
@@ -72,14 +66,12 @@ function render(p) {
             if(cleanUrl) {
                 const img = document.createElement('img');
                 img.src = cleanUrl;
-                img.style.width = "100%"; 
-                img.style.display = "block";
                 imgArea.appendChild(img);
             }
         });
     }
 
-    // 渲染顏色選項 (隱藏韓文顯示，僅存入變數)
+    // 渲染顏色選項 (隱藏韓文顯示)
     const swatchGroup = document.getElementById('swatch-group');
     if (swatchGroup) {
         swatchGroup.innerHTML = ""; 
@@ -92,7 +84,7 @@ function render(p) {
             if (!name) return;
             const hex = colorCodes[i] || '#eee';
             const pattern = colorPatterns[i] || "";
-            const krColor = krColors[i] || ""; // 背景保留
+            const krColor = krColors[i] || ""; 
 
             const item = document.createElement('div');
             item.className = "swatch-item";
@@ -106,19 +98,21 @@ function render(p) {
             item.onclick = () => {
                 const targetImg = colorImageMap[name] || p.image_main;
                 selectColor(name, hex, krColor, item, targetImg);
-                const mainImg = document.getElementById('primary-img');
-                if (mainImg) mainImg.src = targetImg;
+                if (primaryImg) primaryImg.src = targetImg;
             };
 
             swatchGroup.appendChild(item);
-            if (i === 0) item.click(); 
+            if (i === 0) item.click(); // 自動選取第一個
         });
     }
 
-    // 渲染分段尺寸價格 (BABY/KIDS/JUNIOR)
+    // 渲染尺寸價格 (鎖死 SALE 標籤邏輯)
     const sizeArea = document.getElementById('size-area');
     if (sizeArea) {
         sizeArea.innerHTML = ""; 
+        const isSale = p.status === 'SALE';
+        const saleHtml = isSale ? `<span class="sale-badge" style="background:#d9534f; color:#fff; font-size:10px; padding:2px 6px; border-radius:2px; margin-left:8px;">SALE</span>` : '';
+
         const categories = [
             { key: 'baby', label: 'BABY' }, 
             { key: 'kid', label: 'KIDS' }, 
@@ -135,7 +129,7 @@ function render(p) {
                 box.className = 'size-group';
                 box.innerHTML = `
                     <div class="group-header">
-                        <span>${cat.label}</span>
+                        <span>${cat.label} ${saleHtml}</span>
                         <span class="price-tag">NT$ ${Number(price).toLocaleString()}</span>
                     </div>
                     <div class="s-btn-wrap">
@@ -150,14 +144,20 @@ function render(p) {
 }
 
 /**
- * 3. 顏色選取 (UI 純中文)
+ * 3. 顏色選取 (UI 純中文 + 手機投影框同步)
  */
 function selectColor(name, hex, krColor, el, imageUrl) {
-    selectedColor = { name, hex, krColor }; 
+    selectedColor = { name, hex, krColor, image: imageUrl }; 
     document.querySelectorAll('.swatch-item').forEach(i => i.classList.remove('active'));
     el.classList.add('active');
 
+    // 同步手機版投影框圖片與文字
+    const mobileImg = document.getElementById('mobile-color-preview-img');
     const mobileText = document.getElementById('mobile-color-preview-name');
+    if (mobileImg) {
+        mobileImg.src = imageUrl;
+        mobileImg.style.opacity = "1";
+    }
     if (mobileText) mobileText.innerText = name; 
 }
 
@@ -177,10 +177,11 @@ function addToList(sizeName, price) {
         selectedItems.push({ 
             key, 
             color: selectedColor.name, 
-            krColor: selectedColor.krColor, // 背景存入韓文
+            krColor: selectedColor.krColor,
             size: sizeName, 
             price, 
-            quantity: 1 
+            quantity: 1,
+            image: selectedColor.image // 鎖定選取時的顏色圖
         });
     }
     renderSelectedList();
@@ -216,8 +217,6 @@ function addAllToCart() {
     let cart = JSON.parse(localStorage.getItem('cart')) || [];
     
     selectedItems.forEach(item => {
-        const colorImg = (colorImageMap && colorImageMap[item.color]) ? colorImageMap[item.color] : currentProduct.image_main;
-
         const cartItem = { 
             code: currentProduct.code, 
             name: currentProduct.name, 
@@ -226,10 +225,10 @@ function addAllToCart() {
             size: item.size, 
             price: item.price, 
             quantity: item.quantity, 
-            image: colorImg,
-            status: currentProduct.status, // 結帳打折判定用
-            korean_name: currentProduct.korean_name || "", // 背景韓文
-            korean_color: item.krColor // 背景韓文
+            image: item.image,
+            status: currentProduct.status, // 結帳打折判定用 (SALE 鎖死)
+            korean_name: currentProduct.korean_name || "", 
+            korean_color: item.krColor 
         };
         
         const idx = cart.findIndex(i => i.code === cartItem.code && i.size === cartItem.size && i.color === cartItem.color);

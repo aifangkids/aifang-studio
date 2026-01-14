@@ -17,7 +17,7 @@
         .cart-container { max-width: 900px; margin: calc(var(--header-h) + 40px) auto 100px; padding: 0 20px; }
         .page-title { font-size: 18px; font-weight: 500; letter-spacing: 3px; text-align: center; margin-bottom: 40px; text-transform: uppercase; }
 
-        /* 免運提示進度條 - 優化點 */
+        /* 免運提示進度條 */
         .shipping-notice { background: #f9f9f9; padding: 15px; text-align: center; font-size: 12px; margin-bottom: 30px; border-radius: 2px; }
         .progress-bar { height: 4px; background: #eee; width: 100%; margin-top: 10px; border-radius: 2px; overflow: hidden; }
         .progress-fill { height: 100%; background: #111; width: 0%; transition: 0.5s; }
@@ -52,7 +52,6 @@
         .checkout-btn:hover { background: #333; }
         .checkout-btn:disabled { background: #ccc; cursor: not-allowed; }
 
-        /* 手機版適配 */
         @media (max-width: 600px) {
             .cart-container { padding: 0 15px; margin-top: calc(var(--header-h) + 20px); }
             .back-btn { display: none; }
@@ -84,35 +83,37 @@
         <div class="summary-box">
             <div class="summary-row">
                 <span>SUBTOTAL 小計</span>
-                <span id="subtotal">NT$ 0</span>
+                <span id="cart-subtotal">NT$ 0</span>
             </div>
             <div class="summary-row">
                 <span>SHIPPING 運費 (滿 NT$ 1,500 免運)</span>
-                <span id="shipping">NT$ 60</span>
+                <span id="cart-shipping">NT$ 60</span>
             </div>
             <div class="summary-row total-row">
                 <span>TOTAL 總計</span>
-                <span id="total-amount">NT$ 0</span>
+                <span id="cart-total">NT$ 0</span>
             </div>
         </div>
 
         <button class="checkout-btn" id="checkout-btn" onclick="goToCheckout()">Proceed to Checkout</button>
     </div>
 
-    <script>
-        const FREE_SHIPPING_LIMIT = 1500;
+    <script src="js/api.js"></script> <script src="js/cart.js"></script>
 
+    <script>
+        /**
+         * 覆蓋 cart.js 中的渲染邏輯，以符合 cart.html 的視覺結構 (Flex 排版)
+         */
         function renderCart() {
             const cart = JSON.parse(localStorage.getItem('cart')) || [];
             const container = document.getElementById('cart-list');
-            const subtotalEl = document.getElementById('subtotal');
-            const shippingEl = document.getElementById('shipping');
-            const totalEl = document.getElementById('total-amount');
+            const subtotalEl = document.getElementById('cart-subtotal');
+            const shippingEl = document.getElementById('cart-shipping');
+            const totalEl = document.getElementById('cart-total');
             const shippingText = document.getElementById('shipping-text');
             const progressFill = document.getElementById('progress-fill');
             const checkoutBtn = document.getElementById('checkout-btn');
-
-            let subtotal = 0;
+            const noticeArea = document.getElementById('shipping-notice');
 
             if (cart.length === 0) {
                 container.innerHTML = `
@@ -120,84 +121,68 @@
                         <p style="color:#aaa; font-size:14px; margin-bottom:20px;">Your bag is empty.</p>
                         <a href="index.html" style="color:#111; font-size:12px; font-weight:bold; text-decoration:underline;">GO SHOPPING</a>
                     </div>`;
-                subtotalEl.innerText = "NT$ 0";
-                shippingEl.innerText = "NT$ 0";
-                totalEl.innerText = "NT$ 0";
-                checkoutBtn.disabled = true;
-                document.getElementById('shipping-notice').style.display = 'none';
+                updateUI(0, 0, 0);
+                if (noticeArea) noticeArea.style.display = 'none';
+                if (checkoutBtn) checkoutBtn.disabled = true;
                 return;
             }
 
-            checkoutBtn.disabled = false;
-            document.getElementById('shipping-notice').style.display = 'block';
+            if (noticeArea) noticeArea.style.display = 'block';
+            if (checkoutBtn) checkoutBtn.disabled = false;
+
+            // 使用 cart.js 的核心計算邏輯 [cite: 2, 6]
+            const result = calculateOrder(cart);
 
             container.innerHTML = cart.map((item, index) => {
-                const itemTotal = item.price * item.quantity;
-                subtotal += itemTotal;
+                const itemTotal = Number(item.price) * Number(item.quantity);
+                const displayImg = item.image || './images/ui/no-image.jpg';
                 return `
                     <div class="cart-item">
-                        <img src="${item.image}" class="item-img">
+                        <img src="${displayImg}" class="item-img" onerror="this.src='./images/ui/no-image.jpg'">
                         <div class="item-info">
                             <p class="item-name">${item.name}</p>
-                            <p class="item-detail">${item.color} / ${item.size}</p>
-                            
+                            <p class="item-detail">${item.color || 'F'} / ${item.size || 'F'}</p>
                             <div class="qty-control">
-                                <button class="qty-btn" onclick="updateQty(${index}, -1)">-</button>
+                                <button class="qty-btn" onclick="changeQty(${index}, -1)">-</button>
                                 <input type="text" class="qty-val" value="${item.quantity}" readonly>
-                                <button class="qty-btn" onclick="updateQty(${index}, 1)">+</button>
+                                <button class="qty-btn" onclick="changeQty(${index}, 1)">+</button>
                             </div>
                             <div class="item-price">NT$ ${itemTotal.toLocaleString()}</div>
                         </div>
-                        
-                        <div class="remove-wrapper" onclick="removeItem(${index})">
+                        <div class="remove-wrapper" onclick="deleteItem(${index})">
                             <img src="./images/ui/btn_close.jpg" class="remove-icon">
                         </div>
                     </div>
                 `;
             }).join('');
 
-            // 計算運費與進度條
-            const shipping = subtotal >= FREE_SHIPPING_LIMIT ? 0 : 60;
-            const remaining = FREE_SHIPPING_LIMIT - subtotal;
-            const progress = Math.min((subtotal / FREE_SHIPPING_LIMIT) * 100, 100);
+            // 更新 UI 金額 
+            updateUI(result.subtotal, result.shipping, result.total);
 
-            subtotalEl.innerText = `NT$ ${subtotal.toLocaleString()}`;
-            shippingEl.innerText = shipping === 0 ? "FREE" : `NT$ ${shipping}`;
-            totalEl.innerText = `NT$ ${(subtotal + shipping).toLocaleString()}`;
+            // 更新免運進度條邏輯 [cite: 96, 98, 99]
+            const FREE_LIMIT = 1500;
+            const progress = Math.min((result.subtotal / FREE_LIMIT) * 100, 100);
+            const remaining = FREE_LIMIT - result.subtotal;
             
-            progressFill.style.width = `${progress}%`;
-            if (remaining > 0) {
-                shippingText.innerHTML = `再買 <b>NT$ ${remaining.toLocaleString()}</b> 即可享免運優惠`;
-            } else {
-                shippingText.innerHTML = `🎉 恭喜您！已符合免運資格`;
+            if (progressFill) progressFill.style.width = `${progress}%`;
+            if (shippingText) {
+                shippingText.innerHTML = remaining > 0 
+                    ? `再買 <b>NT$ ${remaining.toLocaleString()}</b> 即可享免運優惠`
+                    : `🎉 恭喜您！已符合免運資格`;
             }
         }
 
-        function updateQty(index, change) {
-            let cart = JSON.parse(localStorage.getItem('cart')) || [];
-            if (cart[index]) {
-                cart[index].quantity += change;
-                if (cart[index].quantity < 1) cart[index].quantity = 1;
-                localStorage.setItem('cart', JSON.stringify(cart));
-                renderCart();
-            }
-        }
-
-        function removeItem(index) {
-            if(confirm("確定要從購物袋中移除此商品嗎？")) {
-                let cart = JSON.parse(localStorage.getItem('cart')) || [];
-                cart.splice(index, 1);
-                localStorage.setItem('cart', JSON.stringify(cart));
-                renderCart();
-            }
-        }
-
+        /**
+         * 跳轉至結帳頁 (配合 cart.js 邏輯)
+         */
         function goToCheckout() {
             const cart = JSON.parse(localStorage.getItem('cart')) || [];
-            if (cart.length === 0) return;
-            location.href = 'checkout.html';
+            if (cart.length > 0) {
+                location.href = 'checkout.html';
+            }
         }
 
+        // 頁面載入完成後執行
         window.onload = renderCart;
     </script>
 </body>
