@@ -8,30 +8,27 @@
     <link rel="icon" href="./favicon.ico" type="image/x-icon">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
-        :root { --header-h: 70px; --accent: #d9534f; --gray-bg: #fcfcfc; --sale-red: #e74c3c; }
+        :root { --header-h: 70px; --accent: #d9534f; --gray-bg: #fcfcfc; }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Noto Sans TC', sans-serif; background: #fff; color: #333; line-height: 1.6; }
 
         /* Header */
-        .top-header {
-            width: 100%; height: var(--header-h); background: #fff;
-            position: fixed; top: 0; left: 0; z-index: 2000;
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 0 25px; border-bottom: 1px solid #f2f2f2;
-        }
+        .top-header { width: 100%; height: var(--header-h); background: #fff; position: fixed; top: 0; left: 0; z-index: 2000; display: flex; align-items: center; justify-content: space-between; padding: 0 25px; border-bottom: 1px solid #f2f2f2; }
         .main-logo { height: 30px; cursor: pointer; position: absolute; left: 50%; transform: translateX(-50%); }
         .header-icon { font-size: 13px; font-weight: bold; cursor: pointer; text-decoration: none; color: #333; letter-spacing: 1px; }
 
+        /* Layout */
         .container { max-width: 800px; margin: calc(var(--header-h) + 50px) auto 80px; padding: 0 20px; }
         .page-title { font-size: 18px; font-weight: 700; letter-spacing: 3px; text-align: center; margin-bottom: 40px; }
 
-        /* 搜尋區塊 */
+        /* Search Box */
         .search-section { background: var(--gray-bg); padding: 30px; border-radius: 8px; text-align: center; margin-bottom: 40px; border: 1px solid #eee; }
         .search-group { display: flex; gap: 10px; max-width: 500px; margin: 0 auto; }
         .query-input { flex: 1; padding: 12px 15px; border: 1px solid #ddd; outline: none; font-size: 14px; border-radius: 4px; }
-        .query-btn { padding: 12px 25px; background: #111; color: #fff; border: none; cursor: pointer; font-weight: bold; border-radius: 4px; }
+        .query-btn { padding: 12px 25px; background: #111; color: #fff; border: none; cursor: pointer; font-weight: bold; border-radius: 4px; transition: 0.3s; }
+        .query-btn:disabled { background: #ccc; cursor: not-allowed; }
 
-        /* 進度條 */
+        /* 進度條 - 一般線性樣式 */
         .progress-container { margin: 20px 0 40px; padding: 0 10px; position: relative; }
         .progress-track { position: absolute; top: 6px; left: 10%; right: 10%; height: 2px; background: #eee; z-index: 1; }
         #progress-bar-fill { position: absolute; top: 0; left: 0; height: 100%; background: #111; width: 0%; transition: width 0.8s ease; }
@@ -42,38 +39,32 @@
         .step-text { font-size: 10px; color: #aaa; font-weight: bold; display: block; transform: scale(0.9); white-space: nowrap; }
         .step-node.active .step-text { color: #111; }
 
-        /* 狀態提示 */
-        #special-status-box { background: #fff5f5; color: var(--accent); padding: 15px; text-align: center; font-weight: bold; margin-bottom: 20px; border-radius: 4px; display: none; border: 1px solid #ffe3e3; }
-        #sale-alert-box { background: #fff9e6; color: #856404; border: 1px solid #ffeeba; padding: 12px; text-align: center; font-size: 13px; margin-bottom: 20px; border-radius: 4px; display: none; }
+        /* Result Area */
+        #result-area { display: none; animation: fadeIn 0.5s ease; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* 結果顯示區域 */
-        #result-area { display: none; }
         .order-meta { border-bottom: 2px solid #111; padding-bottom: 15px; margin-bottom: 20px; }
         .meta-row { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 8px; border-bottom: 1px solid #f9f9f9; padding-bottom: 4px; }
         .meta-label { color: #888; font-weight: 500; }
         .meta-value { color: #111; font-weight: 600; text-align: right; }
 
-        /* 商品列表 */
+        /* Item List */
         .order-item { display: flex; padding: 15px 0; border-bottom: 1px solid #eee; align-items: center; }
         .item-img { width: 70px; height: 90px; object-fit: cover; background: #f5f5f5; border-radius: 2px; }
         .item-info { flex: 1; padding-left: 15px; }
         .item-name { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
         .item-spec { font-size: 12px; color: #888; }
-        .sale-badge { background: var(--sale-red); color: #fff; font-size: 9px; padding: 2px 5px; border-radius: 2px; margin-right: 6px; }
 
-        /* 金額摘要 */
+        /* Summary */
         .summary-box { margin-top: 25px; background: #fcfcfc; border: 1px solid #eee; padding: 20px; border-radius: 4px; }
         .summary-line { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 14px; }
         .summary-line.total { border-top: 1px solid #ddd; padding-top: 15px; margin-top: 10px; font-size: 18px; font-weight: 700; color: #111; }
 
-        /* 物流按鈕 */
-        #shipping-action-area { display: none; margin-top: 20px; }
-        .shipping-btn { width: 100%; padding: 16px; background: #111; color: #fff; border: none; border-radius: 4px; font-size: 14px; font-weight: bold; cursor: pointer; letter-spacing: 1px; }
-
-        #error-msg { display: none; color: var(--accent); text-align: center; margin-top: 20px; background: #fff5f5; padding: 15px; border-radius: 4px; }
+        /* Shipping Button */
+        .shipping-btn { width: 100%; padding: 16px; background: #111; color: #fff; border: none; border-radius: 4px; font-size: 14px; font-weight: bold; cursor: pointer; margin-top: 20px; letter-spacing: 1px; }
+        #error-msg { display: none; color: var(--accent); text-align: center; margin-top: 20px; padding: 15px; background: #fff5f5; border-radius: 4px; font-weight: 500; }
 
         @media (max-width: 600px) {
-            .search-group { flex-direction: column; }
             .meta-row { flex-direction: column; align-items: flex-start; }
             .meta-value { text-align: left; margin-top: 2px; }
         }
@@ -83,7 +74,7 @@
 
     <header class="top-header">
         <a href="index.html" class="header-icon">BACK</a>
-        <img src="images/ui/logo.png" class="main-logo" alt="AIFANG" onclick="location.href='index.html'">
+        <img src="images/ui/logo.png" class="main-logo" alt="AiFang Kids Logo" onclick="location.href='index.html'">
         <div style="width: 40px;"></div>
     </header>
 
@@ -92,150 +83,105 @@
 
         <div class="search-section">
             <div class="search-group">
-                <input type="text" id="order-id-input" class="query-input" placeholder="輸入訂單編號 (例如: AF2025...)">
+                <input type="text" id="order-id-input" class="query-input" placeholder="請輸入訂單編號" title="請在此輸入您的訂單編號">
                 <button class="query-btn" id="q-btn" onclick="handleQuery()">查詢</button>
             </div>
         </div>
 
-        <div id="error-msg">找不到此訂單，請確認編號是否正確。</div>
+        <div id="error-msg"></div>
 
         <div id="result-area">
             <div class="progress-container">
                 <div class="progress-track"><div id="progress-bar-fill"></div></div>
                 <div class="progress-steps">
-                    <div class="step-node" id="step-1"><div class="step-dot"></div><span class="step-text" id="t-step-1">未付款</span></div>
-                    <div class="step-node" id="step-2"><div class="step-dot"></div><span class="step-text" id="t-step-2">已登記</span></div>
-                    <div class="step-node" id="step-3"><div class="step-dot"></div><span class="step-text" id="t-step-3">已付款</span></div>
-                    <div class="step-node" id="step-4"><div class="step-dot"></div><span class="step-text" id="t-step-4">已運送</span></div>
-                    <div class="step-node" id="step-5"><div class="step-dot"></div><span class="step-text" id="t-step-5">已完成</span></div>
+                    <div class="step-node" id="step-1"><div class="step-dot"></div><span class="step-text">未付款</span></div>
+                    <div class="step-node" id="step-2"><div class="step-dot"></div><span class="step-text">已登記</span></div>
+                    <div class="step-node" id="step-3"><div class="step-dot"></div><span class="step-text">已付款</span></div>
+                    <div class="step-node" id="step-4"><div class="step-dot"></div><span class="step-text">已運送</span></div>
+                    <div class="step-node" id="step-5"><div class="step-dot"></div><span class="step-text">已完成</span></div>
                 </div>
             </div>
 
-            <div id="sale-alert-box">💡 提醒：此訂單包含 SALE 商品，金額已為特惠價。</div>
-
             <div class="order-meta">
-                <div class="meta-row"><span class="meta-label">ORDER ID / 訂單編號</span><span class="meta-value" id="res-id"></span></div>
-                <div class="meta-row"><span class="meta-label">DATE / 下單日期</span><span class="meta-value" id="res-date"></span></div>
-                <div class="meta-row"><span class="meta-label">NAME / 顧客姓名</span><span class="meta-value" id="res-name"></span></div>
-                <div class="meta-row"><span class="meta-label">PHONE / 手機號碼</span><span class="meta-value" id="res-phone"></span></div>
-                <div class="meta-row"><span class="meta-label">EMAIL / 電子郵件</span><span class="meta-value" id="res-email"></span></div>
-                <div class="meta-row"><span class="meta-label">ADDRESS / 收件地址</span><span class="meta-value" id="res-address"></span></div>
-                <div class="meta-row"><span class="meta-label">PAYMENT / 付款方式</span><span class="meta-value" id="res-pay"></span></div>
-                <div class="meta-row"><span class="meta-label">SHIPPING / 物流方式</span><span class="meta-value" id="res-ship-method"></span></div>
+                <div class="meta-row"><span class="meta-label">訂單編號</span><span class="meta-value" id="res-id"></span></div>
+                <div class="meta-row"><span class="meta-label">下單日期</span><span class="meta-value" id="res-date"></span></div>
+                <div class="meta-row"><span class="meta-label">顧客姓名</span><span class="meta-value" id="res-name"></span></div>
+                <div class="meta-row"><span class="meta-label">聯絡電話</span><span class="meta-value" id="res-phone"></span></div>
+                <div class="meta-row"><span class="meta-label">付款方式</span><span class="meta-value" id="res-pay"></span></div>
+                <div class="meta-row"><span class="meta-label">收件地址</span><span class="meta-value" id="res-address"></span></div>
             </div>
 
             <div id="order-items-container"></div>
 
             <div class="summary-box">
-                <div class="summary-line"><span>Subtotal / 小計</span><span id="res-subtotal"></span></div>
-                <div class="summary-line"><span>Shipping / 運費</span><span id="res-shipping-fee"></span></div>
-                <div class="summary-line" style="color:var(--accent);"><span>Discount / 折扣</span><span id="res-discount"></span></div>
-                <div class="summary-line total"><span>TOTAL / 總計金額</span><span id="res-total"></span></div>
+                <div class="summary-line"><span>商品小計</span><span id="res-subtotal"></span></div>
+                <div class="summary-line"><span>運費</span><span id="res-shipping-fee"></span></div>
+                <div class="summary-line" style="color:var(--accent);"><span>折扣金額</span><span id="res-discount"></span></div>
+                <div class="summary-line total"><span>總計金額</span><span id="res-total"></span></div>
             </div>
 
-            <div id="shipping-action-area">
-                <button class="shipping-btn" onclick="goToTracking()">
-                    📦 貨態查詢：<span id="display-shipping-no"></span> (自動複製單號)
-                </button>
-            </div>
+            <button id="shipping-btn" class="shipping-btn" style="display:none;" onclick="copyAndTrack()">
+                📦 貨態查詢：<span id="display-shipping-no"></span>
+            </button>
         </div>
     </div>
 
-    <textarea id="copy-helper" style="position:absolute; left:-9999px;"></textarea>
-
     <script>
-        // 工具函式：清洗資料
-        const clean = (s) => (s === null || s === undefined) ? "" : String(s).replace(/["'{}[\]]/g, "").trim();
+        const clean = (s) => (s === null || s === undefined) ? "" : String(s).trim();
 
         async function handleQuery() {
-            const idInput = document.getElementById('order-id-input');
-            const orderId = idInput.value.trim();
-            if(!orderId) { alert("請輸入訂單編號"); return; }
+            const idValue = document.getElementById('order-id-input').value.trim();
+            if(!idValue) return;
 
             const btn = document.getElementById('q-btn');
             const resArea = document.getElementById('result-area');
             const errBox = document.getElementById('error-msg');
 
-            btn.disabled = true;
-            btn.innerText = "查詢中...";
+            btn.disabled = true; btn.innerText = "查詢中...";
             resArea.style.display = 'none';
             errBox.style.display = 'none';
 
             try {
-                if (typeof ApiService === 'undefined') throw new Error("找不到 api.js 核心邏輯");
-                
-                // 這裡對接您 api.js 裡的 queryOrder
-                const data = await ApiService.queryOrder(orderId);
-                console.log("🔍 API 原始回傳:", data);
+                // 從 api.js 的 ApiService 獲取資料
+                const data = await ApiService.queryOrder(idValue);
+                console.log("🔍 API 回傳:", data);
 
                 if (data.success && data.order) {
                     renderOrder(data.order);
                     resArea.style.display = 'block';
                 } else {
-                    errBox.innerText = data.message || "找不到訂單，請確認編號是否正確。";
+                    errBox.innerText = data.message || "找不到該訂單，請確認編號。";
                     errBox.style.display = 'block';
                 }
             } catch (e) {
-                console.error("Query Error:", e);
-                errBox.innerText = "連線異常：" + e.message;
+                console.error(e);
+                errBox.innerText = "連線異常，請稍後再試。";
                 errBox.style.display = 'block';
             } finally {
-                btn.disabled = false;
-                btn.innerText = "查詢";
+                btn.disabled = false; btn.innerText = "查詢";
             }
         }
 
         function renderOrder(order) {
-            // 1. 多路徑映射 (防止 Key 不對)
-            const getVal = (paths) => {
-                for (let p of paths) {
-                    if (order[p] !== undefined && order[p] !== null && order[p] !== "") return clean(order[p]);
-                }
-                return "-";
-            };
-
-            const res = {
-                id: getVal(['order_id', 'id']),
-                date: getVal(['order_date', 'date']),
-                name: getVal(['customer_name', 'name']),
-                phone: getVal(['customer_phone', 'phone']),
-                email: getVal(['customer_email', 'email']),
-                address: getVal(['customer_address', 'address']),
-                pay: getVal(['payment_method', 'pay_method']),
-                ship: getVal(['shipping_method', 'ship_method']),
-                sn: clean(order.shipping_no || order.ship_no || ""),
-                status: clean(order.order_status || "NEW").toUpperCase()
-            };
-
-            // 2. 顯示基本資訊
-            document.getElementById('res-id').innerText = res.id;
-            document.getElementById('res-date').innerText = res.date;
-            document.getElementById('res-name').innerText = res.name;
-            document.getElementById('res-phone').innerText = res.phone;
-            document.getElementById('res-email').innerText = res.email;
-            document.getElementById('res-address').innerText = res.address;
-            document.getElementById('res-pay').innerText = res.pay;
-            document.getElementById('res-ship-method').innerText = res.ship;
-
-            // 3. 進度條邏輯
-            const isCOD = res.pay.includes("COD") || res.pay.includes("貨到付款");
-            const t3 = document.getElementById('t-step-3');
-            const t4 = document.getElementById('t-step-4');
-
-            if (isCOD) {
-                t3.innerText = "已運送"; t4.innerText = "已付款";
-            } else {
-                t3.innerText = "已付款"; t4.innerText = "已運送";
-            }
-
-            // 單號存在權限
-            let currentStatus = res.status;
-            if (res.sn !== "" && !["COMPLETED", "CANCELLED"].includes(currentStatus)) {
-                currentStatus = "SHIPPED";
-            }
-
-            const levelMap = { "NEW": 1, "REGISTERED": 2, "PAID": isCOD ? 4 : 3, "SHIPPED": isCOD ? 3 : 4, "COMPLETED": 5 };
-            const level = levelMap[currentStatus] || 1;
+            const fmt = (v) => `NT$ ${Math.floor(Number(v)||0).toLocaleString()}`;
+            
+            // 基本資料填充 (依據您的 Console 欄位名)
+            document.getElementById('res-id').innerText = order.order_id || "-";
+            document.getElementById('res-date').innerText = order.order_date || "-";
+            document.getElementById('res-name').innerText = order.customer_name || "-";
+            document.getElementById('res-phone').innerText = order.customer_phone || "-";
+            document.getElementById('res-pay').innerText = order.payment_method || "-";
+            document.getElementById('res-address').innerText = order.customer_address || "-";
+            
+            // --- 進度條邏輯 ---
+            const status = String(order.order_status || "NEW").toUpperCase();
+            const sn = clean(order.shipping_no);
+            
+            const levelMap = { "NEW": 1, "REGISTERED": 2, "PAID": 3, "SHIPPED": 4, "COMPLETED": 5 };
+            let level = levelMap[status] || 1;
+            
+            // 只要有單號，至少顯示為已運送
+            if(sn !== "" && level < 4 && status !== "CANCELLED") level = 4;
 
             document.getElementById('progress-bar-fill').style.width = ((level - 1) / 4 * 100) + "%";
             for(let i=1; i<=5; i++) {
@@ -243,48 +189,51 @@
                 i <= level ? node.classList.add('active') : node.classList.remove('active');
             }
 
-            // 4. 商品清單
-            let hasSale = false;
-            document.getElementById('order-items-container').innerHTML = (order.items || []).map(item => {
-                const isSale = String(item.status || "").toUpperCase() === "SALE";
-                if(isSale) hasSale = true;
-                return `
-                    <div class="order-item">
-                        <img src="${clean(item.image) || './images/ui/no-image.jpg'}" class="item-img" onerror="this.src='./images/ui/no-image.jpg';">
-                        <div class="item-info">
-                            <div class="item-name">${isSale ? '<span class="sale-badge">SALE</span>' : ''}${item.product_name || item.name}</div>
-                            <div class="item-spec">${item.color} / ${item.size} / ${item.quantity}件</div>
-                            <div style="font-size:13px; font-weight:bold;">NT$ ${Number(item.unit_price || item.price || 0).toLocaleString()}</div>
-                        </div>
-                    </div>`;
-            }).join('');
-            document.getElementById('sale-alert-box').style.display = hasSale ? 'block' : 'none';
+            // --- 商品渲染 ---
+            document.getElementById('order-items-container').innerHTML = (order.items || []).map(item => `
+                <div class="order-item">
+                    <img src="${item.image || './images/ui/no-image.jpg'}" class="item-img" alt="商品照片">
+                    <div class="item-info">
+                        <div class="item-name">${item.product_name}</div>
+                        <div class="item-spec">${item.color} / ${item.size} / ${item.quantity}件</div>
+                        <div style="font-weight:bold;">${fmt(item.unit_price)}</div>
+                    </div>
+                </div>
+            `).join('');
 
-            // 5. 金額渲染
-            const curr = (v) => `NT$ ${Math.floor(Number(v)||0).toLocaleString()}`;
-            document.getElementById('res-subtotal').innerText = curr(order.subtotal);
-            document.getElementById('res-shipping-fee').innerText = curr(order.shipping_fee);
-            document.getElementById('res-discount').innerText = `- NT$ ${Math.floor(Number(order.discount_total)||0).toLocaleString()}`;
-            document.getElementById('res-total').innerText = curr(order.total_amount);
+            // --- 金額渲染 ---
+            document.getElementById('res-subtotal').innerText = fmt(order.subtotal);
+            document.getElementById('res-shipping-fee').innerText = fmt(order.shipping_fee);
+            document.getElementById('res-discount').innerText = `- ${fmt(order.discount_total)}`;
+            document.getElementById('res-total').innerText = fmt(order.total_amount);
 
-            // 6. 物流單號
-            if (res.sn !== "") {
-                document.getElementById('shipping-action-area').style.display = 'block';
-                document.getElementById('display-shipping-no').innerText = res.sn;
-                window.currentSN = res.sn;
+            // --- 物流按鈕 ---
+            const sBtn = document.getElementById('shipping-btn');
+            if(sn) {
+                sBtn.style.display = 'block';
+                document.getElementById('display-shipping-no').innerText = sn;
+                window.lastSN = sn;
             } else {
-                document.getElementById('shipping-action-area').style.display = 'none';
+                sBtn.style.display = 'none';
             }
         }
 
-        function goToTracking() {
-            const sn = window.currentSN;
+        function copyAndTrack() {
+            const sn = String(window.lastSN || "").trim();
             if(!sn) return;
-            const helper = document.getElementById('copy-helper');
-            helper.value = sn; helper.select(); document.execCommand('copy');
-            alert("物流單號已複製：" + sn);
-            const url = sn.length >= 10 ? `https://www.t-cat.com.tw/inquire/TraceDetail.aspx?queryNo=${sn}` : `https://tracking.shopmore.com.tw/`;
-            window.open(url, '_blank');
+
+            navigator.clipboard.writeText(sn).then(() => {
+                alert("單號已複製: " + sn);
+                
+                let url = "";
+                // 判斷物流商
+                if (sn.length === 8 || sn.length === 11) {
+                    url = `https://tracking.7-11.com.tw/tracking/Search?ID=${sn}`;
+                } else {
+                    url = `https://www.t-cat.com.tw/inquire/TraceDetail.aspx?queryNo=${sn}`;
+                }
+                window.open(url, '_blank');
+            });
         }
     </script>
 </body>
