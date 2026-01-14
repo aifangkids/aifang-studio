@@ -1,13 +1,13 @@
 /**
  * AiFang Kids - cart.js
- * [2026.01 終極資料同步版]
- * 負責：渲染購物車、即時計算金額、對接試算表欄位並送出訂單
+ * [2026.01 效能優化版]
+ * 負責：渲染購物車、即時計算金額、儲存狀態並跳轉至結帳頁
  */
 
 document.addEventListener('DOMContentLoaded', () => {
     renderCart();
 
-    // 監聽結帳按鈕 (請確保 HTML ID 為 checkout-btn)
+    // 監聽結帳按鈕 (負責跳轉，不送出 Order)
     const checkoutBtn = document.getElementById('checkout-btn');
     if (checkoutBtn) {
         checkoutBtn.addEventListener('click', handleCheckout);
@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 /**
  * 1. 核心計算邏輯
- * 確保預估金額與最終送出金額一致
+ * 確保預估金額正確
  */
 function calculateOrder(cart) {
     let subtotal = 0;
@@ -41,7 +41,7 @@ function calculateOrder(cart) {
 }
 
 /**
- * 2. 渲染購物車 Table
+ * 2. 渲染購物車 Table (保持原有 CSS 與結構)
  */
 function renderCart() {
     const cart = JSON.parse(localStorage.getItem('cart')) || [];
@@ -93,73 +93,22 @@ function renderCart() {
 }
 
 /**
- * 3. 處理結帳送出 (對接 GAS 欄位)
+ * 3. 處理結帳按鈕點擊 (優化重點：只傳遞資料，不呼叫 API)
  */
-async function handleCheckout() {
+function handleCheckout() {
     const cart = JSON.parse(localStorage.getItem('cart')) || [];
     if (cart.length === 0) return alert("購物車是空的！");
 
-    // 取得 HTML 表單資料 (對應你的試算表欄位名稱)
-    const customer_name = document.getElementById('order-name')?.value;
-    const customer_phone = document.getElementById('order-phone')?.value;
-    const customer_email = document.getElementById('order-email')?.value;
-    const customer_address = document.getElementById('order-address')?.value;
-    const payment_method = document.querySelector('input[name="payment"]:checked')?.value || 'transfer';
-    const shipping_method = document.querySelector('input[name="shipping"]:checked')?.value || '7-11';
-
-
+    // 計算最後金額並存入 localStorage，讓 checkout.html 讀取
     const result = calculateOrder(cart);
+    localStorage.setItem('temp_order_summary', JSON.stringify(result));
 
-    // 構建 Payload：這裡的 Key 必須讓 GAS 的 doPost 能夠正確解析
-    const orderPayload = {
-        order_data: {
-            customer_name,
-            customer_phone,
-            customer_email,
-            customer_address,
-            payment_method,
-            shipping_method,
-            subtotal: result.subtotal,
-            shipping_fee: result.shipping,
-            discount: result.discount,
-            total_amount: result.total
-        },
-        // 這裡的 items 會進入 GAS 的 Order_Items 分頁
-        items: cart.map(item => ({
-            code: item.code,          // 對應 GAS 的 product_code
-            name: item.name,          // 對應 GAS 的 product_name
-            brand: item.brand || "AiFang",
-            color: item.color,
-            size: item.size,
-            price: item.price,        // 對應 GAS 的 unit_price
-            quantity: item.quantity
-        }))
-    };
-
-    const checkoutBtn = document.getElementById('checkout-btn');
-    checkoutBtn.innerText = "訂單處理中...";
-    checkoutBtn.disabled = true;
-
-    try {
-        // 使用 api.js 的 ApiService 送出
-        const response = await ApiService.submitOrder(orderPayload);
-        
-        if (response.success) {
-            alert("訂單已成功送出！請至 Email 查看確認信。");
-            localStorage.removeItem('cart');
-            window.location.href = "order_success.html";
-        } else {
-            throw new Error(response.error || "傳輸失敗");
-        }
-    } catch (err) {
-        alert("結帳發生錯誤: " + err.message);
-        checkoutBtn.innerText = "重新送出結帳";
-        checkoutBtn.disabled = false;
-    }
+    // 立即跳轉至結帳頁面，這就是「變快」的原因
+    window.location.href = "checkout.html";
 }
 
 /**
- * 4. 輔助 UI 功能
+ * 4. 輔助 UI 功能 (保持原有邏輯)
  */
 window.changeQty = function(index, delta) {
     let cart = JSON.parse(localStorage.getItem('cart')) || [];

@@ -18,7 +18,20 @@
         /* Layout */
         .detail-wrapper { display: flex; max-width: 1400px; margin: var(--header-h) auto 0; position: relative; }
         .scroll-content { flex: 1; padding: 40px; border-right: 1px solid #f2f2f2; min-height: 100vh; }
-        #image-main-area img { width: 100%; border-radius: 4px; display: block; margin-bottom: 20px; background: #f9f9f9; height: auto; transition: opacity 0.3s; }
+        
+        /* --- 修正部分：確保圖片自動轉化為 1000x1000 正方形視覺 --- */
+        #image-main-area img { 
+            width: 100%; 
+            max-width: 1000px;           /* 限制最大顯示寬度 */
+            aspect-ratio: 1 / 1;         /* 強制 1:1 比例 */
+            object-fit: cover;           /* 自動填充並裁切多餘部分，不壓扁圖片 */
+            object-position: center;     /* 裁切時以中心為準 */
+            border-radius: 4px; 
+            display: block; 
+            margin: 0 auto 20px; 
+            background: #f9f9f9; 
+            transition: opacity 0.3s; 
+        }
 
         /* Fixed Aside Info */
         .fixed-aside { 
