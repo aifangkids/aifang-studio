@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Detail | AiFang Kids</title>
+    <link rel="icon" href="./favicon.ico" type="image/x-icon">
+    <style>
+        :root { --header-h: 70px; --side-w: 420px; --baby-pink: #f2a6b2; --kids-blue: #8da9c4; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Noto Sans TC', sans-serif; background: #fff; color: #333; overflow-x: hidden; line-height: 1.6; }
+
+        /* Header */
+        .top-header { width: 100%; height: var(--header-h); background: #fff; position: fixed; top: 0; left: 0; z-index: 2000; display: flex; align-items: center; justify-content: space-between; padding: 0 25px; border-bottom: 1px solid #f2f2f2; }
+        .main-logo { height: 30px; cursor: pointer; position: absolute; left: 50%; transform: translateX(-50%); }
+        .header-icon { font-size: 13px; font-weight: bold; cursor: pointer; text-decoration: none; color: #333; letter-spacing: 1px; }
+
+        /* Layout */
+        .detail-wrapper { display: flex; max-width: 1400px; margin: var(--header-h) auto 0; position: relative; }
+        .scroll-content { flex: 1; padding: 40px; border-right: 1px solid #f2f2f2; min-height: 100vh; }
+        #image-main-area img { width: 100%; border-radius: 4px; display: block; margin-bottom: 20px; background: #f9f9f9; height: auto; }
+
+        /* Fixed Aside Info */
+        .fixed-aside { 
+            width: var(--side-w); 
+            position: sticky; 
+            top: var(--header-h); 
+            align-self: flex-start; 
+            padding: 30px 40px; 
+            background: #fff; 
+        }
+
+        /* --- 優化：電腦版右側選單獨立捲動且隱藏捲軸 --- */
+        @media (min-width: 901px) {
+            .fixed-aside {
+                max-height: calc(100vh - var(--header-h));
+                overflow-y: auto;
+                -ms-overflow-style: none;  /* IE/Edge */
+                scrollbar-width: none;  /* Firefox */
+            }
+            .fixed-aside::-webkit-scrollbar {
+                display: none; /* Chrome/Safari */
+            }
+        }
+
+        .brand-tag { font-size: 11px; font-weight: 500; letter-spacing: 1px; text-decoration: underline; margin-bottom: 8px; color: #555; display: block; }
+        .p-title { font-size: 24px; font-weight: 500; margin-bottom: 10px; color: #111; line-height: 1.4; word-break: break-word; }
+        .p-id { font-size: 11px; color: #bbb; margin-bottom: 25px; }
+        .label { font-size: 10px; font-weight: 900; color: #aaa; margin: 25px 0 10px; display: block; letter-spacing: 1px; text-transform: uppercase; border-bottom: 1px solid #f2f2f2; padding-bottom: 5px; }
+
+        /* --- 手機版專用微型投影框 CSS --- */
+        .mobile-preview-box {
+            display: none; 
+            align-items: center;
+            gap: 12px;
+            padding: 10px;
+            background: #fdfdfd;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            animation: fadeIn 0.4s ease;
+        }
+        #mobile-color-preview-img { width: 60px; height: 60px; object-fit: cover; border-radius: 4px; border: 1px solid #f0f0f0; transition: opacity 0.2s; }
+        .preview-info-text { display: flex; flex-direction: column; }
+        .preview-info-text .hint { font-size: 9px; color: #aaa; letter-spacing: 1px; }
+        #mobile-color-preview-name { font-size: 14px; font-weight: 700; color: #333; }
+
+        /* 顏色與尺寸選擇 */
+        .swatch-group { display: flex; flex-wrap: wrap; gap: 8px; }
+        .swatch-item { cursor: pointer; display: flex; align-items: center; padding: 6px 12px; border: 1px solid #ddd; border-radius: 20px; transition: 0.2s; }
+        .swatch-item.active { border: 2px solid #333; font-weight: bold; }
+        .swatch-circle { width: 14px; height: 14px; border-radius: 50%; border: 1px solid #eee; margin-right: 6px; }
+        
+        .size-group { background: #fbfbfb; padding: 15px; border-radius: 4px; margin-bottom: 12px; border: 1px solid #f2f2f2; }
+        .group-header { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 11px; font-weight: bold; }
+        .price-tag { color: #d9534f; }
+        .s-btn-wrap { display: flex; flex-wrap: wrap; gap: 6px; }
+        .s-btn { border: 1px solid #ddd; background: #fff; padding: 8px 14px; cursor: pointer; font-size: 11px; transition: 0.2s; border-radius: 2px; }
+        .s-btn:hover { border-color: #333; }
+        .s-btn.active.babe { background: var(--baby-pink); color: #fff; border-color: var(--baby-pink); }
+        .s-btn.active.kids { background: var(--kids-blue); color: #fff; border-color: var(--kids-blue); }
+
+        /* 複選清單樣式 */
+        .selected-list { margin: 20px 0; border-top: 1px solid #eee; }
+        .selected-item { background: #f9f9f9; padding: 15px; margin-top: 10px; position: relative; border-radius: 4px; animation: fadeIn 0.3s ease; }
+        .sel-info { font-size: 12px; margin-bottom: 10px; font-weight: 500; }
+        .sel-close { position: absolute; top: 10px; right: 10px; width: 18px; cursor: pointer; opacity: 0.5; }
+        .sel-close:hover { opacity: 1; }
+        .sel-bottom { display: flex; justify-content: space-between; align-items: center; }
+        
+        /* 數量控制 */
+        .qty-box { display: flex; align-items: center; border: 1px solid #ddd; background: #fff; }
+        .qty-btn { width: 30px; height: 30px; border: none; background: none; cursor: pointer; font-size: 16px; }
+        .qty-input { width: 35px; text-align: center; border: none; font-size: 12px; pointer-events: none; font-weight: bold; }
+
+        .add-cart-btn { width: 100%; padding: 18px; background: #111; color: #fff; border: none; font-size: 13px; font-weight: 700; letter-spacing: 2px; cursor: pointer; margin-top: 10px; transition: 0.3s; }
+        .add-cart-btn:hover { background: #333; }
+
+        /* 工具按鈕 */
+        .tool-btns { position: fixed; right: 20px; bottom: 30px; z-index: 100; display: flex; flex-direction: column; gap: 10px; }
+        .tool-btn { 
+            width: 45px; height: 45px; background: #fff; border: 1px solid #333; 
+            display: flex; align-items: center; justify-content: center; 
+            font-size: 11px; font-weight: bold; cursor: pointer; transition: 0.3s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .tool-btn:hover { background: #333; color: #fff; }
+
+        /* --- 新增：手機版專用「直接下單」按鈕 --- */
+        .mobile-order-trigger {
+            display: none;
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #111;
+            color: #fff;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-size: 12px;
+            font-weight: bold;
+            letter-spacing: 2px;
+            z-index: 2001;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            border: none;
+            transition: 0.3s;
+        }
+
+        /* Toast 提示 */
+        #custom-toast {
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.85); color: #fff; padding: 16px 32px;
+            border-radius: 4px; font-size: 14px; z-index: 9999;
+            opacity: 0; visibility: hidden; transition: 0.3s;
+            white-space: nowrap; letter-spacing: 1px; pointer-events: none;
+        }
+        #custom-toast.show { opacity: 1; visibility: visible; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- 手機版響應式優化 --- */
+        @media (max-width: 900px) {
+            .detail-wrapper { flex-direction: column; }
+            .scroll-content { order: 1; padding: 15px; border-right: none; min-height: auto; }
+            .fixed-aside { order: 2; width: 100%; position: relative; top: 0; padding: 30px 20px; border-top: 10px solid #f9f9f9; }
+            .p-title { font-size: 22px; }
+            .tool-btns { right: 15px; bottom: 15px; }
+            .s-btn { padding: 10px 16px; font-size: 12px; }
+            .mobile-preview-box { display: flex; }
+            .mobile-order-trigger { display: block; }
+        }
+    </style>
+</head>
+<body>
+
+    <header class="top-header">
+        <a href="javascript:history.back()" class="header-icon">BACK</a>
+        <img src="images/ui/logo.png" class="main-logo" alt="AIFANG" onclick="location.href='index.html'">
+        <a href="cart.html" class="header-icon">CART (<span id="cart-count">0</span>)</a>
+    </header>
+
+    <div class="detail-wrapper">
+        <main class="scroll-content" id="image-main-area">
+            <img id="primary-img" src="" alt="Loading...">
+        </main>
+
+        <aside class="fixed-aside" id="product-info">
+            <span id="p-brand" class="brand-tag">-</span>
+            <h1 id="p-title" class="p-title">載入中...</h1>
+            <p id="p-id" class="p-id">CODE: -</p>
+
+            <span class="label">COLOR / 顏色</span>
+            
+            <div id="mobile-preview-area" class="mobile-preview-box">
+                <img id="mobile-color-preview-img" src="" alt="Color Preview">
+                <div class="preview-info-text">
+                    <span class="hint">SELECTED COLOR</span>
+                    <span id="mobile-color-preview-name">請選擇花色</span>
+                </div>
+            </div>
+
+            <div id="swatch-group" class="swatch-group"></div>
+
+            <span class="label">SIZE / 尺寸價格</span>
+            <div id="size-area"></div>
+
+            <div id="selected-list" class="selected-list"></div>
+
+            <button class="add-cart-btn" onclick="addAllToCart()">ADD TO CART</button>
+            <p id="styling-note" style="margin-top:25px; font-size:12px; color:#888; line-height:1.7; white-space: pre-line;"></p>
+        </aside>
+    </div>
+
+    <button class="mobile-order-trigger" id="scroll-trigger" onclick="scrollToOptions()">SELECT OPTIONS</button>
+
+    <div class="tool-btns">
+        <div class="tool-btn" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">TOP</div>
+    </div>
+
+    <div id="custom-toast"></div>
+
+    <script src="js/detail.js"></script>
+
+    <script>
+        // 1. 手機版：點擊按鈕滑動至選單區
+        function scrollToOptions() {
+            const aside = document.getElementById('product-info');
+            const offset = aside.offsetTop - 80;
+            window.scrollTo({ top: offset, behavior: 'smooth' });
+        }
+
+        // 2. 手機版：滾動監聽，當用戶已經滑到選單區時，隱藏浮動按鈕
+        window.addEventListener('scroll', () => {
+            const trigger = document.getElementById('scroll-trigger');
+            const aside = document.getElementById('product-info');
+            if (window.innerWidth <= 900 && trigger && aside) {
+                // 如果滑動超過選單區上方 300px，就隱藏按鈕
+                if (window.pageYOffset > (aside.offsetTop - 300)) {
+                    trigger.style.opacity = '0';
+                    trigger.style.pointerEvents = 'none';
+                } else {
+                    trigger.style.opacity = '1';
+                    trigger.style.pointerEvents = 'auto';
+                }
+            }
+        });
+    </script>
+</body>
+</html>
