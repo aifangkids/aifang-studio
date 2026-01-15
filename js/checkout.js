@@ -1,6 +1,6 @@
 /**
  * AiFang Kids - checkout.js
- * [2026.01 最終優化完整版 - 整合門市查詢、自動格式化與成功頁面對接]
+ * [2026.01 最終優化完整版 - 包含 Email 寫入與成功頁面 100% 對接]
  */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -165,12 +165,15 @@ async function submitOrder() {
     const payMethodEl = document.querySelector('input[name="pay_method"]:checked');
     const shipMethodEl = document.querySelector('input[name="ship_method"]:checked');
 
+    // 獲取所有欄位資訊
+    const email = document.getElementById('cust_email')?.value.trim();
     const name = document.getElementById('cust_name')?.value.trim();
     const phone = document.getElementById('cust_phone')?.value.trim();
     const address = document.getElementById('cust_address')?.value.trim();
 
-    if (!name || !phone || !address || !payMethodEl || !shipMethodEl) {
-        alert("請填寫完整收件資訊並選擇運送方式");
+    // 驗證（包含 Email）
+    if (!email || !name || !phone || !address || !payMethodEl || !shipMethodEl) {
+        alert("請填寫完整收件資訊（含 Email）並選擇運送方式");
         return;
     }
 
@@ -181,38 +184,54 @@ async function submitOrder() {
     const orderId = "AF" + new Date().getTime().toString().slice(-6);
     const payText = payMethodEl.value === 'transfer' ? '銀行匯款(8折)' : '貨到付款(9折)';
 
+    // LINE 訊息生成
     let lineMsg = `AIFANG KIDS 訂單確認\n•┈┈┈┈┈┈୨୧┈┈┈┈┈┈•\n訂單編號：${orderId}\n收件人：${name}\n付款方式：${payText}\n•┈┈┈┈┈┈୨୧┈┈┈┈┈┈•\n`;
     cart.forEach((item, i) => {
         lineMsg += `${i+1}. ${item.name} (${item.color}/${item.size}) x${item.quantity}\n`;
     });
     lineMsg += `•┈┈┈┈┈┈୨୧┈┈┈┈┈┈•\n應付金額：NT$ ${calc.finalTotal.toLocaleString()}`;
 
+    // 傳送到試算表的資料 (加入 customer_email)
     const order_payload = {
         mode: "createOrder",
         order_data: { 
-            order_id: orderId, customer_name: name, customer_phone: phone, 
-            customer_address: address, payment_method: payMethodEl.value, 
-            shipping_method: shipMethodEl.value, subtotal: calc.subtotal, 
-            discount: calc.discountAmount, shipping_fee: calc.shippingFee, total_amount: calc.finalTotal 
+            order_id: orderId, 
+            customer_email: email, 
+            customer_name: name, 
+            customer_phone: phone, 
+            customer_address: address, 
+            payment_method: payMethodEl.value, 
+            shipping_method: shipMethodEl.value, 
+            subtotal: calc.subtotal, 
+            discount: calc.discountAmount, 
+            shipping_fee: calc.shippingFee, 
+            total_amount: calc.finalTotal 
         },
-        items: cart.map(item => ({ code: item.code, name: item.name, color: item.color, size: item.size, price: Number(item.price), quantity: Number(item.quantity) }))
+        items: cart.map(item => ({ 
+            code: item.code, 
+            name: item.name, 
+            color: item.color, 
+            size: item.size, 
+            price: Number(item.price), 
+            quantity: Number(item.quantity) 
+        }))
     };
 
-    // --- 關鍵修正：對接原版 order_success.js 的欄位名稱 ---
+    // 存入 LocalStorage (給 order_success.js 使用，對齊欄位名)
     localStorage.setItem('last_order_info', JSON.stringify({ 
         id: orderId, 
         customer_name: name, 
         customer_phone: phone, 
         customer_address: address, 
-        pay_method_text: payText, // 修正名稱
+        pay_method_text: payText,
         total_amount: calc.finalTotal, 
         line_msg: lineMsg,
         items: cart.map(item => ({
-            product_name: item.name, // 修正名稱
+            product_name: item.name,
             color: item.color,
             size: item.size,
             quantity: item.quantity,
-            unit_price: Number(item.price) // 修正名稱
+            unit_price: Number(item.price)
         }))
     }));
 
