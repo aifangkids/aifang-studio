@@ -5,8 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Product Detail | AiFang Kids</title>
     <link rel="icon" href="./favicon.ico" type="image/x-icon">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    
     <style>
-        :root { --header-h: 70px; --side-w: 420px; --baby-pink: #f2a6b2; --kids-blue: #8da9c4; }
+        :root { --header-h: 70px; --side-w: 420px; --baby-pink: #f2a6b2; --kids-blue: #8da9c4; --accent: #d9534f; }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Noto Sans TC', sans-serif; background: #fff; color: #333; overflow-x: hidden; line-height: 1.6; }
 
@@ -17,20 +19,30 @@
 
         /* Layout */
         .detail-wrapper { display: flex; max-width: 1400px; margin: var(--header-h) auto 0; position: relative; }
-        .scroll-content { flex: 1; padding: 40px; border-right: 1px solid #f2f2f2; min-height: 100vh; }
         
-        /* --- 修正部分：確保圖片自動轉化為 1000x1000 正方形視覺 --- */
+        /* 左側滾動內容區 */
+        .scroll-content { 
+            flex: 1; 
+            padding: 40px; 
+            border-right: 1px solid #f2f2f2; 
+            min-height: 100vh;
+            background: #fff;
+        }
+        
+        /* --- 修正部分：不限制 1000x1000，改為寬度自適應完整顯示 --- */
         #image-main-area img { 
-            width: 100%; 
-            max-width: 1000px;           /* 限制最大顯示寬度 */
-            aspect-ratio: 1 / 1;         /* 強制 1:1 比例 */
-            object-fit: cover;           /* 自動填充並裁切多餘部分，不壓扁圖片 */
-            object-position: center;     /* 裁切時以中心為準 */
+            width: 100%;             /* 寬度填滿容器 */
+            max-width: 1200px;       /* 提升最大寬度上限 */
+            height: auto;            /* 高度自動，不強制正方形，確保比例不失真 */
+            aspect-ratio: auto;      /* 移除強制 1:1 比例 */
+            object-fit: contain;     /* 確保完整顯示，不裁切 */
             border-radius: 4px; 
             display: block; 
-            margin: 0 auto 20px; 
-            background: #f9f9f9; 
-            transition: opacity 0.3s; 
+            margin: 0 auto 30px;     /* 圖片間距加寬 */
+            background: #fff;        /* 移除灰色背景，讓圖片更乾淨 */
+            transition: opacity 0.4s ease; 
+            /* 效能優化 */
+            image-rendering: -webkit-optimize-contrast;
         }
 
         /* Fixed Aside Info */
@@ -43,7 +55,7 @@
             background: #fff; 
         }
 
-        /* --- 電腦版右側選單獨立捲動且隱藏捲軸 --- */
+        /* 電腦版右側選單獨立捲動且隱藏捲軸 */
         @media (min-width: 901px) {
             .fixed-aside {
                 max-height: calc(100vh - var(--header-h));
@@ -54,70 +66,74 @@
             .fixed-aside::-webkit-scrollbar { display: none; }
         }
 
-        .brand-tag { font-size: 11px; font-weight: 500; letter-spacing: 1px; text-decoration: underline; margin-bottom: 8px; color: #555; display: block; }
+        /* 文字排版優化 */
+        .brand-tag { font-size: 11px; font-weight: 500; letter-spacing: 1px; text-decoration: underline; margin-bottom: 8px; color: #555; display: block; text-transform: uppercase; }
         .p-title { font-size: 24px; font-weight: 500; margin-bottom: 10px; color: #111; line-height: 1.4; word-break: break-word; }
-        .p-id { font-size: 11px; color: #bbb; margin-bottom: 25px; }
+        .p-id { font-size: 11px; color: #bbb; margin-bottom: 25px; letter-spacing: 0.5px; }
         .label { font-size: 10px; font-weight: 900; color: #aaa; margin: 25px 0 10px; display: block; letter-spacing: 1px; text-transform: uppercase; border-bottom: 1px solid #f2f2f2; padding-bottom: 5px; }
 
-        /* --- 手機版專用微型投影框 CSS --- */
+        /* 手機版專用微型投影框 */
         .mobile-preview-box {
             display: none; 
             align-items: center;
             gap: 12px;
-            padding: 10px;
-            background: #fdfdfd;
+            padding: 12px;
+            background: #fafafa;
             border: 1px solid #eee;
             border-radius: 8px;
             margin-bottom: 15px;
             animation: fadeIn 0.4s ease;
         }
-        #mobile-color-preview-img { width: 60px; height: 60px; object-fit: cover; border-radius: 4px; border: 1px solid #f0f0f0; }
+        #mobile-color-preview-img { width: 64px; height: 64px; object-fit: cover; border-radius: 4px; border: 1px solid #eee; }
         .preview-info-text { display: flex; flex-direction: column; }
-        .preview-info-text .hint { font-size: 9px; color: #aaa; letter-spacing: 1px; }
+        .preview-info-text .hint { font-size: 9px; color: #aaa; letter-spacing: 1px; margin-bottom: 2px; }
         #mobile-color-preview-name { font-size: 14px; font-weight: 700; color: #333; }
 
-        /* 顏色與尺寸選擇 */
+        /* 顏色選取器 */
         .swatch-group { display: flex; flex-wrap: wrap; gap: 8px; }
-        .swatch-item { cursor: pointer; display: flex; align-items: center; padding: 6px 12px; border: 1px solid #ddd; border-radius: 20px; transition: 0.2s; background: #fff; }
-        .swatch-item.active { border: 2px solid #333; font-weight: bold; }
-        .swatch-circle { width: 14px; height: 14px; border-radius: 50%; border: 1px solid #eee; margin-right: 6px; }
+        .swatch-item { cursor: pointer; display: flex; align-items: center; padding: 6px 14px; border: 1px solid #ddd; border-radius: 20px; transition: 0.2s; background: #fff; font-size: 12px; }
+        .swatch-item.active { border: 2px solid #111; font-weight: bold; background: #f9f9f9; }
+        .swatch-circle { width: 14px; height: 14px; border-radius: 50%; border: 1px solid #eee; margin-right: 8px; background-size: cover; }
         
-        .size-group { background: #fbfbfb; padding: 15px; border-radius: 4px; margin-bottom: 12px; border: 1px solid #f2f2f2; }
+        /* 尺寸選取區 */
+        .size-group { background: #fdfdfd; padding: 15px; border-radius: 4px; margin-bottom: 12px; border: 1px solid #f2f2f2; }
         .group-header { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 11px; font-weight: bold; }
-        .price-tag { color: #d9534f; }
-        .s-btn-wrap { display: flex; flex-wrap: wrap; gap: 6px; }
-        .s-btn { border: 1px solid #ddd; background: #fff; padding: 8px 14px; cursor: pointer; font-size: 11px; transition: 0.2s; border-radius: 2px; }
+        .price-tag { color: var(--accent); font-size: 13px; }
+        .s-btn-wrap { display: flex; flex-wrap: wrap; gap: 8px; }
+        .s-btn { border: 1px solid #ddd; background: #fff; padding: 10px 16px; cursor: pointer; font-size: 11px; transition: 0.2s; border-radius: 2px; }
         .s-btn:hover { border-color: #333; }
-        .s-btn.active.babe { background: var(--baby-pink); color: #fff; border-color: var(--baby-pink); }
-        .s-btn.active.kids { background: var(--kids-blue); color: #fff; border-color: var(--kids-blue); }
+        .s-btn.active.babe { background: var(--baby-pink); color: #fff; border-color: var(--baby-pink); font-weight: bold; }
+        .s-btn.active.kids { background: var(--kids-blue); color: #fff; border-color: var(--kids-blue); font-weight: bold; }
 
-        /* 複選清單樣式 */
+        /* 已選項目清單 */
         .selected-list { margin: 20px 0; border-top: 1px solid #eee; }
-        .selected-item { background: #f9f9f9; padding: 15px; margin-top: 10px; position: relative; border-radius: 4px; animation: fadeIn 0.3s ease; }
-        .sel-info { font-size: 12px; margin-bottom: 10px; font-weight: 500; }
-        .sel-close { position: absolute; top: 10px; right: 10px; width: 18px; cursor: pointer; opacity: 0.5; }
+        .selected-item { background: #f9f9f9; padding: 15px; margin-top: 10px; position: relative; border-radius: 4px; animation: fadeIn 0.3s ease; border: 1px solid #f0f0f0; }
+        .sel-info { font-size: 12px; margin-bottom: 10px; font-weight: 500; color: #333; }
+        .sel-close { position: absolute; top: 12px; right: 12px; width: 16px; height: 16px; cursor: pointer; opacity: 0.4; transition: 0.2s; }
         .sel-close:hover { opacity: 1; }
         .sel-bottom { display: flex; justify-content: space-between; align-items: center; }
         
-        /* 數量控制 */
-        .qty-box { display: flex; align-items: center; border: 1px solid #ddd; background: #fff; }
-        .qty-btn { width: 30px; height: 30px; border: none; background: none; cursor: pointer; font-size: 16px; }
-        .qty-input { width: 35px; text-align: center; border: none; font-size: 12px; pointer-events: none; font-weight: bold; }
+        /* 數量按鈕 */
+        .qty-box { display: flex; align-items: center; border: 1px solid #ddd; background: #fff; border-radius: 2px; overflow: hidden; }
+        .qty-btn { width: 32px; height: 32px; border: none; background: none; cursor: pointer; font-size: 16px; transition: 0.2s; }
+        .qty-btn:hover { background: #f0f0f0; }
+        .qty-input { width: 35px; text-align: center; border: none; font-size: 13px; pointer-events: none; font-weight: bold; }
 
-        .add-cart-btn { width: 100%; padding: 18px; background: #111; color: #fff; border: none; font-size: 13px; font-weight: 700; letter-spacing: 2px; cursor: pointer; margin-top: 10px; transition: 0.3s; }
-        .add-cart-btn:hover { background: #333; }
+        /* 加入購物車按鈕 */
+        .add-cart-btn { width: 100%; padding: 20px; background: #111; color: #fff; border: none; font-size: 13px; font-weight: 700; letter-spacing: 2px; cursor: pointer; margin-top: 15px; transition: 0.3s; }
+        .add-cart-btn:hover { background: #333; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
 
-        /* 工具按鈕 */
+        /* 工具鈕 */
         .tool-btns { position: fixed; right: 20px; bottom: 30px; z-index: 100; display: flex; flex-direction: column; gap: 10px; }
         .tool-btn { 
             width: 45px; height: 45px; background: #fff; border: 1px solid #333; 
             display: flex; align-items: center; justify-content: center; 
             font-size: 11px; font-weight: bold; cursor: pointer; transition: 0.3s;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
         }
         .tool-btn:hover { background: #333; color: #fff; }
 
-        /* 手機版專用「直接下單」按鈕 */
+        /* 手機版下方浮動按鈕 */
         .mobile-order-trigger {
             display: none;
             position: fixed;
@@ -126,13 +142,13 @@
             transform: translateX(-50%);
             background: #111;
             color: #fff;
-            padding: 15px 30px;
+            padding: 16px 36px;
             border-radius: 50px;
             font-size: 12px;
             font-weight: bold;
             letter-spacing: 2px;
             z-index: 2001;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
             border: none;
             transition: 0.3s;
         }
@@ -140,25 +156,26 @@
         /* Toast 提示 */
         #custom-toast {
             position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            background: rgba(0,0,0,0.85); color: #fff; padding: 16px 32px;
+            background: rgba(0,0,0,0.85); color: #fff; padding: 18px 36px;
             border-radius: 4px; font-size: 14px; z-index: 9999;
             opacity: 0; visibility: hidden; transition: 0.3s;
             white-space: nowrap; letter-spacing: 1px; pointer-events: none;
         }
         #custom-toast.show { opacity: 1; visibility: visible; }
 
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* 手機版響應式優化 */
+        /* 手機版響應式 */
         @media (max-width: 900px) {
             .detail-wrapper { flex-direction: column; }
             .scroll-content { order: 1; padding: 15px; border-right: none; min-height: auto; }
-            .fixed-aside { order: 2; width: 100%; position: relative; top: 0; padding: 30px 20px; border-top: 10px solid #f9f9f9; }
+            #image-main-area img { margin-bottom: 15px; }
+            .fixed-aside { order: 2; width: 100%; position: relative; top: 0; padding: 30px 20px; border-top: 8px solid #f2f2f2; }
             .p-title { font-size: 22px; }
             .tool-btns { right: 15px; bottom: 15px; }
-            .s-btn { padding: 10px 16px; font-size: 12px; }
             .mobile-preview-box { display: flex; }
             .mobile-order-trigger { display: block; }
+            .add-cart-btn { padding: 18px; }
         }
     </style>
 </head>
@@ -172,12 +189,12 @@
 
     <div class="detail-wrapper">
         <main class="scroll-content" id="image-main-area">
-            <img id="primary-img" src="" alt="Product Image">
-            </main>
+            <img id="primary-img" src="" alt="Product Image" loading="lazy">
+        </main>
 
         <aside class="fixed-aside" id="product-info">
             <span id="p-brand" class="brand-tag">-</span>
-            <h1 id="p-title" class="p-title">載入中...</h1>
+            <h1 id="p-title" class="p-title">LOADING...</h1>
             <p id="p-id" class="p-id">CODE: -</p>
 
             <span class="label">COLOR / 顏色</span>
@@ -214,7 +231,7 @@
     <script src="js/detail.js"></script>
 
     <script>
-        // 手機版：點擊按鈕滑動至選單區
+        // 手機版滑動邏輯
         function scrollToOptions() {
             const aside = document.getElementById('product-info');
             if (aside) {
@@ -223,11 +240,12 @@
             }
         }
 
-        // 手機版：滾動監聽，當用戶已經滑到選單區時，隱藏浮動按鈕
+        // 滾動監聽
         window.addEventListener('scroll', () => {
             const trigger = document.getElementById('scroll-trigger');
             const aside = document.getElementById('product-info');
             if (window.innerWidth <= 900 && trigger && aside) {
+                // 如果已經滑到選單區，則隱藏浮動按鈕
                 if (window.pageYOffset > (aside.offsetTop - 300)) {
                     trigger.style.opacity = '0';
                     trigger.style.pointerEvents = 'none';
