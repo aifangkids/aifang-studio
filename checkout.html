@@ -27,6 +27,13 @@
         .input-group input:focus { border-color: #111; background: #fff; }
         .input-group input::placeholder { color: #ccc; font-size: 13px; }
 
+        /* 門市查詢專用樣式 */
+        #store-helper-area { margin-bottom: 25px; }
+        .helper-card { background: #fff9fa; border: 1px dashed var(--accent); padding: 20px; border-radius: 2px; }
+        .btn-map-trigger { width: 100%; padding: 14px; background: #111; color: #fff; border: none; font-size: 12px; font-weight: bold; cursor: pointer; letter-spacing: 1px; transition: 0.3s; }
+        .btn-map-trigger:hover { background: #333; }
+        .helper-text { font-size: 11px; color: #888; margin-top: 10px; line-height: 1.6; }
+
         /* 選項按鈕 */
         .radio-group { display: flex; flex-direction: column; gap: 12px; margin-top: 5px; }
         .radio-item { display: flex; align-items: flex-start; flex-wrap: wrap; padding: 15px; border: 1px solid #eee; cursor: pointer; font-size: 13px; transition: 0.3s; position: relative; }
@@ -43,7 +50,6 @@
         .order-summary { background: #111; color: #fff; padding: 35px; border-radius: 2px; margin-top: 40px; }
         .summary-line { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; font-size: 13px; opacity: 0.8; }
         
-        /* 折扣行文字樣式 */
         .discount-label { display: flex; flex-direction: column; }
         .sale-notice { color: var(--accent); font-size: 10px; font-weight: bold; margin-top: 2px; }
 
@@ -96,8 +102,8 @@
                     <span>貨到付款</span>
                     <span class="discount-tag tag-red">9 折</span>
                     <div class="payment-notice">
-                        1. 會為您安排 賣貨便 專屬下單連結<br>
-                        2. 『運費』將依照平台標準計算
+                        1. 會為您安排 交貨便 出貨<br>
+                        2. 『運費』為 60 元
                     </div>  
                 </label>
             </div>
@@ -124,9 +130,23 @@
             <label>PHONE / 手機號碼</label>
             <input type="tel" id="cust_phone" placeholder="09xxxxxxxx">
         </div>
+
+        <div id="store-helper-area" style="display:none;">
+            <label>7-11 STORE SEARCH / 門市查詢</label>
+            <div class="helper-card">
+                <button type="button" class="btn-map-trigger" onclick="openIbonMap()">
+                    🔍 開啟 IBON 門市查詢小視窗
+                </button>
+                <p class="helper-text">
+                    💡 <b>小提醒：</b><br>
+                    進入查詢頁面找到門市後，<b>長按複製「店號 + 店名」</b>整行文字，貼入下方地址欄即可自動完成排版。
+                </p>
+            </div>
+        </div>
+
         <div class="input-group">
             <label id="address-label">ADDRESS / 收件地址</label>
-            <input type="text" id="cust_address" placeholder="完整收件地址 或 7-11 店名店號">
+            <input type="text" id="cust_address" placeholder="完整收件地址 或 貼上門市資訊">
         </div>
     </div>
 
@@ -150,7 +170,7 @@
             <span>ORDER TOTAL / 總計</span>
             <span id="show-total">NT$ 0</span>
         </div>
-        <button id="submit-btn" class="btn-place-order" onclick="submitOrder()">PLACE ORDER</button>
+        <button id="submit-btn" class="btn-place-order">PLACE ORDER</button>
     </div>
 </div>
 
