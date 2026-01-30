@@ -227,7 +227,7 @@ function closeMenu() {
  * 5. 彈窗邏輯
  */
 function showRandomPopup() {
-    const pops = ['./images/popup/popup_01.jpg','./images/popup/popup_02.jpg']; 
+    const pops = ['./images/popup/popup_01.jpg','./images/popup/popup_02.jpg','./images/popup/popup_03.jpg']; 
     const randomPop = pops[Math.floor(Math.random() * pops.length)];
     const popImg = document.getElementById('popup-img');
     const overlay = document.getElementById('popup-overlay');
