@@ -1,6 +1,6 @@
 /**
  * AiFang Kids - index.js
- * [2026.02 最終優化版 - 配合 api.js 預處理價格顯示]
+ * [2026.02 優化版]
  */
 
 let allData = [];
@@ -11,30 +11,38 @@ let activeBrands = new Set();
  * 1. 初始化頁面
  */
 async function init() {
-    showRandomPopup(); 
+    // 綁定事件與彈窗
     bindPopupEvents(); 
+    showRandomPopup(); 
     
     try {
-        console.log("🚀 [Index] 正在初始化商品資料...");
-        // 調用 api.js 封裝好的 ApiService
-        // 注意：這裡拿到的資料已經過 api.js 的 _processPrices 處理
+        console.log("🚀 [Index] 正在從 ApiService 初始化資料...");
+        // 獲取已由 api.js 預處理過價格的商品資料
         allData = await ApiService.fetchProducts();
         
         if (allData && allData.length > 0) {
             render(allData);
-            document.getElementById('main-content').classList.add('loaded');
+            // 觸發漸顯動畫
+            const main = document.getElementById('main-content');
+            if (main) main.classList.add('loaded');
         } else {
-            throw new Error("無商品資料");
+            throw new Error("目前沒有可顯示的商品");
         }
     } catch (e) {
         console.error("載入失敗:", e);
         const container = document.getElementById('product-list');
-        if (container) container.innerHTML = "<p style='grid-column: 1/-1; text-align:center; padding: 50px;'>系統維護中，請稍後再試。</p>";
+        if (container) {
+            container.innerHTML = `
+                <div style="grid-column: 1/-1; text-align:center; padding: 100px 0; color:#888;">
+                    <p style="font-size: 14px; letter-spacing: 1px;">SYSTEM MAINTENANCE</p>
+                    <p style="font-size: 11px; margin-top: 10px;">請稍後再試或聯繫客服</p>
+                </div>`;
+        }
     }
 }
 
 /**
- * 2. 渲染商品列表 (配合 api.js 欄位顯示)
+ * 2. 渲染商品列表
  */
 function render(items) {
     const container = document.getElementById('product-list');
@@ -43,26 +51,23 @@ function render(items) {
     container.innerHTML = "";
     
     if (items.length === 0) {
-        container.innerHTML = "<p style='grid-column: 1/-1; text-align:center; padding: 50px; color:#999;'>Coming Soon...</p>";
+        container.innerHTML = "<p style='grid-column: 1/-1; text-align:center; padding: 100px 0; color:#bbb; letter-spacing:2px;'>COMING SOON...</p>";
         return;
     }
 
     items.forEach(item => {
-        const status = (String(item.status) || "").toUpperCase();
+        const status = (String(item.status || "")).toUpperCase();
         const isSale = status === "SALE";
         const badgeHtml = status ? `<span class="status-badge badge-${status}">${status}</span>` : "";
         
-        // --- 價格顯示邏輯：直接取用 api.js 算好的欄位 ---
+        // 價格顯示：配合 CSS 的 .on-sale 控制大小與顏色
         let priceHtml = "";
-
         if (isSale) {
-            // SALE 商品：只顯示最終價 (紅字)
             priceHtml = `
                 <div class="p-price-wrapper on-sale">
                     <div class="p-price-final">NT$ ${item.price_final.toLocaleString()}</div>
                 </div>`;
         } else {
-            // 一般商品：顯示原價 (刪除線) + 9折價
             priceHtml = `
                 <div class="p-price-wrapper">
                     <div class="p-price-original">NT$ ${item.price_original.toLocaleString()}</div>
@@ -70,7 +75,7 @@ function render(items) {
                 </div>`;
         }
 
-        // 處理顏色圓點與花色 (Pattern)
+        // 顏色圓點處理 (支援 Hex 與 Pattern)
         const names = String(item.color || "").split(',').filter(Boolean);
         const codes = String(item.color_code || "").split(',').filter(Boolean);
         const patterns = String(item.color_pattern || "").split(',').filter(Boolean);
@@ -79,16 +84,16 @@ function render(items) {
         names.forEach((name, index) => {
             const hex = (codes[index] || "").trim();
             const patternImg = (patterns[index] || "").trim();
-            let style = "";
+            let dotStyle = "";
             
             if (patternImg) {
-                style = `background-image: url('${patternImg}'); background-size: cover;`;
+                dotStyle = `background-image: url('${patternImg}');`;
             } else if (hex.startsWith('#')) {
-                style = `background-color: ${hex};`;
+                dotStyle = `background-color: ${hex};`;
             }
             
-            if (style) {
-                colorHtml += `<div class="color-dot" title="${name.trim()}" style="${style}"></div>`;
+            if (dotStyle) {
+                colorHtml += `<div class="color-dot" title="${name.trim()}" style="${dotStyle}"></div>`;
             }
         });
         colorHtml += '</div>';
@@ -102,7 +107,7 @@ function render(items) {
         card.innerHTML = `
             <div class="img-wrap" style="background-image: url('${item.image_main}')">${badgeHtml}</div>
             <div class="info-wrap">
-                <p class="p-name">${item.name || '未命名商品'}</p>
+                <p class="p-name">${item.name || 'Untitled'}</p>
                 ${colorHtml}
                 ${priceHtml}
             </div>`;
@@ -111,7 +116,7 @@ function render(items) {
 }
 
 /**
- * 3. 搜尋與篩選邏輯 (保持不變)
+ * 3. 搜尋與篩選
  */
 function handleSearch(query) {
     const q = query.toLowerCase().trim();
@@ -130,9 +135,7 @@ function filterByCat(cat) {
     activeCat = cat; 
     activeBrands.clear(); 
     
-    const searchInput = document.getElementById('search-input');
-    if (searchInput) searchInput.value = ""; 
-
+    // UI 反饋：選單啟動
     document.querySelectorAll('.category-menu li').forEach(li => {
         const liText = li.innerText.replace(' ITEMS', '').trim();
         li.classList.toggle('active', liText.toUpperCase() === cat.toUpperCase());
@@ -140,6 +143,7 @@ function filterByCat(cat) {
 
     const filtered = cat === 'All' ? allData : allData.filter(p => p.category === cat);
     
+    // 處理品牌面板
     const area = document.getElementById('brand-area');
     const brandList = document.getElementById('brand-list');
     
@@ -179,7 +183,7 @@ function toggleBrand(e, b) {
 }
 
 /**
- * 4. UI 互動 (保持不變)
+ * 4. 購物車 UI 互動
  */
 function toggleCart() {
     const cartSide = document.getElementById('cart-sidebar');
@@ -200,27 +204,33 @@ function renderMiniCart() {
     if (!container || !totalEl) return;
 
     if (cartData.length === 0) {
-        container.innerHTML = "<p style='text-align:center; padding:40px; color:#bbb; font-size:12px;'>Bag is empty</p>";
+        container.innerHTML = `
+            <div style="text-align:center; padding:80px 0; color:#ccc;">
+                <p style="font-size:11px; letter-spacing:1px;">YOUR BAG IS EMPTY</p>
+            </div>`;
         totalEl.innerText = `NT$ 0`;
         return;
     }
 
     container.innerHTML = cartData.map(item => {
-        // 注意：這裡應使用 item.price，因為加入購物車時應已存入 price_final
-        total += item.price * item.quantity;
+        total += (item.price * item.quantity);
         return `
-            <div style="display:flex; gap:15px; margin-bottom:20px; font-size:12px; align-items:center;">
-                <img src="${item.image}" width="60" style="border-radius:2px; aspect-ratio:1/1; object-fit:cover;">
-                <div style="flex:1;">
-                    <p style="font-weight:700; margin-bottom:3px;">${item.name}</p>
-                    <p style="color:#888;">${item.color} / ${item.size}</p>
-                    <p style="margin-top:2px;">${item.quantity} x NT$ ${item.price.toLocaleString()}</p>
+            <div class="cart-item">
+                <img src="${item.image}" alt="${item.name}">
+                <div class="cart-item-info" style="flex:1; font-size:12px;">
+                    <p style="font-weight:700; margin-bottom:2px;">${item.name}</p>
+                    <p style="color:#888; font-size:11px; margin-bottom:4px;">${item.color} / ${item.size}</p>
+                    <p style="font-weight:500;">${item.quantity} x NT$ ${item.price.toLocaleString()}</p>
                 </div>
             </div>`;
     }).join('');
+    
     totalEl.innerText = `NT$ ${total.toLocaleString()}`;
 }
 
+/**
+ * 5. 側欄選單控制
+ */
 function toggleMenu() { 
     const sidebar = document.getElementById('sidebar');
     const overlay = document.getElementById('overlay');
@@ -239,7 +249,7 @@ function closeMenu() {
 }
 
 /**
- * 5. 彈窗邏輯 (保持不變)
+ * 6. 彈窗邏輯
  */
 function showRandomPopup() {
     const pops = ['./images/popup/popup_01.jpg','./images/popup/popup_02.jpg','./images/popup/popup_03.jpg']; 
@@ -267,5 +277,5 @@ function closePopup() {
     if (overlay) overlay.style.display = 'none'; 
 }
 
-// 啟動
-window.addEventListener('load', init);
+// 啟動初始化
+window.addEventListener('DOMContentLoaded', init);

@@ -1,0 +1,178 @@
+/* --- 1. 字體與基礎設定 --- */
+/* 修正路徑：從 assets/css/ 退一層到 assets/ 進入 fonts/ */
+@font-face { font-family: 'NotoSansKR'; src: url('../fonts/NotoSansKR-Light.ttf') format('truetype'); font-weight: 100; }
+@font-face { font-family: 'NotoSansKR'; src: url('../fonts/NotoSansKR-Medium.ttf') format('truetype'); font-weight: 300; }
+@font-face { font-family: 'NotoSansKR'; src: url('../fonts/NotoSansKR-Regular.ttf') format('truetype'); font-weight: 400; }
+@font-face { font-family: 'NotoSansKR'; src: url('../fonts/NotoSansKR-Thin.ttf') format('truetype'); font-weight: 500; }
+
+:root { 
+    --sidebar-width: 260px; 
+    --accent: #d9534f; /* 折扣紅 */
+    --new-color: #a29bfe; 
+    --header-h: 70px; 
+    --cart-w: 380px;
+    --gray-light: #bbb;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { 
+    font-family: 'NotoSansKR', 'Noto Sans TC', sans-serif; 
+    background: #fff; 
+    color: #333; 
+    overflow-x: hidden; 
+    -webkit-font-smoothing: antialiased;
+}
+
+/* --- 2. 頂部導覽 --- */
+.top-header {
+    width: 100%; height: var(--header-h); background: #fff;
+    position: fixed; top: 0; left: 0; z-index: 1200;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 20px; border-bottom: 1px solid #f2f2f2;
+}
+
+.header-left, .header-right { display: flex; align-items: center; flex: 1; }
+.header-right { gap: 20px; justify-content: flex-end; }
+.header-left { gap: 15px; }
+
+.search-wrap { position: relative; display: flex; align-items: center; }
+#search-input {
+    border: 1px solid #eee; padding: 6px 10px; font-size: 11px;
+    width: 150px; outline: none; transition: 0.3s;
+    font-family: 'NotoSansKR'; letter-spacing: 1px;
+}
+#search-input:focus { width: 200px; border-color: #ccc; }
+
+.header-icon { width: 22px; height: 22px; cursor: pointer; object-fit: contain; }
+.main-logo { height: 32px; cursor: pointer; position: absolute; left: 50%; transform: translateX(-50%); }
+
+/* --- 3. 側欄佈局與遮罩 --- */
+.sidebar {
+    width: var(--sidebar-width); height: 100vh; position: fixed;
+    left: 0; top: 0; border-right: 1px solid #eee;
+    padding: calc(var(--header-h) + 40px) 30px 50px; background: #fff; z-index: 1100; overflow-y: auto;
+    transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+.sidebar-overlay { 
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+    background: rgba(0,0,0,0.3); z-index: 1050; display: none; 
+}
+.sidebar-overlay.active { display: block; }
+
+.filter-title { 
+    font-size: 11px; font-weight: 700; letter-spacing: 2px; 
+    margin-bottom: 20px; text-transform: uppercase; 
+    border-bottom: 1px solid #f0f0f0; padding-bottom: 8px; color: #111;
+}
+.category-menu { list-style: none; }
+.category-menu li { font-size: 13px; font-weight: 400; margin-bottom: 15px; color: #888; cursor: pointer; transition: 0.3s; }
+.category-menu li:hover, .category-menu li.active { color: #000; font-weight: 500; text-decoration: underline; }
+
+.brand-panel { max-height: 0; overflow: hidden; transition: max-height 0.5s ease; background: #fafafa; border-radius: 4px; }
+.brand-panel.open { max-height: 500px; padding: 15px 10px; margin-bottom: 20px; }
+.brand-item { display: block; font-size: 11px; font-weight: 300; color: #999; margin-bottom: 10px; cursor: pointer; transition: 0.2s; }
+.brand-item.selected { color: #000; font-weight: 700; }
+
+/* --- 4. 主內容區與商品卡 --- */
+.main-content { 
+    width: 100%; 
+    padding: calc(var(--header-h) + 40px) 40px 80px calc(var(--sidebar-width) + 40px); 
+    transition: opacity 0.8s ease; opacity: 0; 
+}
+.main-content.loaded { opacity: 1; }
+
+.product-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 40px 20px; }
+.product-card { cursor: pointer; text-align: left; } 
+
+.img-wrap { 
+    width: 100%; aspect-ratio: 3/4; background-size: cover; background-position: center; 
+    background-color: #f9f9f9; margin-bottom: 15px; position: relative; overflow: hidden;
+    border-radius: 4px;
+}
+.status-badge { 
+    position: absolute; top: 10px; left: 10px; padding: 3px 8px; 
+    font-size: 10px; font-weight: 700; color: #fff; z-index: 10;
+    border-radius: 2px; letter-spacing: 1px;
+}
+.badge-NEW { background: var(--new-color); }
+.badge-SALE { background: var(--accent); }
+
+.p-name { font-size: 12px; font-weight: 400; color: #333; margin-bottom: 6px; height: 36px; overflow: hidden; line-height: 1.5; }
+
+.color-row { display: flex; justify-content: flex-start; gap: 4px; margin: 8px 0; flex-wrap: wrap; min-height: 14px; }
+.color-dot { width: 12px; height: 12px; border: 1px solid #eee; border-radius: 2px; background-size: cover; cursor: help; }
+
+/* --- 價格樣式：對齊您要求的數值 --- */
+.p-price-wrapper { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+.p-price-original { color: #999; text-decoration: line-through; font-size: 13px; font-weight: 400; }
+.p-price-final { color: #d9534f; font-weight: 700; font-size: 16px; }
+
+/* 當商品標註為 SALE 時，改為黑色質感大字 */
+.p-price-wrapper.on-sale .p-price-final { color: #111; font-size: 18px; }
+
+/* --- 5. 工具組 --- */
+.fixed-tools { position: fixed; bottom: 30px; right: 20px; z-index: 2000; display: flex; flex-direction: column; }
+.tool-btn { 
+    width: 45px; height: 45px; background: #fff; border: 1px solid #333; 
+    display: flex; align-items: center; justify-content: center; 
+    font-size: 11px; font-weight: bold; cursor: pointer; transition: 0.3s;
+    margin-bottom: -1px; 
+}
+.tool-btn:hover { background: #333; color: #fff; }
+.line-btn { color: #06C755; }
+
+/* --- 6. SHOPPING BAG 側欄還原優化 --- */
+#cart-overlay { 
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+    background: rgba(0,0,0,0.4); z-index: 2999; display: none; 
+}
+.cart-sidebar {
+    position: fixed; top: 0; right: calc(var(--cart-w) * -1); 
+    width: var(--cart-w); height: 100vh; background: #fff;
+    z-index: 3000; display: flex; flex-direction: column; 
+    transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    box-shadow: -5px 0 15px rgba(0,0,0,0.05);
+}
+.cart-sidebar.open { transform: translateX(calc(var(--cart-w) * -1)); }
+
+.cart-header { 
+    padding: 30px 25px; border-bottom: 1px solid #f2f2f2; 
+    display: flex; justify-content: space-between; align-items: center; 
+}
+.cart-title { font-size: 13px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; }
+.cart-close { font-size: 11px; color: #111; cursor: pointer; text-decoration: underline; font-weight: bold; }
+
+.cart-body { flex: 1; padding: 25px; overflow-y: auto; }
+.cart-footer { padding: 25px; border-top: 1px solid #f2f2f2; background: #fff; }
+.cart-total-wrap { 
+    display:flex; justify-content:space-between; margin-bottom:20px; 
+    font-weight:700; font-size:14px; letter-spacing: 1px;
+}
+.checkout-btn { 
+    width: 100%; padding: 18px; background: #111; color: #fff; border: none; 
+    cursor: pointer; font-size: 12px; font-weight: 700; letter-spacing: 2px; transition: 0.3s; 
+}
+.checkout-btn:hover { background: #333; }
+
+/* --- 7. POPUP 彈窗修正 --- */
+#popup-overlay { 
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+    background: rgba(0,0,0,0.7); z-index: 9999; 
+    display: none; justify-content: center; align-items: center; 
+}
+.popup-box { position: relative; background: #fff; max-width: 380px; width: 85%; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+.popup-close { 
+    position: absolute; bottom: -40px; left: 50%; transform: translateX(-50%); 
+    color: #fff; cursor: pointer; font-size: 12px; border: 1px solid #fff; 
+    padding: 5px 20px; white-space: nowrap; 
+}
+
+/* --- 8. 手機版響應式 --- */
+@media (max-width: 900px) {
+    :root { --cart-w: 100%; } /* 手機版購物車全滿 */
+    .sidebar { transform: translateX(-100%); width: 280px; }
+    .sidebar.open { transform: translateX(0); box-shadow: 5px 0 15px rgba(0,0,0,0.1); }
+    .main-content { padding: calc(var(--header-h) + 30px) 15px 80px 15px; }
+    .product-grid { grid-template-columns: repeat(2, 1fr); gap: 25px 12px; }
+    .main-logo { height: 28px; }
+}
