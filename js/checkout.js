@@ -1,6 +1,6 @@
 /**
  * AiFang Kids - checkout.js
- * [2026.01 最終優化完整版 - 包含 Email 寫入與成功頁面 100% 對接]
+ * [2026.02 最終優化完整版 - 統一 9 折並排除 SALE 商品]
  */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -22,7 +22,7 @@ function initCheckout() {
         radio.addEventListener('change', handlePaymentChange);
     });
 
-    // 監聽地址欄位的「輸入/貼上」事件，自動處理 ibon 格式
+    // 監聽地址欄位的自動處理 ibon 格式
     const addrInput = document.getElementById('cust_address');
     if (addrInput) {
         addrInput.addEventListener('input', formatStoreInput);
@@ -37,7 +37,7 @@ function initCheckout() {
 }
 
 /**
- * 門市查詢小視窗 (使用 ibon 穩定連結)
+ * 門市查詢小視窗
  */
 window.openIbonMap = function() {
     const mapUrl = 'https://www.ibon.com.tw/mobile/retail_inquiry.aspx#gsc.tab=0';
@@ -54,12 +54,11 @@ function formatStoreInput(e) {
     if (shipMethod !== 'store') return;
 
     let val = e.target.value.trim();
-    // 偵測 Tab (\t) 或 兩個以上的空格
     if (val.includes('\t') || /\s{2,}/.test(val)) {
         const parts = val.split(/[\t\s]{2,}/).map(p => p.trim());
         if (parts.length >= 2) {
-            const storeId = parts[0];   // 110817
-            const storeName = parts[1]; // 千翔
+            const storeId = parts[0];   
+            const storeName = parts[1]; 
             e.target.value = `${storeName} (${storeId})`;
         }
     }
@@ -133,6 +132,9 @@ function updateUIByShipMethod() {
     }
 }
 
+/**
+ * 核心計算：統一 9 折，但排除標註為 SALE 的商品
+ */
 function updateSummary() {
     const cart = JSON.parse(localStorage.getItem('cart')) || [];
     const payMethod = document.querySelector('input[name="pay_method"]:checked')?.value;
@@ -142,12 +144,18 @@ function updateSummary() {
     cart.forEach(item => {
         const itemTotal = (Number(item.price) || 0) * item.quantity;
         subtotal += itemTotal;
-        if ((item.status || "").toString().trim().toUpperCase() !== 'SALE') {
-            discountAmount += Math.round(itemTotal * (payMethod === 'transfer' ? 0.2 : 0.1));
+
+        // 檢查是否為特價品 (SALE)
+        const isSaleItem = (item.status || "").toString().trim().toUpperCase() === 'SALE';
+        
+        // 只有非 SALE 商品才計算 10% 的折扣金額 (即達成 9 折)
+        if (!isSaleItem) {
+            discountAmount += Math.round(itemTotal * 0.1);
         }
     });
 
     const discountedSubtotal = subtotal - discountAmount;
+    // 運費規則：匯款(transfer)一律免運，貨到付款滿 1500 免運
     let shippingFee = (payMethod === 'transfer') ? 0 : (discountedSubtotal >= 1500 ? 0 : 60);
     const finalTotal = discountedSubtotal + shippingFee;
 
@@ -165,13 +173,11 @@ async function submitOrder() {
     const payMethodEl = document.querySelector('input[name="pay_method"]:checked');
     const shipMethodEl = document.querySelector('input[name="ship_method"]:checked');
 
-    // 獲取所有欄位資訊
     const email = document.getElementById('cust_email')?.value.trim();
     const name = document.getElementById('cust_name')?.value.trim();
     const phone = document.getElementById('cust_phone')?.value.trim();
     const address = document.getElementById('cust_address')?.value.trim();
 
-    // 驗證（包含 Email）
     if (!email || !name || !phone || !address || !payMethodEl || !shipMethodEl) {
         alert("請填寫完整收件資訊（含 Email）並選擇運送方式");
         return;
@@ -182,16 +188,15 @@ async function submitOrder() {
     submitBtn.innerText = "PROCESSING...";
 
     const orderId = "AF" + new Date().getTime().toString().slice(-6);
-    const payText = payMethodEl.value === 'transfer' ? '銀行匯款(8折)' : '貨到付款(9折)';
+    // 統一顯示為 9 折
+    const payText = payMethodEl.value === 'transfer' ? '銀行匯款(9折)' : '貨到付款(9折)';
 
-    // LINE 訊息生成
     let lineMsg = `AIFANG KIDS 訂單確認\n•┈┈┈┈┈┈୨୧┈┈┈┈┈┈•\n訂單編號：${orderId}\n收件人：${name}\n付款方式：${payText}\n•┈┈┈┈┈┈୨୧┈┈┈┈┈┈•\n`;
     cart.forEach((item, i) => {
         lineMsg += `${i+1}. ${item.name} (${item.color}/${item.size}) x${item.quantity}\n`;
     });
     lineMsg += `•┈┈┈┈┈┈୨୧┈┈┈┈┈┈•\n應付金額：NT$ ${calc.finalTotal.toLocaleString()}`;
 
-    // 傳送到試算表的資料 (加入 customer_email)
     const order_payload = {
         mode: "createOrder",
         order_data: { 
@@ -217,7 +222,6 @@ async function submitOrder() {
         }))
     };
 
-    // 存入 LocalStorage (給 order_success.js 使用，對齊欄位名)
     localStorage.setItem('last_order_info', JSON.stringify({ 
         id: orderId, 
         customer_name: name, 

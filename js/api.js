@@ -1,6 +1,6 @@
 /**
  * AiFang Kids - api.js
- * [2026.01 效能優化最終版]
+ * [2026.02 價格邏輯優化版 - 全站統一 9 折預處理]
  */
 
 const ApiService = {
@@ -10,7 +10,27 @@ const ApiService = {
     CACHE_EXPIRY: 10 * 60 * 1000, // 10分鐘快取
 
     /**
-     * 1. 獲取所有產品列表 (首頁使用)
+     * 內部工具：處理價格邏輯
+     * 這裡統一全站折扣邏輯，方便未來一鍵修改
+     */
+    _processPrices(products) {
+        if (!Array.isArray(products)) return products;
+        return products.map(item => {
+            const original = Number(item.price_kid || 0);
+            const isSale = (String(item.status) || "").toUpperCase() === "SALE";
+            
+            return {
+                ...item,
+                // 新增兩個標準欄位供全站調用
+                price_original: original,
+                // 如果是 SALE 維持原價；如果是一般商品，無腦 9 折
+                price_final: isSale ? original : Math.round(original * 0.9)
+            };
+        });
+    },
+
+    /**
+     * 1. 獲取所有產品列表
      */
     async fetchProducts() {
         const cached = sessionStorage.getItem(this.CACHE_KEY);
@@ -19,7 +39,7 @@ const ApiService = {
                 const parsed = JSON.parse(cached);
                 const isExpired = (Date.now() - parsed.timestamp) > this.CACHE_EXPIRY;
                 if (!isExpired) {
-                    console.log("⚡ [ApiService] 資料來自瀏覽器快取 (Cache Hit)");
+                    console.log("⚡ [ApiService] 快取命中 (數據已含折扣處理)");
                     return parsed.data;
                 }
             } catch (e) {
@@ -28,20 +48,20 @@ const ApiService = {
         }
 
         try {
-            console.log("🌐 [ApiService] 正在連線至 GAS 獲取最新資料...");
+            console.log("🌐 [ApiService] 正在連線至 GAS 並注入折扣邏輯...");
             const response = await fetch(this.API_URL);
             if (!response.ok) throw new Error("網路請求失敗");
             
             const result = await response.json();
-            const products = result.products || [];
+            // --- 核心優化：在這裡直接注入折扣數據 ---
+            const processedProducts = this._processPrices(result.products || []);
 
-            // 更新快取
             sessionStorage.setItem(this.CACHE_KEY, JSON.stringify({
-                data: products,
+                data: processedProducts,
                 timestamp: Date.now()
             }));
 
-            return products;
+            return processedProducts;
         } catch (error) {
             console.error("❌ [ApiService] 商品讀取失敗:", error);
             return cached ? JSON.parse(cached).data : null;
@@ -49,26 +69,23 @@ const ApiService = {
     },
 
     /**
-     * 2. 獲取單一產品 (Detail.js 使用)
-     * 優化：優先從「全品項快取」中過濾，找不到才單獨請求 API
+     * 2. 獲取單一產品
      */
     async getProductByCode(code) {
-        // 先嘗試從全品項快取中尋找
         const allProducts = await this.fetchProducts(); 
         if (allProducts) {
             const found = allProducts.find(p => String(p.code) === String(code));
-            if (found) {
-                console.log(`⚡ [ApiService] 商品 ${code} 已從快取秒開`);
-                return found;
-            }
+            if (found) return found;
         }
 
-        // 若快取內找不到 (例如直接貼網址進來)，則單獨向 API 請求
-        console.log(`🌐 [ApiService] 快取無此商品，單獨請求 API: ${code}`);
+        console.log(`🌐 [ApiService] 快取無此商品，單獨請求並處理價格: ${code}`);
         try {
             const response = await fetch(`${this.API_URL}?code=${code}`);
             const result = await response.json();
-            return result.products ? result.products.find(p => String(p.code) === String(code)) : (Array.isArray(result) ? result[0] : result);
+            const rawItem = result.products ? result.products.find(p => String(p.code) === String(code)) : (Array.isArray(result) ? result[0] : result);
+            
+            // 單一商品也過一遍價格處理
+            return rawItem ? this._processPrices([rawItem])[0] : null;
         } catch (e) {
             console.error("單一商品讀取失敗", e);
             return null;
@@ -87,7 +104,6 @@ const ApiService = {
                 headers: { "Content-Type": "text/plain" },
                 body: JSON.stringify(orderPayload)
             });
-            // GAS no-cors 模式下回傳透明，我們直接回傳成功
             return { success: true };
         } catch (error) {
             console.error("❌ [ApiService] 訂單送出異常:", error);
@@ -96,7 +112,7 @@ const ApiService = {
     },
 
     /**
-     * 4. 查詢單一訂單 (order_query.html)
+     * 4. 查詢單一訂單
      */
     async queryOrder(orderId) {
         try {

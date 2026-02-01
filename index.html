@@ -2,6 +2,15 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
+    <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-5XTC9J1E5P"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-5XTC9J1E5P');
+</script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AIFANGKIDS | Studio</title>
     <link rel="icon" href="./favicon.ico" type="image/x-icon">
@@ -15,10 +24,11 @@
 
         :root { 
             --sidebar-width: 260px; 
-            --accent: #d9534f; 
+            --accent: #d9534f; /* SALE 標籤與折扣價顏色 */
             --new-color: #a29bfe; 
             --header-h: 70px; 
             --cart-w: 380px;
+            --gray-light: #bbb;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -104,8 +114,23 @@
             background-size: cover; background-position: center; cursor: help;
         }
         
-        .p-price { font-size: 13px; font-weight: 700; color: #111; }
-        .p-price.on-sale { color: var(--accent); }
+        /* --- 價格樣式優化區 --- */
+        .p-price-wrapper { display: flex; flex-direction: column; gap: 2px; }
+        .p-price-original { 
+            font-size: 11px; 
+            color: var(--gray-light); 
+            text-decoration: line-through; 
+            font-weight: 400; 
+        }
+        .p-price-final { 
+            font-size: 13px; 
+            font-weight: 700; 
+            color: #111; 
+        }
+        /* 當商品原本就是 SALE 時，最終價格變紅 */
+        .on-sale .p-price-final { color: var(--accent); }
+        /* 當一般商品打 9 折時，我們也可以讓折扣價稍微明顯一點（選用） */
+        .p-price-wrapper:not(.on-sale) .p-price-final { color: #111; }
 
         /* --- 5. 工具組 --- */
         .fixed-tools { position: fixed; bottom: 30px; right: 20px; z-index: 2000; display: flex; flex-direction: column; gap: 0; }

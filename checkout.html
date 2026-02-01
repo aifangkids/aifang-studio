@@ -2,6 +2,15 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
+    <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-5XTC9J1E5P"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-5XTC9J1E5P');
+</script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Checkout | AiFang Kids</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
@@ -91,10 +100,11 @@
                 <label class="radio-item">
                     <input type="radio" name="pay_method" value="transfer" checked onchange="handlePaymentChange()"> 
                     <span>銀行匯款</span>
-                    <span class="discount-tag">8 折 / 免運</span>
+                    <span class="discount-tag">9 折 / 免運</span>
                     <div class="payment-notice">
                         1. 匯款資訊會透過 LINE 聊天室傳送給您<br>
-                        2. 為保障您的訂單權益，請在 48 小時內完成匯款
+                        2. 為保障您的訂單權益，請在 48 小時內完成匯款<br>
+                        3. 銀行匯款享不限金額免運費
                     </div>
                 </label>
                 <label class="radio-item">
@@ -102,8 +112,8 @@
                     <span>貨到付款</span>
                     <span class="discount-tag tag-red">9 折</span>
                     <div class="payment-notice">
-                        1. 會為您安排 交貨便 出貨<br>
-                        2. 『運費』為 60 元
+                        1. 會為您安排 7-11 交貨便 出貨<br>
+                        2. 滿 NT$ 1,500 享免運費，未滿則酌收 60 元運費
                     </div>  
                 </label>
             </div>
@@ -112,7 +122,7 @@
         <div class="input-group">
             <label>SHIPPING METHOD / 運送方式</label>
             <div class="radio-group" id="ship-method-container">
-                </div>
+            </div>
         </div>
     </div>
 

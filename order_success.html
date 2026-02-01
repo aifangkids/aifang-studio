@@ -2,63 +2,89 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
+    <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-5XTC9J1E5P"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-5XTC9J1E5P');
+</script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Order Success | AiFang Kids</title>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
     <style>
-        /* --- 原始 CSS 風格完整保留 --- */
-        :root { --accent: #06C755; --dark: #111; --gray: #fcfcfc; --border: #eeeeee; --sale-red: #e74c3c; }
+        /* --- 核心 CSS 風格優化與保留 --- */
+        :root { --accent: #06C755; --dark: #111; --gray: #fafafa; --border: #f0f0f0; --sale-red: #d9534f; }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Noto Sans TC', sans-serif; background: #fff; color: #333; line-height: 1.6; padding: 40px 20px; }
         
         .container { max-width: 500px; margin: 0 auto; }
         
+        /* 狀態頭部優化 */
         .header-status { text-align: center; margin-bottom: 40px; }
         .success-icon { 
-            width: 60px; height: 60px; background: var(--accent); color: #fff; 
+            width: 70px; height: 70px; background: var(--accent); color: #fff; 
             border-radius: 50%; display: flex; align-items: center; justify-content: center; 
-            font-size: 30px; margin: 0 auto 15px; 
-            box-shadow: 0 10px 20px rgba(6, 199, 85, 0.2);
-            animation: scaleUp 0.5s ease-out;
+            font-size: 35px; margin: 0 auto 20px; 
+            box-shadow: 0 10px 25px rgba(6, 199, 85, 0.3);
+            animation: scaleUp 0.6s cubic-bezier(0.17, 0.67, 0.83, 0.67);
         }
-        @keyframes scaleUp { from { transform: scale(0); } to { transform: scale(1); } }
+        @keyframes scaleUp { 
+            0% { transform: scale(0); opacity: 0; } 
+            70% { transform: scale(1.1); }
+            100% { transform: scale(1); opacity: 1; } 
+        }
 
-        h1 { font-size: 22px; letter-spacing: 2px; margin-bottom: 10px; text-transform: uppercase; }
-        .order-id { font-size: 14px; color: #888; font-family: monospace; }
+        h1 { font-size: 24px; font-weight: 900; letter-spacing: 3px; margin-bottom: 8px; text-transform: uppercase; color: var(--dark); }
+        .order-id { font-size: 13px; color: #999; font-family: 'Courier New', monospace; letter-spacing: 1px; }
 
-        .info-card { background: var(--gray); border: 1px solid var(--border); padding: 25px; border-radius: 4px; margin-bottom: 25px; }
-        .info-card h3 { font-size: 13px; margin-bottom: 15px; border-bottom: 1px solid #ddd; padding-bottom: 8px; letter-spacing: 1px; color: #111; }
+        /* 卡片設計優化 */
+        .info-card { background: var(--gray); border: 1px solid var(--border); padding: 25px; border-radius: 8px; margin-bottom: 20px; transition: 0.3s; }
+        .info-card:hover { border-color: #ddd; }
+        .info-card h3 { font-size: 12px; margin-bottom: 18px; border-bottom: 1px solid #eee; padding-bottom: 10px; letter-spacing: 1.5px; color: #888; font-weight: 700; }
         
-        .info-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 14px; }
-        .info-label { color: #888; }
-        .info-value { font-weight: 500; text-align: right; color: #111; }
+        .info-row { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 14px; align-items: baseline; }
+        .info-label { color: #888; flex-shrink: 0; margin-right: 15px; }
+        .info-value { font-weight: 500; text-align: right; color: var(--dark); word-break: break-all; }
 
-        .item-list { margin-top: 15px; }
-        .item-mini { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 6px; padding-bottom: 6px; border-bottom: 1px dashed #eee; }
-        .item-mini:last-child { border-bottom: none; }
+        /* 明細列表優化 */
+        .item-list { margin-top: 5px; }
+        .item-mini { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px dashed #e5e5e5; color: #555; }
+        .item-mini:last-child { border-bottom: none; margin-bottom: 0; }
 
-        /* LINE 按鈕樣式 */
+        /* LINE 按鈕強化動畫 */
         .line-section { text-align: center; margin-top: 40px; }
         .btn-line { 
             display: inline-flex; align-items: center; justify-content: center;
-            width: 100%; padding: 18px; background: var(--accent); color: #fff;
-            text-decoration: none; border-radius: 4px; font-weight: bold;
-            font-size: 16px; transition: 0.3s; border: none; cursor: pointer;
-            box-shadow: 0 4px 12px rgba(6, 199, 85, 0.3);
+            width: 100%; padding: 20px; background: var(--accent); color: #fff;
+            text-decoration: none; border-radius: 8px; font-weight: 900;
+            font-size: 17px; transition: 0.3s; border: none; cursor: pointer;
+            box-shadow: 0 6px 15px rgba(6, 199, 85, 0.4);
+            animation: pulse-green 2s infinite;
         }
-        .btn-line:hover { background: #05b34c; transform: translateY(-2px); }
-        .line-icon { width: 24px; height: 24px; margin-right: 10px; }
+        @keyframes pulse-green {
+            0% { box-shadow: 0 0 0 0 rgba(6, 199, 85, 0.7); }
+            70% { box-shadow: 0 0 0 15px rgba(6, 199, 85, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(6, 199, 85, 0); }
+        }
+        .btn-line:hover { background: #05b34c; transform: translateY(-2px); box-shadow: 0 8px 20px rgba(6, 199, 85, 0.5); }
+        .line-icon { width: 26px; height: 26px; margin-right: 12px; }
         
-        .tip-text { font-size: 12px; color: #d9534f; margin-top: 15px; font-weight: 500; line-height: 1.5; }
+        .tip-box { margin-top: 20px; padding: 15px; border-radius: 6px; background: #fff5f5; border: 1px solid #ffebeb; }
+        .tip-text { font-size: 12px; color: var(--sale-red); font-weight: 700; line-height: 1.6; }
         
-        .home-link { display: block; margin-top: 30px; text-align: center; font-size: 13px; color: #888; text-decoration: none; border-bottom: 1px solid #ccc; width: fit-content; margin-left: auto; margin-right: auto; }
+        .home-link { display: block; margin-top: 35px; text-align: center; font-size: 12px; color: #bbb; text-decoration: none; border-bottom: 1px solid #eee; width: fit-content; margin-left: auto; margin-right: auto; transition: 0.3s; padding-bottom: 2px; text-transform: uppercase; letter-spacing: 1px; }
+        .home-link:hover { color: var(--dark); border-color: var(--dark); }
 
-        /* 複製文字輔助器 */
+        /* 複製輔助 */
         #copy-helper { position: absolute; left: -9999px; }
 
         @media (max-width: 500px) {
-            body { padding: 30px 15px; }
-            h1 { font-size: 20px; }
+            body { padding: 40px 20px; }
+            h1 { font-size: 22px; }
+            .info-card { padding: 20px; }
         }
     </style>
 </head>
@@ -92,13 +118,13 @@
         <div id="display-item-list" class="item-list">
             </div>
         
-        <div class="info-row" style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #ddd;">
+        <div class="info-row" style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #eee;">
             <span class="info-label">付款方式</span>
             <span class="info-value" id="display-pay-method">-</span>
         </div>
         <div class="info-row">
-            <span class="info-label" style="color:var(--dark); font-weight:bold;">實付總額</span>
-            <span class="info-value" style="color:var(--dark); font-weight:bold; font-size:18px;" id="display-total">NT$ 0</span>
+            <span class="info-label" style="color:var(--dark); font-weight:700;">實付總額</span>
+            <span class="info-value" style="color:var(--dark); font-weight:900; font-size:20px;" id="display-total">NT$ 0</span>
         </div>
     </div>
 
@@ -107,9 +133,13 @@
             <img src="https://upload.wikimedia.org/wikipedia/commons/4/41/LINE_logo.svg" class="line-icon" alt="LINE Logo">
             傳送訂單訊息至 LINE
         </button>
-        <p class="tip-text">⚠️ 提示：請務必點擊上方按鈕開啟 LINE 並傳送訊息</p><p class="tip-text">我們收到訊息後才會開始處理您的訂單</p>
         
-        <a href="index.html" class="home-link">CONTINUE SHOPPING</a>
+        <div class="tip-box">
+            <p class="tip-text">⚠️ 提示：請務必點擊上方按鈕開啟 LINE 並傳送訊息</p>
+            <p class="tip-text">我們收到訊息後才會開始處理您的訂單</p>
+        </div>
+        
+        <a href="index.html" class="home-link">Back to Homepage</a>
     </div>
 </div>
 

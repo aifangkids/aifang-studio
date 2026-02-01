@@ -1,6 +1,6 @@
 /**
  * AiFang Kids - index.js
- * [2026.01 最終檢查優化版]
+ * [2026.02 最終優化版 - 配合 api.js 預處理價格顯示]
  */
 
 let allData = [];
@@ -17,6 +17,7 @@ async function init() {
     try {
         console.log("🚀 [Index] 正在初始化商品資料...");
         // 調用 api.js 封裝好的 ApiService
+        // 注意：這裡拿到的資料已經過 api.js 的 _processPrices 處理
         allData = await ApiService.fetchProducts();
         
         if (allData && allData.length > 0) {
@@ -33,7 +34,7 @@ async function init() {
 }
 
 /**
- * 2. 渲染商品列表
+ * 2. 渲染商品列表 (配合 api.js 欄位顯示)
  */
 function render(items) {
     const container = document.getElementById('product-list');
@@ -51,8 +52,23 @@ function render(items) {
         const isSale = status === "SALE";
         const badgeHtml = status ? `<span class="status-badge badge-${status}">${status}</span>` : "";
         
-        const displayPrice = Number(item.price_kid || 0);
-        const priceClass = isSale ? "p-price on-sale" : "p-price";
+        // --- 價格顯示邏輯：直接取用 api.js 算好的欄位 ---
+        let priceHtml = "";
+
+        if (isSale) {
+            // SALE 商品：只顯示最終價 (紅字)
+            priceHtml = `
+                <div class="p-price-wrapper on-sale">
+                    <div class="p-price-final">NT$ ${item.price_final.toLocaleString()}</div>
+                </div>`;
+        } else {
+            // 一般商品：顯示原價 (刪除線) + 9折價
+            priceHtml = `
+                <div class="p-price-wrapper">
+                    <div class="p-price-original">NT$ ${item.price_original.toLocaleString()}</div>
+                    <div class="p-price-final">NT$ ${item.price_final.toLocaleString()}</div>
+                </div>`;
+        }
 
         // 處理顏色圓點與花色 (Pattern)
         const names = String(item.color || "").split(',').filter(Boolean);
@@ -79,7 +95,6 @@ function render(items) {
 
         const card = document.createElement('div');
         card.className = 'product-card';
-        // 確保 code 存在才轉連結
         card.onclick = () => {
             if(item.code) location.href = `detail.html?code=${item.code}`;
         };
@@ -89,14 +104,14 @@ function render(items) {
             <div class="info-wrap">
                 <p class="p-name">${item.name || '未命名商品'}</p>
                 ${colorHtml}
-                <div class="${priceClass}">NT$ ${displayPrice.toLocaleString()}</div>
+                ${priceHtml}
             </div>`;
         container.appendChild(card);
     });
 }
 
 /**
- * 3. 搜尋與篩選邏輯
+ * 3. 搜尋與篩選邏輯 (保持不變)
  */
 function handleSearch(query) {
     const q = query.toLowerCase().trim();
@@ -118,9 +133,8 @@ function filterByCat(cat) {
     const searchInput = document.getElementById('search-input');
     if (searchInput) searchInput.value = ""; 
 
-    // 修正：對應 HTML 的 li 選單激活狀態
     document.querySelectorAll('.category-menu li').forEach(li => {
-        const liText = li.innerText.replace(' ITEMS', '').trim(); // 處理 "ALL ITEMS" -> "ALL"
+        const liText = li.innerText.replace(' ITEMS', '').trim();
         li.classList.toggle('active', liText.toUpperCase() === cat.toUpperCase());
     });
 
@@ -165,7 +179,7 @@ function toggleBrand(e, b) {
 }
 
 /**
- * 4. UI 互動（側欄、購物車）
+ * 4. UI 互動 (保持不變)
  */
 function toggleCart() {
     const cartSide = document.getElementById('cart-sidebar');
@@ -192,6 +206,7 @@ function renderMiniCart() {
     }
 
     container.innerHTML = cartData.map(item => {
+        // 注意：這裡應使用 item.price，因為加入購物車時應已存入 price_final
         total += item.price * item.quantity;
         return `
             <div style="display:flex; gap:15px; margin-bottom:20px; font-size:12px; align-items:center;">
@@ -224,7 +239,7 @@ function closeMenu() {
 }
 
 /**
- * 5. 彈窗邏輯
+ * 5. 彈窗邏輯 (保持不變)
  */
 function showRandomPopup() {
     const pops = ['./images/popup/popup_01.jpg','./images/popup/popup_02.jpg','./images/popup/popup_03.jpg']; 
@@ -242,7 +257,6 @@ function bindPopupEvents() {
     const overlay = document.getElementById('popup-overlay');
     if (overlay) {
         overlay.addEventListener('click', (e) => {
-            // 只有點擊到遮罩本體（非內容框）才關閉
             if (e.target === overlay) closePopup();
         });
     }
