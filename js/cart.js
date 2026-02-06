@@ -73,7 +73,7 @@ function getTaipeiTimeString() {
 }
 
 /**
- * 3. 渲染右側摘要
+ * 3. 渲染右側摘要 (針對響應式佈局優化版本)
  */
 function renderCart() {
     const cart = JSON.parse(localStorage.getItem('cart')) || [];
@@ -89,28 +89,34 @@ function renderCart() {
     const result = calculateOrder(cart);
 
     container.innerHTML = result.processedItems.map((item, index) => {
-        let badgeHtml = item.status === 'NEW' ? `<span style="background:#5bc0de; color:#fff; font-size:9px; padding:2px 4px; border-radius:2px; margin-left:5px;">1+1組合</span>` : '';
+        // 修正 1+1 標籤：改用獨立 class 方便 CSS 控制換行
+        let badgeHtml = item.status === 'NEW' ? `<span class="promo-tag-1plus1">1+1 組合優惠</span>` : '';
         const colorSpec = item.korean_color ? `${item.color} (${item.korean_color})` : item.color;
 
         return `
             <div class="cart-item-mini">
                 <img src="${item.image || './images/ui/no-image.jpg'}" class="item-img-mini" onerror="this.src='./images/ui/no-image.jpg'">
                 <div class="item-info-mini">
-                    <div class="item-name-mini">${item.name} ${badgeHtml}</div>
+                    <div class="item-name-mini">${item.name}</div>
+                    
+                    ${badgeHtml}
+                    
                     <div class="item-spec-mini">${colorSpec} / ${item.size}</div>
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:5px;">
+                    
+                    <div class="item-bottom-row">
+                        <div class="item-price-mini">NT$ ${item.item_total.toLocaleString()}</div>
                         <div class="qty-control">
                             <button class="qty-btn" onclick="changeQty(${index}, -1)">-</button>
                             <input type="text" class="qty-val" value="${item.quantity}" readonly>
                             <button class="qty-btn" onclick="changeQty(${index}, 1)">+</button>
                         </div>
-                        <div class="item-price-mini">NT$ ${item.item_total.toLocaleString()}</div>
                     </div>
                 </div>
                 <button onclick="deleteItem(${index})" class="delete-btn">&times;</button>
             </div>`;
     }).join('');
 
+    // ... 後續的優惠券列表與 UI 更新邏輯維持不變 ...
     const couponListArea = document.getElementById('applied-coupons-list');
     if (couponListArea) {
         couponListArea.innerHTML = appliedCoupons.map((c, idx) => `
