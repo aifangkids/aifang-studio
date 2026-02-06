@@ -2,145 +2,18 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-5XTC9J1E5P"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-5XTC9J1E5P');
-</script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-5XTC9J1E5P"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-5XTC9J1E5P');
+    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Product Detail | AiFang Kids</title>
     <link rel="icon" href="./favicon.ico" type="image/x-icon">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
-    
-    <style>
-        :root { 
-            --header-h: 70px; 
-            --side-w: 420px; 
-            --accent: #d9534f; 
-            /* 尺寸按鈕配色變數 */
-            --color-baby: #f8f1e7;    /* 奶茶色 */
-            --text-baby: #8a7b6a;
-            --color-junior: #333333;  /* 深灰色 */
-        }
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Noto Sans TC', sans-serif; background: #fff; color: #333; overflow-x: hidden; line-height: 1.6; }
-
-        /* --- Header --- */
-        .top-header { width: 100%; height: var(--header-h); background: #fff; position: fixed; top: 0; left: 0; z-index: 2000; display: flex; align-items: center; justify-content: space-between; padding: 0 25px; border-bottom: 1px solid #f2f2f2; }
-        .main-logo { height: 30px; cursor: pointer; position: absolute; left: 50%; transform: translateX(-50%); }
-        .header-icon { font-size: 13px; font-weight: bold; cursor: pointer; text-decoration: none; color: #333; letter-spacing: 1px; }
-
-        /* --- Layout --- */
-        .detail-wrapper { display: flex; max-width: 1400px; margin: var(--header-h) auto 0; position: relative; }
-        
-        /* 左側圖片區 */
-        .scroll-content { flex: 1; padding: 40px; border-right: 1px solid #f2f2f2; min-height: 100vh; background: #fff; }
-        #image-main-area img { 
-            width: 100%; max-width: 1200px; height: auto; display: block; 
-            margin: 0 auto 30px; border-radius: 4px; transition: opacity 0.4s ease;
-            image-rendering: -webkit-optimize-contrast;
-        }
-
-        /* 右側資訊區 */
-        .fixed-aside { width: var(--side-w); position: sticky; top: var(--header-h); align-self: flex-start; padding: 30px 40px; background: #fff; }
-
-        @media (min-width: 901px) {
-            .fixed-aside {
-                max-height: calc(100vh - var(--header-h));
-                overflow-y: auto;
-                scrollbar-width: none;
-            }
-            .fixed-aside::-webkit-scrollbar { display: none; }
-        }
-
-        /* --- 文字與標籤 --- */
-        .brand-tag { font-size: 11px; font-weight: 500; letter-spacing: 1px; text-decoration: underline; margin-bottom: 8px; color: #555; display: block; text-transform: uppercase; }
-        .p-title { font-size: 24px; font-weight: 500; margin-bottom: 10px; color: #111; line-height: 1.4; }
-        .p-id { font-size: 11px; color: #bbb; margin-bottom: 25px; letter-spacing: 0.5px; }
-        .label { font-size: 10px; font-weight: 900; color: #aaa; margin: 25px 0 10px; display: block; letter-spacing: 1px; text-transform: uppercase; border-bottom: 1px solid #f2f2f2; padding-bottom: 5px; }
-
-        /* --- 顏色選取器 --- */
-        .swatch-group { display: flex; flex-wrap: wrap; gap: 8px; }
-        .swatch-item { cursor: pointer; display: flex; align-items: center; padding: 6px 14px; border: 1px solid #ddd; border-radius: 20px; transition: 0.2s; background: #fff; font-size: 12px; }
-        .swatch-item.active { border: 2px solid #111; font-weight: bold; background: #f9f9f9; }
-        .swatch-circle { width: 14px; height: 14px; border-radius: 50%; border: 1px solid #eee; margin-right: 8px; background-size: cover; background-position: center; }
-
-        /* --- 尺寸選取區 (三色優化) --- */
-        .size-group { background: #fdfdfd; padding: 15px; border-radius: 4px; margin-bottom: 12px; border: 1px solid #f2f2f2; }
-        .group-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-        .group-label { font-size: 11px; font-weight: bold; letter-spacing: 1px; }
-        
-        .price-tag-wrap { text-align: right; }
-        .price-original { font-size: 11px; color: #bbb; text-decoration: line-through; margin-right: 5px; }
-        .price-final { font-size: 15px; font-weight: 700; color: #111; }
-        .sale-red { color: var(--accent) !important; }
-        .badge-sale-mini { background: var(--accent); color: #fff; font-size: 9px; padding: 2px 4px; border-radius: 2px; margin-left: 4px; vertical-align: middle; }
-
-        .s-btn-wrap { display: flex; flex-wrap: wrap; gap: 8px; }
-        .s-btn { border: 1px solid #ddd; background: #fff; padding: 10px 16px; cursor: pointer; font-size: 11px; transition: 0.2s; border-radius: 2px; font-family: 'NotoSansKR'; }
-        
-        /* 尺寸按鈕配色 */
-        .s-btn.btn-baby { background: var(--color-baby); color: var(--text-baby); border-color: #eee; }
-        .s-btn.btn-kid { background: #fff; color: #333; border-color: #ddd; }
-        .s-btn.btn-junior { background: var(--color-junior); color: #fff; border-color: var(--color-junior); }
-        .s-btn:hover { border-color: #111; transform: translateY(-1px); box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-
-        /* --- 已選項目與數量 --- */
-        .selected-list { margin: 20px 0; border-top: 1px solid #eee; }
-        .selected-item { background: #f9f9f9; padding: 15px; margin-top: 10px; position: relative; border-radius: 4px; animation: fadeIn 0.3s ease; border: 1px solid #f0f0f0; }
-        .sel-info { font-size: 12px; margin-bottom: 10px; font-weight: 500; }
-        .sel-close { position: absolute; top: 12px; right: 12px; width: 14px; height: 14px; cursor: pointer; opacity: 0.3; }
-        .sel-close:hover { opacity: 1; }
-        .sel-bottom { display: flex; justify-content: space-between; align-items: center; }
-        
-        .qty-box { display: flex; align-items: center; border: 1px solid #ddd; background: #fff; border-radius: 2px; }
-        .qty-btn { width: 30px; height: 30px; border: none; background: none; cursor: pointer; font-size: 16px; }
-        .qty-input { width: 35px; text-align: center; border: none; font-size: 13px; font-weight: bold; }
-        .sel-price { font-size: 14px; font-weight: 700; color: #111; }
-
-        /* --- 按鈕與工具 --- */
-        .add-cart-btn { width: 100%; padding: 20px; background: #111; color: #fff; border: none; font-size: 13px; font-weight: 700; letter-spacing: 2px; cursor: pointer; margin-top: 15px; transition: 0.3s; }
-        .add-cart-btn:hover { background: #333; }
-
-        .tool-btns { position: fixed; right: 20px; bottom: 30px; z-index: 100; display: flex; flex-direction: column; }
-        .tool-btn { width: 45px; height: 45px; background: #fff; border: 1px solid #333; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: bold; cursor: pointer; }
-
-        /* --- 手機版投影框 --- */
-        .mobile-preview-box {
-            display: none; align-items: center; gap: 12px; padding: 12px;
-            background: #fafafa; border: 1px solid #eee; border-radius: 8px; margin-bottom: 15px;
-        }
-        #mobile-color-preview-img { width: 64px; height: 64px; object-fit: cover; border-radius: 4px; }
-        #mobile-color-preview-name { font-size: 14px; font-weight: 700; }
-
-        .mobile-order-trigger {
-            display: none; position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
-            background: #111; color: #fff; padding: 16px 36px; border-radius: 50px;
-            font-size: 12px; font-weight: bold; z-index: 2001; border: none;
-        }
-
-        #custom-toast {
-            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            background: rgba(0,0,0,0.85); color: #fff; padding: 16px 32px;
-            border-radius: 4px; font-size: 14px; z-index: 9999; opacity: 0; visibility: hidden; transition: 0.3s;
-        }
-        #custom-toast.show { opacity: 1; visibility: visible; }
-
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* --- 手機版響應式 --- */
-        @media (max-width: 900px) {
-            .detail-wrapper { flex-direction: column; }
-            .scroll-content { order: 1; padding: 15px; border-right: none; min-height: auto; }
-            .fixed-aside { order: 2; width: 100%; position: relative; padding: 30px 20px; border-top: 8px solid #f2f2f2; }
-            .mobile-preview-box { display: flex; }
-            .mobile-order-trigger { display: block; }
-        }
-    </style>
+    <link rel="stylesheet" href="./assets/css/detail.css">
 </head>
 <body>
 
@@ -153,7 +26,7 @@
     <div class="detail-wrapper">
         <main class="scroll-content" id="image-main-area">
             <img id="primary-img" src="" alt="Product Image">
-        </main>
+            </main>
 
         <aside class="fixed-aside" id="product-info">
             <span id="p-brand" class="brand-tag">-</span>
@@ -165,7 +38,7 @@
             <div id="mobile-preview-area" class="mobile-preview-box">
                 <img id="mobile-color-preview-img" src="images/ui/placeholder.jpg">
                 <div class="preview-info-text">
-                    <span style="font-size: 9px; color: #aaa; letter-spacing: 1px;">SELECTED</span>
+                    <span class="preview-label">SELECTED</span>
                     <span id="mobile-color-preview-name">請選擇</span>
                 </div>
             </div>
@@ -177,9 +50,9 @@
 
             <div id="selected-list" class="selected-list"></div>
 
-            <button class="add-cart-btn" onclick="addAllToCart()">ADD TO CART</button>
+            <button id="add-cart-btn" class="add-cart-btn" onclick="addAllToCart()">ADD TO CART</button>
             
-            <p id="styling-note" style="margin-top:25px; font-size:12px; color:#888; line-height:1.7; white-space: pre-line;"></p>
+            <p id="styling-note" class="styling-note-text"></p>
         </aside>
     </div>
 
@@ -195,19 +68,25 @@
     <script src="js/detail.js"></script>
 
     <script>
+        /**
+         * 畫面滾動邏輯
+         */
         function scrollToOptions() {
             const aside = document.getElementById('product-info');
             if (aside) {
-                const offset = aside.offsetTop - 80;
+                // 考量到 Header 高度
+                const offset = aside.offsetTop - 70;
                 window.scrollTo({ top: offset, behavior: 'smooth' });
             }
         }
 
+        // 手機版按鈕顯示/隱藏監聽
         window.addEventListener('scroll', () => {
             const trigger = document.getElementById('scroll-trigger');
             const aside = document.getElementById('product-info');
             if (window.innerWidth <= 900 && trigger && aside) {
-                if (window.pageYOffset > (aside.offsetTop - 300)) {
+                // 當捲到選項區塊時，隱藏浮動按鈕以免遮擋
+                if (window.pageYOffset > (aside.offsetTop - 200)) {
                     trigger.style.opacity = '0';
                     trigger.style.pointerEvents = 'none';
                 } else {

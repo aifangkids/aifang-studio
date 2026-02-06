@@ -15,20 +15,63 @@
 
     <link rel="icon" href="./favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="./assets/css/indexstyle.css">
+    <style>
+        /* 優化 1 & 搜尋框隱藏樣式 */
+        .site-logo { transition: opacity 0.3s; }
+        #search-input { 
+            display: none; 
+            border: none; 
+            border-bottom: 1px solid #000; 
+            outline: none; 
+            font-size: 12px;
+            width: 150px;
+        }
+        .header-right { display: flex; align-items: center; gap: 15px; }
+        
+        /* 優化 2: 顯示更多按鈕樣式 */
+        .load-more-container {
+            text-align: center;
+            padding: 40px 0;
+            grid-column: 1 / -1;
+        }
+        .load-more-btn {
+            background: #fff;
+            border: 1px solid #333;
+            padding: 10px 30px;
+            font-size: 12px;
+            letter-spacing: 2px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .load-more-btn:hover { background: #000; color: #fff; }
+
+        /* 優化 3: 購物車圖片比例 3:4 */
+        .cart-item-img-wrap {
+            width: 60px;
+            aspect-ratio: 3 / 4; /* 強制 3:4 */
+            overflow: hidden;
+            margin-right: 12px;
+            flex-shrink: 0;
+        }
+        .cart-item-img-wrap img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+    </style>
 </head>
 <body>
 
     <header class="top-header">
         <div class="header-left">
             <img src="./images/ui/menu.png" class="header-icon" onclick="toggleMenu()" alt="Menu">
-            <div class="search-wrap">
-                <input type="text" id="search-input" placeholder="SEARCH CODE / NAME" oninput="handleSearch(this.value)">
-            </div>
         </div>
 
-        <img src="./images/ui/logo.png" class="main-logo" onclick="location.reload()" alt="AIFANGKIDS">
+        <img src="./images/ui/logo.png" class="main-logo site-logo" id="main-logo" onclick="location.reload()" alt="AIFANGKIDS">
         
         <div class="header-right">
+            <input type="text" id="search-input" placeholder="SEARCH CODE / NAME">
+            <img src="./images/ui/magnifying-glass.png" class="header-icon search-icon-img" alt="Search">
             <img src="./images/ui/order.png" class="header-icon" onclick="location.href='order_query.html'" alt="Order">
             <img src="./images/ui/icon_tcart.png" class="header-icon" onclick="toggleCart()" alt="Cart">
         </div>
@@ -56,7 +99,7 @@
                 <li onclick="filterByCat('TOP')">TOP</li>
                 <li onclick="filterByCat('BOTTOM')">BOTTOM</li>
                 <li onclick="filterByCat('SET')">SET</li>
-                <li onclick="filterByCat('OUTRE')">OUTRE</li>
+                <li onclick="filterByCat('OUTER')">OUTER</li>
                 <li onclick="filterByCat('BEBE')">BEBE</li>
                 <li onclick="filterByCat('FAMILY')">FAMILY</li>
                 <li onclick="filterByCat('ACC')">ACC</li>
@@ -74,11 +117,19 @@
             <span class="cart-title">SHOPPING BAG</span>
             <span class="cart-close" onclick="toggleCart()">CLOSE</span>
         </div>
-        <div id="mini-cart-body" class="cart-body"></div>
+        <div id="mini-cart-body" class="cart-body">
+            </div>
         <div class="cart-footer">
-            <div class="cart-total-wrap">
-                <span>TOTAL</span>
-                <span id="mini-cart-total">NT$ 0</span>
+            <div class="cart-total-wrap" style="flex-direction: column; align-items: flex-end; gap: 5px;">
+                <div style="width: 100%; display: flex; justify-content: space-between; font-size: 11px; color: #888;">
+                    <span>SUBTOTAL</span><span id="mini-cart-subtotal">NT$ 0</span>
+                </div>
+                <div style="width: 100%; display: flex; justify-content: space-between; font-size: 11px; color: #d9534f;">
+                    <span>DISCOUNT</span><span id="mini-cart-discount">NT$ 0</span>
+                </div>
+                <div style="width: 100%; display: flex; justify-content: space-between; font-weight: bold; border-top: 1px solid #eee; padding-top: 5px; margin-top: 5px;">
+                    <span>TOTAL</span><span id="mini-cart-total">NT$ 0</span>
+                </div>
             </div>
             <button class="checkout-btn" onclick="location.href='cart.html'">VIEW CART & CHECKOUT</button>
         </div>
@@ -86,6 +137,10 @@
 
     <main id="main-content" class="main-content">
         <div id="product-list" class="product-grid"></div>
+        
+        <div id="load-more-container" class="load-more-container" style="display:none;">
+            <button class="load-more-btn" onclick="loadMoreProducts()">顯示更多商品 SHOW MORE</button>
+        </div>
     </main>
 
     <script src="js/api.js"></script>
