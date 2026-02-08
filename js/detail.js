@@ -1,17 +1,14 @@
 /**
- * AiFang Kids - detail.js 2026 最終優化完整版
- * 修正重點：
- * 1. 補強韓文欄位 (korean_name, korean_color) 寫入 LocalStorage。
- * 2. 增加手機版/電腦版按鈕 (add-cart-btn) 自動事件綁定。
- * 3. 確保資料在存入購物車前維持正確型別與完整度。
+ * AiFang Kids - detail.js 2026 最終修正版
  */
 
+// 確保這些變數在最上方正確宣告
 const urlParams = new URLSearchParams(window.location.search);
 const productCode = urlParams.get('code');
 
 let currentProduct = null;
-let selectedColor = { name: "", hex: "", krColor: "", image: "" }; 
-let selectedItems = []; 
+let selectedColor = { name: "", hex: "", krColor: "", image: "" };
+let selectedItems = [];
 let colorImageMap = {}; 
 
 /**
@@ -20,18 +17,26 @@ let colorImageMap = {};
 async function init() {
     updateCartCount();
     
-    // --- 自動綁定點擊事件 (防止手機版按鈕失效) ---
+    // 自動綁定按鈕事件
     const addBtn = document.getElementById('add-cart-btn');
-    if (addBtn) addBtn.onclick = addAllToCart;
+    if (addBtn) {
+        addBtn.onclick = addAllToCart;
+    }
 
-    if (!productCode) return;
+    if (!productCode) {
+        console.error("缺少產品代碼");
+        return;
+    }
     
     try {
-        console.log("🚀 [Detail] 正在獲取商品資料:", productCode);
-        // 呼叫 api.js 中的 ApiService
+        // 確保 ApiService 已由 api.js 載入
+        if (typeof ApiService === 'undefined') {
+            throw new Error("ApiService 未定義，請檢查 api.js 是否正確載入");
+        }
+
         const product = await ApiService.getProductByCode(productCode);
-        
         if (!product) throw new Error("找不到商品");
+        
         currentProduct = product;
         render(currentProduct);
     } catch (e) {
@@ -45,59 +50,60 @@ async function init() {
  * 2. 渲染商品資料
  */
 function render(p) {
-    document.getElementById('p-title').innerText = p.name;
+    // 填充文字資訊
+    document.getElementById('p-title').innerText = p.name || "未命名商品";
     document.getElementById('p-brand').innerText = p.brand || "AIFANG SELECT";
-    document.getElementById('p-id').innerText = `CODE: ${p.code}`;
+    document.getElementById('p-id').innerText = `CODE: ${p.code || 'N/A'}`;
     
-    // 渲染 Styling Note
     const noteEl = document.getElementById('styling-note');
     if (noteEl) noteEl.innerText = p.styling_note || "";
-    
-    // 主圖
-    const primaryImg = document.getElementById('primary-img');
-    if (primaryImg) primaryImg.src = p.image_main;
 
-    // 解析顏色圖片映射 (JSON 格式)
-    if (p.images_by_color) {
-        try { 
-            colorImageMap = typeof p.images_by_color === 'string' ? JSON.parse(p.images_by_color) : p.images_by_color; 
-        } catch (e) { 
-            console.warn("顏色對應圖解析失敗"); 
+    // --- 渲染 image_extra 多圖展示 ---
+    const imgArea = document.getElementById('image-main-area');
+    if (imgArea) {
+        imgArea.innerHTML = ""; 
+
+        // 優先讀取 image_extra，若無則讀取 image_main
+        const imageSource = p.image_extra || p.image_main;
+        
+        if (imageSource) {
+            String(imageSource).split(/[\n,]+/).forEach(url => {
+                const cleanUrl = url.trim();
+                if (cleanUrl) {
+                    const img = document.createElement('img');
+                    img.src = cleanUrl;
+                    img.className = 'extra-img'; 
+                    img.loading = 'lazy';
+                    imgArea.appendChild(img);
+                }
+            });
         }
     }
 
-    // 渲染下方細節圖 (image_extra 以逗號分隔)
-    const imgArea = document.getElementById('image-main-area');
-    if (p.image_extra && imgArea) {
-        const existingExtras = imgArea.querySelectorAll('img:not(#primary-img)');
-        existingExtras.forEach(el => el.remove());
-
-        String(p.image_extra).split(',').forEach(url => {
-            const cleanUrl = url.trim();
-            if(cleanUrl) {
-                const img = document.createElement('img');
-                img.src = cleanUrl;
-                imgArea.appendChild(img);
-            }
-        });
+    // 解析顏色圖片映射
+    if (p.images_by_color) {
+        try { 
+            colorImageMap = typeof p.images_by_color === 'string' ? JSON.parse(p.images_by_color) : p.images_by_color;
+        } catch (e) { 
+            colorImageMap = {};
+        }
     }
 
-    // 渲染選項與尺寸
     renderColorSwatches(p);
     renderSizeGroups(p);
 }
 
 /**
- * 3. 渲染尺寸分組與價格 (對接四色按鈕)
+ * 3. 渲染尺寸與價格
  */
 function renderSizeGroups(p) {
     const sizeArea = document.getElementById('size-area');
     if (!sizeArea) return;
-    sizeArea.innerHTML = ""; 
+    sizeArea.innerHTML = "";
 
     const status = (String(p.status || "")).toUpperCase();
     const isSale = status === 'SALE';
-
+    
     const groups = [
         { key: 'baby', label: 'BABY', colorClass: 'btn-baby' }, 
         { key: 'kid', label: 'KIDS', colorClass: 'btn-kid' }, 
@@ -109,24 +115,14 @@ function renderSizeGroups(p) {
         const rawSizes = p[`sizes_${group.key}`];
         const originalPrice = Number(p[`price_${group.key}`] || 0);
         
-        // --- 修正處：強制轉字串再進行檢查 ---
-        const sizeStr = String(rawSizes || "").trim();
-        
-        if (sizeStr !== "" && originalPrice > 0) {
+        if (rawSizes && originalPrice > 0) {
             const finalPrice = isSale ? originalPrice : Math.round(originalPrice * 0.9);
-
             const box = document.createElement('div');
             box.className = 'size-group';
             
-            let priceDisplay = "";
-            if (isSale) {
-                priceDisplay = `<span class="price-final sale-red">NT$ ${originalPrice.toLocaleString()}</span> <span class="badge-sale-mini">SALE</span>`;
-            } else {
-                priceDisplay = `
-                    <span class="price-original">NT$ ${originalPrice.toLocaleString()}</span>
-                    <span class="price-final sale-red">NT$ ${finalPrice.toLocaleString()}</span>
-                `;
-            }
+            let priceDisplay = isSale 
+                ? `<span class="price-final sale-red">NT$ ${originalPrice.toLocaleString()}</span> <span class="badge-sale-mini">SALE</span>`
+                : `<span class="price-original">NT$ ${originalPrice.toLocaleString()}</span><span class="price-final sale-red">NT$ ${finalPrice.toLocaleString()}</span>`;
 
             box.innerHTML = `
                 <div class="group-header">
@@ -134,7 +130,7 @@ function renderSizeGroups(p) {
                     <div class="price-tag-wrap">${priceDisplay}</div>
                 </div>
                 <div class="s-btn-wrap">
-                    ${sizeStr.split(',').map(s => `
+                    ${String(rawSizes).split(',').map(s => `
                         <button class="s-btn ${group.colorClass}" onclick="addToList('${s.trim()}', ${finalPrice})">${s.trim()}</button>
                     `).join('')}
                 </div>`;
@@ -144,12 +140,12 @@ function renderSizeGroups(p) {
 }
 
 /**
- * 4. 顏色選取與渲染 (Swatch)
+ * 4. 顏色選取與渲染
  */
 function renderColorSwatches(p) {
     const swatchGroup = document.getElementById('swatch-group');
     if (!swatchGroup) return;
-    swatchGroup.innerHTML = ""; 
+    swatchGroup.innerHTML = "";
 
     const colorNames = String(p.color || "").split(',').map(s => s.trim());
     const colorCodes = String(p.color_code || "").split(',').map(s => s.trim());
@@ -176,15 +172,12 @@ function renderColorSwatches(p) {
 
         item.onclick = () => {
             const targetImg = colorImageMap[name] || p.image_main;
-            selectedColor = { name, hex, krColor, image: targetImg }; 
+            selectedColor = { name, hex, krColor, image: targetImg };
             
             document.querySelectorAll('.swatch-item').forEach(el => el.classList.remove('active'));
             item.classList.add('active');
             
-            const primaryImg = document.getElementById('primary-img');
-            if (primaryImg) primaryImg.src = targetImg;
-            
-            // 手機版同步預覽
+            // 選色後同步更新手機版預覽區
             const mobileImg = document.getElementById('mobile-color-preview-img');
             const mobileText = document.getElementById('mobile-color-preview-name');
             if (mobileImg) mobileImg.src = targetImg;
@@ -197,7 +190,7 @@ function renderColorSwatches(p) {
 }
 
 /**
- * 5. 購物清單邏輯 (下單前預覽)
+ * 5. 購物清單與購物車邏輯
  */
 function addToList(sizeName, price) {
     if (!selectedColor.name) {
@@ -226,7 +219,6 @@ function addToList(sizeName, price) {
 function renderSelectedList() {
     const listArea = document.getElementById('selected-list');
     if (!listArea) return;
-    
     listArea.innerHTML = selectedItems.map((item, index) => `
         <div class="selected-item">
             <img src="./images/ui/btn_close.jpg" class="sel-close" onclick="removeFromList(${index})" alt="close">
@@ -242,18 +234,13 @@ function renderSelectedList() {
         </div>`).join('');
 }
 
-/**
- * 6. 加入購物車 (存入 LocalStorage)
- * 修正點：確保韓文名稱與韓文顏色被完整寫入
- */
 function addAllToCart() {
     if (selectedItems.length === 0) { 
-        showToast("請先選擇顏色與尺寸"); 
+        showToast("請先選擇顏色與尺寸");
         return; 
     }
     
     let cart = JSON.parse(localStorage.getItem('cart')) || [];
-    
     selectedItems.forEach(item => {
         const cartItem = { 
             code: currentProduct.code, 
@@ -265,20 +252,13 @@ function addAllToCart() {
             quantity: Number(item.quantity), 
             image: item.image,
             status: (currentProduct.status || "").toUpperCase(),
-            // 核心修正：存入韓文資訊
             korean_name: currentProduct.korean_name || "", 
             korean_color: item.krColor || "" 
         };
-        
-        const idx = cart.findIndex(i => 
-            i.code === cartItem.code && 
-            i.size === cartItem.size && 
-            i.color === cartItem.color
-        );
-        
+       
+        const idx = cart.findIndex(i => i.code === cartItem.code && i.size === cartItem.size && i.color === cartItem.color);
         if (idx > -1) {
             cart[idx].quantity += cartItem.quantity;
-            // 同步補齊韓文資訊（針對舊資料更新）
             cart[idx].korean_name = cartItem.korean_name;
             cart[idx].korean_color = cartItem.korean_color;
         } else {
@@ -288,15 +268,11 @@ function addAllToCart() {
     
     localStorage.setItem('cart', JSON.stringify(cart));
     updateCartCount();
-    
     selectedItems = [];
     renderSelectedList();
     showToast("商品已成功加入購物車");
 }
 
-/**
- * 工具函數
- */
 function updateListQty(index, delta) {
     if (selectedItems[index].quantity + delta > 0) {
         selectedItems[index].quantity += delta;
@@ -327,5 +303,5 @@ function updateCartCount() {
     }
 }
 
-// 頁面加載完成後初始化
-window.addEventListener('load', init);
+// 最後啟動
+window.onload = init;

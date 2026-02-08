@@ -12,8 +12,49 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Product Detail | AiFang Kids</title>
     <link rel="icon" href="./favicon.ico" type="image/x-icon">
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&family=Inter:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="./assets/css/detail.css">
+    <style>
+        /* 針對 image_extra 多圖展示的優化樣式 */
+        .scroll-content {
+            display: flex;
+            flex-direction: column;
+            gap: 10px; /* 圖片間距 */
+        }
+        .extra-img {
+            width: 100%;
+            height: auto;
+            display: block;
+            object-fit: cover;
+        }
+        /* 電腦版：左側圖區可滾動，右側資訊固定 */
+        @media (min-width: 901px) {
+            .detail-wrapper {
+                display: flex;
+                gap: 40px;
+            }
+            .scroll-content {
+                flex: 1;
+                max-width: 65%;
+            }
+            .fixed-aside {
+                width: 35%;
+                position: sticky;
+                top: 90px;
+                height: fit-content;
+            }
+        }
+        /* 手機版：圖片撐滿上方 */
+        @media (max-width: 900px) {
+            .detail-wrapper {
+                display: block;
+            }
+            .scroll-content {
+                width: 100%;
+                margin-bottom: 20px;
+            }
+        }
+    </style>
 </head>
 <body>
 
@@ -25,8 +66,8 @@
 
     <div class="detail-wrapper">
         <main class="scroll-content" id="image-main-area">
-            <img id="primary-img" src="" alt="Product Image">
-            </main>
+            <div id="loading-spinner" style="padding: 50px; text-align: center; color: #ccc;">Loading Images...</div>
+        </main>
 
         <aside class="fixed-aside" id="product-info">
             <span id="p-brand" class="brand-tag">-</span>
@@ -69,23 +110,23 @@
 
     <script>
         /**
-         * 畫面滾動邏輯
+         * 畫面滾動邏輯：讓使用者點擊手機版按鈕後直接滑到選項區
          */
         function scrollToOptions() {
             const aside = document.getElementById('product-info');
             if (aside) {
-                // 考量到 Header 高度
                 const offset = aside.offsetTop - 70;
                 window.scrollTo({ top: offset, behavior: 'smooth' });
             }
         }
 
-        // 手機版按鈕顯示/隱藏監聽
+        /**
+         * 監聽滾動：手機版下方浮動按鈕的顯示/隱藏切換
+         */
         window.addEventListener('scroll', () => {
             const trigger = document.getElementById('scroll-trigger');
             const aside = document.getElementById('product-info');
             if (window.innerWidth <= 900 && trigger && aside) {
-                // 當捲到選項區塊時，隱藏浮動按鈕以免遮擋
                 if (window.pageYOffset > (aside.offsetTop - 200)) {
                     trigger.style.opacity = '0';
                     trigger.style.pointerEvents = 'none';
