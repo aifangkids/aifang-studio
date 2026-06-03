@@ -1,5 +1,5 @@
 /**
- * AiFang Kids - API & 促銷邏輯整合版 (2026.02 最終優化版)
+ * AiFang Kids - API & 促銷邏輯整合版 (2026.06 最終優化版)
  */
 
 const API_URL = "https://script.google.com/macros/s/AKfycbxnlAwKJucHmCKcJwv67TWuKV0X74Daag9X9I4NG7DOESREuYdU7BtWBPcEHyoJphoEfg/exec";
@@ -44,7 +44,7 @@ const ApiService = {
     },
 
     /**
-     * 4. 核心促銷計算邏輯 (全場 1+1 混搭累計版)
+     * 4. 核心促銷計算邏輯 (已移除 9 折優惠，保留全場 1+1 混搭累計折價)
      */
     calculateCart(cartItems) {
         if (!Array.isArray(cartItems)) return { processedItems: [], subtotal: 0, discount_total: 0, total_amount: 0 };
@@ -62,13 +62,9 @@ const ApiService = {
 
         const processedItems = cartItems.map(item => {
             let originalPrice = Number(item.price);
-            let unitPrice = originalPrice;
+            let unitPrice = originalPrice; // 已修正：預設維持原價，不進行 9 折計算
             let currentStatus = String(item.status || "").toUpperCase();
             let qty = Number(item.quantity);
-
-            if (currentStatus !== "SALE") {
-                unitPrice = Math.round(originalPrice * 0.9);
-            }
 
             let finalStatus = currentStatus;
             if (currentStatus === "NEW") {
@@ -91,17 +87,15 @@ const ApiService = {
             };
         });
 
+        // 1+1 優惠：每兩件 NEW 商品現折 100 元
         const discount_total = Math.floor(totalNewQty / 2) * 100;
         const total_amount = subtotal - discount_total;
 
         return { processedItems, subtotal, discount_total, total_amount };
     },
 
-    /**
-     * 5. 送出訂單 (終極容錯版)
-     */
+    // 5. 送出訂單 (終極容錯版)
     async submitOrder(customerInfo, cartSummary) {
-        // --- 容錯邏輯核心 ---
         let itemsArray = [];
         let summaryData = { subtotal: 0, discount_total: 0, total_amount: 0 };
 
@@ -112,7 +106,6 @@ const ApiService = {
             itemsArray = cartSummary.processedItems;
             summaryData = cartSummary;
         } else if (typeof cartSummary === 'object' && cartSummary !== null) {
-            // 如果 cartSummary 是一個包含 items 的大物件
             itemsArray = cartSummary.items || [];
             summaryData = cartSummary.summary || cartSummary;
         }
@@ -151,19 +144,16 @@ const ApiService = {
         };
 
         try {
-            // 使用 text/plain 以避免 CORS preflight (OPTIONS) 限制
             const res = await fetch(API_URL, {
                 method: "POST",
-                mode: 'no-cors', // 強制發送，不要求回傳 (GAS 常見解法)
+                mode: 'no-cors', 
                 headers: { "Content-Type": "text/plain" },
                 body: JSON.stringify(payload)
             });
 
-            // no-cors 下無法讀取 res.json()，直接回傳成功
             return { success: true, order_id: payload.order_data.order_id };
         } catch (e) { 
             console.error("Submit Order Error:", e);
-            // 只要沒斷網，這裡通常已經送出去了
             return { success: true, order_id: payload.order_data.order_id }; 
         }
     },

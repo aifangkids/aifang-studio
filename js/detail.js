@@ -1,5 +1,6 @@
 /**
  * AiFang Kids - detail.js 2026 最終修正版
+ * 配合：左側純圖展示、右側指定六大欄位順序排版
  */
 
 // 確保這些變數在最上方正確宣告
@@ -50,15 +51,21 @@ async function init() {
  * 2. 渲染商品資料
  */
 function render(p) {
-    // 填充文字資訊
-    document.getElementById('p-title').innerText = p.name || "未命名商品";
-    document.getElementById('p-brand').innerText = p.brand || "AIFANG SELECT";
-    document.getElementById('p-id').innerText = `CODE: ${p.code || 'N/A'}`;
+    // 填充指定右側欄位資訊 (ID、名稱、價格、詳細介紹)
+    if (document.getElementById('p-id')) {
+        document.getElementById('p-id').innerText = `CODE: ${p.code || 'N/A'}`;
+    }
+    if (document.getElementById('p-title')) {
+        document.getElementById('p-title').innerText = p.name || "未命名商品";
+    }
+    if (document.getElementById('p-brand')) {
+        document.getElementById('p-brand').innerText = p.brand || "AIFANG SELECT";
+    }
     
     const noteEl = document.getElementById('styling-note');
-    if (noteEl) noteEl.innerText = p.styling_note || "";
+    if (noteEl) noteEl.innerText = p.styling_note || "暫無商品詳細介紹。";
 
-    // --- 渲染 image_extra 多圖展示 ---
+    // --- 渲染左側欄位：只顯示圖片 (image_extra 多圖展示) ---
     const imgArea = document.getElementById('image-main-area');
     if (imgArea) {
         imgArea.innerHTML = ""; 
@@ -117,21 +124,24 @@ function renderSizeGroups(p) {
         
         if (rawSizes && originalPrice > 0) {
             const finalPrice = isSale ? originalPrice : Math.round(originalPrice * 0.9);
-            const box = document.createElement('div');
-            box.className = 'size-group';
             
-            let priceDisplay = isSale 
-                ? `<span class="price-final sale-red">NT$ ${originalPrice.toLocaleString()}</span> <span class="badge-sale-mini">SALE</span>`
-                : `<span class="price-original">NT$ ${originalPrice.toLocaleString()}</span><span class="price-final sale-red">NT$ ${finalPrice.toLocaleString()}</span>`;
+            // 同步將首個有效價格渲染至主要價格顯示區
+            const priceEl = document.getElementById('p-price');
+            if (priceEl && priceEl.innerText === 'NT$ -') {
+                priceEl.innerText = `NT$ ${finalPrice.toLocaleString()}`;
+            }
 
+            const box = document.createElement('div');
+            box.className = 'size-group-container';
+            box.style.marginBottom = "15px";
+            
             box.innerHTML = `
-                <div class="group-header">
-                    <span class="group-label">${group.label}</span>
-                    <div class="price-tag-wrap">${priceDisplay}</div>
+                <div class="group-header" style="display:flex; justify-content:space-between; margin-bottom:8px; font-size:12px;">
+                    <span class="group-label" style="font-weight:700; color:#666;">${group.label} SIZE</span>
                 </div>
-                <div class="s-btn-wrap">
+                <div class="s-btn-wrap" style="display:flex; flex-wrap:wrap; gap:8px;">
                     ${String(rawSizes).split(',').map(s => `
-                        <button class="s-btn ${group.colorClass}" onclick="addToList('${s.trim()}', ${finalPrice})">${s.trim()}</button>
+                        <button class="size-btn ${group.colorClass}" onclick="addToList('${s.trim()}', ${finalPrice}, this)">${s.trim()}</button>
                     `).join('')}
                 </div>`;
             sizeArea.appendChild(box);
@@ -154,49 +164,57 @@ function renderColorSwatches(p) {
 
     colorNames.forEach((name, i) => {
         if (!name) return;
-        const hex = colorCodes[i] || '#eee';
+        const hex = colorCodes[i] || '#eeeeee';
         const pattern = colorPatterns[i] || "";
         const krColor = krColors[i] || ""; 
 
         const item = document.createElement('div');
-        item.className = "swatch-item";
+        item.className = "color-dot-btn";
         
-        let innerStyle = pattern 
-            ? `background-image: url('${pattern}'); background-size: cover;` 
-            : `background: ${hex}; border:1px solid #eee;`;
-
-        item.innerHTML = `
-            <div class="swatch-circle" style="${innerStyle}"></div>
-            <span class="swatch-name">${name}</span>
-        `;
+        // 直角底色或圖樣背景設定
+        if (pattern) {
+            item.style.backgroundImage = `url('${pattern}')`;
+        } else {
+            item.style.backgroundColor = hex;
+        }
+        item.title = name;
 
         item.onclick = () => {
             const targetImg = colorImageMap[name] || p.image_main;
             selectedColor = { name, hex, krColor, image: targetImg };
             
-            document.querySelectorAll('.swatch-item').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.color-dot-btn').forEach(el => el.classList.remove('active'));
             item.classList.add('active');
             
-            // 選色後同步更新手機版預覽區
-            const mobileImg = document.getElementById('mobile-color-preview-img');
+            // 安全防錯：僅在元件存在時更新（適配全新極簡結構）
             const mobileText = document.getElementById('mobile-color-preview-name');
-            if (mobileImg) mobileImg.src = targetImg;
             if (mobileText) mobileText.innerText = name;
         };
 
         swatchGroup.appendChild(item);
-        if (i === 0) item.click();
+        if (i === 0) item.click(); // 預設選取第一個顏色
     });
 }
 
 /**
  * 5. 購物清單與購物車邏輯
  */
-function addToList(sizeName, price) {
+function addToList(sizeName, price, btnElement) {
     if (!selectedColor.name) {
         showToast("請先選擇顏色");
         return;
     }
+
+    // 視覺上切換點擊的尺寸按鈕高亮狀態
+    document.querySelectorAll('.size-btn').forEach(el => el.classList.remove('active'));
+    if (btnElement) btnElement.classList.add('active');
+
+    // 即時連動更新右側的價格欄位
+    const priceEl = document.getElementById('p-price');
+    if (priceEl) {
+        priceEl.innerText = `NT$ ${price.toLocaleString()}`;
+    }
+
     const key = `${selectedColor.name}-${sizeName}`;
     const existing = selectedItems.find(i => i.key === key);
     
@@ -219,24 +237,32 @@ function addToList(sizeName, price) {
 function renderSelectedList() {
     const listArea = document.getElementById('selected-list');
     if (!listArea) return;
+    
+    // 平時隱藏，有選取品項時才打開顯示（作為加入購物車前的預覽）
+    if (selectedItems.length > 0) {
+        listArea.style.display = "block";
+    } else {
+        listArea.style.display = "none";
+    }
+
     listArea.innerHTML = selectedItems.map((item, index) => `
-        <div class="selected-item">
-            <img src="./images/ui/btn_close.jpg" class="sel-close" onclick="removeFromList(${index})" alt="close">
-            <div class="sel-info">${item.color} / ${item.size}</div>
-            <div class="sel-bottom">
-                <div class="qty-box">
-                    <button class="qty-btn" onclick="updateListQty(${index}, -1)">-</button>
-                    <input type="text" class="qty-input" value="${item.quantity}" readonly>
-                    <button class="qty-btn" onclick="updateListQty(${index}, 1)">+</button>
+        <div class="selected-item" style="background:#fafafa; padding:12px; margin-top:8px; border:1px solid #eee; font-size:13px; position:relative;">
+            <span style="position:absolute; top:8px; right:12px; cursor:pointer; color:#999;" onclick="removeFromList(${index})">✕</span>
+            <div><strong>${item.color} / ${item.size}</strong></div>
+            <div style="display:flex; justify-content:between; align-items:center; margin-top:8px;">
+                <div class="qty-box" style="display:inline-flex; border:1px solid #000;">
+                    <button class="qty-btn" style="width:28px; height:28px; border:none; background:none; cursor:pointer;" onclick="updateListQty(${index}, -1)">-</button>
+                    <input type="text" class="qty-input" style="width:35px; text-align:center; border:none; font-weight:bold;" value="${item.quantity}" readonly>
+                    <button class="qty-btn" style="width:28px; height:28px; border:none; background:none; cursor:pointer;" onclick="updateListQty(${index}, 1)">+</button>
                 </div>
-                <div class="sel-price">NT$ ${(item.price * item.quantity).toLocaleString()}</div>
+                <div style="margin-left:auto; font-weight:700;">NT$ ${(item.price * item.quantity).toLocaleString()}</div>
             </div>
         </div>`).join('');
 }
 
 function addAllToCart() {
     if (selectedItems.length === 0) { 
-        showToast("請先選擇顏色與尺寸");
+        showToast("請先選擇顏色與尺寸規格");
         return; 
     }
     
@@ -280,6 +306,9 @@ function updateListQty(index, delta) {
     }
 }
 
+/**
+ * 從臨時選擇清單中移除
+ */
 function removeFromList(index) {
     selectedItems.splice(index, 1);
     renderSelectedList();
@@ -289,8 +318,10 @@ function showToast(msg) {
     const toast = document.getElementById('custom-toast');
     if (toast) {
         toast.innerText = msg;
-        toast.classList.add('show');
-        setTimeout(() => toast.classList.remove('show'), 2000);
+        toast.className = 'show'; // 搭配舊有 toast 顯示邏輯
+        setTimeout(() => toast.className = '', 2000);
+    } else {
+        alert(msg); // 備用防錯機制
     }
 }
 
@@ -303,5 +334,5 @@ function updateCartCount() {
     }
 }
 
-// 最後啟動
+// 綁定最後載入啟動
 window.onload = init;

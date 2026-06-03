@@ -1,6 +1,6 @@
 /**
  * AiFang Kids - index.js
- * [2026.02 最終整合版]
+ * [2026.06 最終整合版 - 已移除 9 折顯示]
  * 修正內容：
  * 1. 支援 price_baby, price_kid, price_junior, price_adult 多欄位金額判定。
  * 2. 修正 1+1 促銷在奇數商品時的顯示錯誤。
@@ -100,7 +100,7 @@ function render(items) {
         const isSale = status === "SALE";
         const badgeHtml = status ? `<span class="status-badge badge-${status}">${status}</span>` : "";
         
-        // --- 修正：依序檢查四種尺寸價格，抓取第一個有值的金額作為列表顯示 ---
+        // --- 依序檢查四種尺寸價格，抓取第一個有值的金額作為列表顯示 ---
         const originalPrice = Number(
             item.price_baby || 
             item.price_kid || 
@@ -109,22 +109,20 @@ function render(items) {
             item.price || 0
         );
 
-        // 如果是非 SALE 狀態，顯示 9 折（您原有的邏輯）
-        const finalPrice = isSale ? originalPrice : Math.round(originalPrice * 0.9);
-
         let priceHtml = "";
         if (originalPrice === 0) {
             priceHtml = `<div class="p-price-wrapper"><div class="p-price-final">COMING SOON</div></div>`;
         } else if (isSale) {
+            // 特價商品維持紅色高亮醒目提示
             priceHtml = `
                 <div class="p-price-wrapper on-sale">
-                    <div class="p-price-final">NT$ ${originalPrice.toLocaleString()}</div>
+                    <div class="p-price-final" style="color: #d9534f; font-weight: bold;">NT$ ${originalPrice.toLocaleString()}</div>
                 </div>`;
         } else {
+            // 已修正：一般商品與新品直接清爽顯示原價，不再顯示折價刪除線
             priceHtml = `
                 <div class="p-price-wrapper">
-                    <span class="p-price-original" style="text-decoration: line-through; color: #888; font-size: 0.9em; margin-right: 5px;">NT$ ${originalPrice.toLocaleString()}</span>
-                    <span class="p-price-final" style="color: #d9534f; font-weight: bold;">NT$ ${finalPrice.toLocaleString()}</span>
+                    <div class="p-price-final">NT$ ${originalPrice.toLocaleString()}</div>
                 </div>`;
         }
 
@@ -281,7 +279,7 @@ function renderMiniCart() {
             if (lineItemHasPromo) promoHtml = `<p style="color:#d9534f; font-size:10px; margin-top:2px;">✨ 1+1 組合折抵中</p>`;
         }
 
-        // 金額顯示優化
+        // 金額顯示優化（此處會自動同步讀取 api.js 計算後的無九折正確單價）
         const displayPrice = Number(item.unit_price || item.price || 0);
 
         return `

@@ -9,52 +9,11 @@
       gtag('js', new Date());
       gtag('config', 'G-5XTC9J1E5P');
     </script>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Product Detail | AiFang Kids</title>
     <link rel="icon" href="./favicon.ico" type="image/x-icon">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&family=Inter:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="./assets/css/detail.css">
-    <style>
-        /* 針對 image_extra 多圖展示的優化樣式 */
-        .scroll-content {
-            display: flex;
-            flex-direction: column;
-            gap: 10px; /* 圖片間距 */
-        }
-        .extra-img {
-            width: 100%;
-            height: auto;
-            display: block;
-            object-fit: cover;
-        }
-        /* 電腦版：左側圖區可滾動，右側資訊固定 */
-        @media (min-width: 901px) {
-            .detail-wrapper {
-                display: flex;
-                gap: 40px;
-            }
-            .scroll-content {
-                flex: 1;
-                max-width: 65%;
-            }
-            .fixed-aside {
-                width: 35%;
-                position: sticky;
-                top: 90px;
-                height: fit-content;
-            }
-        }
-        /* 手機版：圖片撐滿上方 */
-        @media (max-width: 900px) {
-            .detail-wrapper {
-                display: block;
-            }
-            .scroll-content {
-                width: 100%;
-                margin-bottom: 20px;
-            }
-        }
-    </style>
 </head>
 <body>
 
@@ -65,35 +24,47 @@
     </header>
 
     <div class="detail-wrapper">
+        
         <main class="scroll-content" id="image-main-area">
             <div id="loading-spinner" style="padding: 50px; text-align: center; color: #ccc;">Loading Images...</div>
         </main>
 
         <aside class="fixed-aside" id="product-info">
-            <span id="p-brand" class="brand-tag">-</span>
-            <h1 id="p-title" class="p-title">LOADING...</h1>
-            <p id="p-id" class="p-id">CODE: -</p>
-
-            <span class="label">COLOR / 花色選取</span>
             
-            <div id="mobile-preview-area" class="mobile-preview-box">
-                <img id="mobile-color-preview-img" src="images/ui/placeholder.jpg">
-                <div class="preview-info-text">
-                    <span class="preview-label">SELECTED</span>
-                    <span id="mobile-color-preview-name">請選擇</span>
-                </div>
+            <div class="info-row">
+                <span class="info-label">PRODUCT CODE / 商品編號</span>
+                <p id="p-id" class="p-id">CODE: -</p>
             </div>
 
-            <div id="swatch-group" class="swatch-group"></div>
+            <div class="info-row">
+                <span id="p-brand" class="brand-tag">-</span>
+                <h1 id="p-title" class="p-title">LOADING...</h1>
+            </div>
 
-            <span class="label">SIZE / 尺寸與價格</span>
-            <div id="size-area"></div>
+            <div class="info-row">
+                <span class="info-label">COLOR / 花色選取</span>
+                <div id="swatch-group" class="swatch-group"></div>
+                <div id="mobile-preview-area" style="display:none;"><span id="mobile-color-preview-name">請選擇</span></div>
+            </div>
+
+            <div class="info-row">
+                <span class="info-label">PRICE / 價格</span>
+                <div id="p-price" class="p-price">NT$ -</div>
+            </div>
+
+            <div class="info-row">
+                <span class="info-label">SIZE / 尺寸選擇</span>
+                <div id="size-area" class="size-group"></div>
+            </div>
+
+            <div class="info-row" style="border-bottom: none; margin-bottom: 10px;">
+                <span class="info-label">DETAILS / 詳細介紹</span>
+                <p id="styling-note" class="info-value">正在載入商品詳細說明...</p>
+            </div>
 
             <div id="selected-list" class="selected-list"></div>
 
-            <button id="add-cart-btn" class="add-cart-btn" onclick="addAllToCart()">ADD TO CART</button>
-            
-            <p id="styling-note" class="styling-note-text"></p>
+            <button id="add-cart-btn" class="add-cart-btn">ADD TO CART</button>
         </aside>
     </div>
 
