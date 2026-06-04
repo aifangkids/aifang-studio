@@ -5,6 +5,7 @@
  * 1. 支援 price_baby, price_kid, price_junior, price_adult 多欄位金額判定。
  * 2. 修正 1+1 促銷在奇數商品時的顯示錯誤。
  * 3. 完整保留彈窗、搜尋與側欄功能。
+ * 4. 新增 Banner 開始購物點擊事件（平滑滾動 + 強制彈窗）。
  */
 
 let allData = [];
@@ -180,6 +181,7 @@ function handleSearch(query) {
     render(filteredData);
 }
 
+/** 分類篩選 */
 function filterByCat(cat) {
     activeCat = cat; 
     activeBrands.clear(); 
@@ -208,6 +210,7 @@ function filterByCat(cat) {
     if (window.innerWidth <= 900) closeMenu();
 }
 
+/** 品牌複選篩選 */
 function toggleBrand(e, b) {
     if (e) e.stopPropagation();
     displayCount = 20; 
@@ -342,6 +345,32 @@ function bindPopupEvents() {
 function closePopup() { 
     const overlay = document.getElementById('popup-overlay');
     if (overlay) overlay.style.display = 'none'; 
+}
+
+/**
+ * ========================================================
+ * 7. Banner 開始購物功能 (新增點擊監聽動作)
+ * ========================================================
+ */
+function startShopping() {
+    // A. 畫面平滑滾動到頁首 (對應 HTML 中 header 的 id="main-header")
+    const header = document.getElementById('main-header');
+    if (header) {
+        header.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // B. 強制讓 POPUP 彈窗顯示
+    const overlay = document.getElementById('popup-overlay');
+    const popImg = document.getElementById('popup-img');
+
+    if (overlay) {
+        // 如果目前沒圖片路徑（可能之前沒載入成功），就補跑一次隨機圖
+        if (popImg && (!popImg.src || popImg.src.slice(-1) === '/')) {
+            showRandomPopup();
+        } else {
+            overlay.style.display = 'flex';
+        }
+    }
 }
 
 window.addEventListener('DOMContentLoaded', init);

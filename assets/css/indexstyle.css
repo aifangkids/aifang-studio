@@ -23,6 +23,35 @@ body {
     -webkit-font-smoothing: antialiased;
 }
 
+/* --- 1.5 首頁滿版大圖 Banner (新增部分) --- */
+.hero-banner {
+    width: 100%;
+    height: 100vh; /* 滿版全螢幕高度 */
+    /* 從 assets/css/ 退兩層回到根目錄，再進入 images/ui/ */
+    background: url('../../images/ui/banner.jpg') no-repeat center center/cover;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+}
+.start-shopping-btn {
+    background-color: #333; /* 質感深色極簡按鈕 */
+    color: #fff;
+    border: none;
+    padding: 15px 40px;
+    font-size: 12px;
+    letter-spacing: 3px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: inherit;
+    font-weight: 500;
+}
+.start-shopping-btn:hover {
+    background-color: #f2b9b2; /* 懸停時轉為溫馨韓國風奶油粉 */
+    color: #fff;
+    transform: translateY(-1px);
+}
+
 /* --- 2. 頂部導覽 --- */
 .top-header {
     width: 100%; height: var(--header-h); background: #fff;
@@ -106,9 +135,6 @@ body {
 .p-price-wrapper { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
 .p-price-original { color: #999; text-decoration: line-through; font-size: 13px; font-weight: 400; }
 .p-price-final { color: #d9534f; font-weight: 700; font-size: 16px; }
-
-/* 當商品標註為 SALE 時，改為黑色質感大字 */
-.p-price-wrapper.on-sale .p-price-final { color: #111; font-size: 18px; }
 
 /* --- 5. 工具組 --- */
 .fixed-tools { position: fixed; bottom: 30px; right: 20px; z-index: 2000; display: flex; flex-direction: column; }
