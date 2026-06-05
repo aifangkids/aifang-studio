@@ -13,11 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-/**
- * 核心金額計算：具備全自動防錯、欄位對齊相容機制
- */
 function calculateOrder(cart) {
-    // 防線一：如果後台 ApiService 正常運作，優先用後台的
     if (typeof ApiService !== 'undefined' && typeof ApiService.calculateCart === 'function') {
         try {
             const summary = ApiService.calculateCart(cart);
@@ -32,14 +28,13 @@ function calculateOrder(cart) {
         }
     }
     
-    // 防線二：萬一後台當掉或欄位對不上，前台自己算，確保絕對不卡死
     let total = 0;
     const processedItems = cart.map(item => {
-        // 自動相容 unitprice 或 price
         const price = Number(item.unitprice || item.price || 0);
         const qty = Number(item.quantity || 1);
         total += price * qty;
         return {
+            code: item.code || '',
             name: item.name || '未命名商品',
             color: item.color || '預設',
             size: item.size || 'F',
@@ -48,7 +43,6 @@ function calculateOrder(cart) {
             quantity: qty
         };
     });
-
     return { total, processedItems };
 }
 
@@ -65,9 +59,6 @@ function getTaipeiTimeString() {
     }).format(new Date()).replace(/\//g, '/');
 }
 
-/**
- * 渲染購物車
- */
 function renderCart() {
     const cart = JSON.parse(localStorage.getItem('cart')) || [];
     const container = document.getElementById('cart-items-preview');
@@ -104,9 +95,6 @@ function renderCart() {
     updateUI(result.total);
 }
 
-/**
- * 送出訂單
- */
 async function submitOrder() {
     const cart = JSON.parse(localStorage.getItem('cart')) || [];
     const name = document.getElementById('cust-name').value.trim();
@@ -117,7 +105,6 @@ async function submitOrder() {
     if (!name || !email) return showToast("請填寫訂購資訊");
 
     const summary = calculateOrder(cart);
-    
     const cartSummaryForApi = {
         processedItems: summary.processedItems,
         subtotal: summary.total,
@@ -156,7 +143,7 @@ async function submitOrder() {
         }
     } catch (err) {
         console.error("Submit Error:", err);
-        showToast("提交失敗，請檢查網路連線");
+        showToast("提交失敗，請檢查網路或重新發布後台");
         const btn = document.getElementById('submit-order-btn');
         btn.innerText = "提交訂單並結帳";
         btn.disabled = false;

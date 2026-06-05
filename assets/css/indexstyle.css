@@ -28,7 +28,8 @@
 }
 
 body { 
-    font-family: 'NotoSansKR', 'Noto Sans TC', sans-serif; 
+    font-family: 'NotoSansKR-Light';
+    src: url('../fonts/NotoSansKR-Light.ttf') format('truetype');
     background-color: var(--bg-cream); 
     color: var(--text-main); 
     overflow-x: hidden; 
@@ -40,15 +41,22 @@ body {
    ========================================================================== */
 .hero-banner {
     width: 100%;
-    height: 100vh; 
-    background: url('../../images/banner/hero.jpg') no-repeat center center/cover;
+    height: 100vh; /* 滿版全螢幕高度 */
+    
+    /* 📌 保留縮放與居中設定，背景圖改由 JS 動態塞入 */
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    
     display: flex;
     justify-content: center;
     align-items: center;
     position: relative;
     z-index: 2000; /* 確保絕對覆蓋前台 */
+    
+    /* 💡 溫馨小提示：可以加個流暢的淡入過場，換圖時會更精緻 */
+    transition: background-image 0.3s ease-in-out; 
 }
-
 .start-shopping-btn {
     background-color: var(--text-main); 
     color: #fff;

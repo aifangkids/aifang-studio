@@ -1,0 +1,317 @@
+/* ==========================================================================
+   AiFang Kids - ordersuccess.css
+   ========================================================================== */
+
+:root {
+    --bg-cream: #FFFDF9;       /* 溫暖的奶油白背景 */
+    --card-bg: #ffffff;          /* 純白卡片 */
+    --primary-pink: #F4D3D3;   /* 主色：優雅的粉撲色 */
+    --accent-tan: #E6B3B3;       /* 精緻奶茶色 */
+    --text-main: #5A4B41;      /* 溫暖的深咖啡色文字 */
+    --text-muted: #8C7B70;     /* 輔助文字顏色 */
+    --border-soft: #FDF5F2;      /* 細緻淺色邊框 */
+    --success-green: #e2f0d9;    /* 複製成功提示淺綠 */
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    @font-face {
+    font-family: 'NotoSansKR-Light';
+    src: url('../fonts/NotoSansKR-Light.ttf') format('truetype');
+}
+    @font-face {
+    font-family: 'NotoSansKR-Regular';
+    src: url('../fonts/NotoSansKR-Regular.ttf') format('truetype');
+}
+    background-color: var(--bg-cream);
+    margin: 0;
+    padding: 0;
+    color: var(--text-main);
+    -webkit-font-smoothing: antialiased;
+}
+
+/* 簡約頂部 Logo 列 */
+.top-header {
+    background: var(--card-bg);
+    text-align: center;
+    padding: 15px;
+    border-bottom: 1px solid var(--border-soft);
+}
+
+.main-logo {
+    height: 38px;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+.main-logo:hover {
+    opacity: 0.8;
+}
+
+/* 主容器 */
+.success-container {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 20px 16px 60px 16px;
+}
+
+/* 📸 滿版響應式 Banner 核心設定 */
+.success-hero {
+    text-align: center;
+    margin-bottom: 25px;
+    border-radius: 16px;
+    overflow: hidden; /* 確保圖片圓角完美 */
+    background: #fff;
+    box-shadow: 0 4px 20px rgba(212, 163, 115, 0.06);
+}
+
+#success-icon-img {
+    width: 100%;       /* 手機版自動流暢撐滿寬度 */
+    height: auto;      /* 高度依比例完美自適應 */
+    display: block;    /* 消除圖檔底部空隙 */
+    object-fit: cover;
+}
+
+.success-title {
+    font-size: 18px;
+    font-weight: 500;
+    color: var(--accent-tan);
+    margin: 20px 0;
+    padding: 0 15px;
+    letter-spacing: 0.5px;
+}
+
+/* 內頁精緻卡片 */
+.order-card {
+    background: var(--card-bg);
+    border-radius: 16px;
+    padding: 25px 20px;
+    box-shadow: 0 4px 25px rgba(212, 163, 115, 0.08);
+    margin-bottom: 25px;
+}
+
+.section-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--accent-tan);
+    letter-spacing: 1px;
+    margin-bottom: 15px;
+    position: relative;
+    padding-left: 10px;
+}
+.section-title::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 3px;
+    width: 4px;
+    height: 14px;
+    background-color: var(--primary-pink);
+    border-radius: 2px;
+}
+
+/* 網格基本資訊 */
+.info-grid {
+    margin-bottom: 10px;
+}
+.info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    font-size: 14px;
+    border-bottom: 1px solid #fafafa;
+}
+.info-row .label {
+    color: var(--text-muted);
+}
+.info-row .value {
+    font-weight: 500;
+}
+.info-row .value.highlighted {
+    color: #c97a63;
+    font-weight: 700;
+}
+
+.divider {
+    border: 0;
+    border-top: 1px dashed var(--border-soft);
+    margin: 20px 0;
+}
+
+/* 商品細項排版 */
+.item-list-container {
+    margin-bottom: 10px;
+}
+
+.success-item-row {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 12px 0;
+    border-bottom: 1px solid #fcfbfa;
+}
+
+.item-img-box img {
+    width: 65px;
+    height: 65px;
+    object-fit: cover;
+    border-radius: 10px;
+    border: 1px solid var(--border-soft);
+}
+
+.item-details-box {
+    flex: 1;
+}
+
+.item-name-text {
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--text-main);
+    margin-bottom: 3px;
+}
+
+.item-spec-text {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.item-qty-text {
+    font-size: 12px;
+    color: #a8a8a8;
+    margin-top: 1px;
+}
+
+.item-price-box {
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--text-main);
+}
+
+/* 金額小計區塊 */
+.summary-box {
+    background: transparent;
+}
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 0;
+    font-size: 14px;
+}
+.summary-row.total {
+    margin-top: 10px;
+    padding-top: 15px;
+    border-top: 1px solid var(--border-soft);
+}
+.summary-row.total .label {
+    font-weight: 700;
+    font-size: 16px;
+    color: var(--text-main);
+}
+.summary-row.total .value {
+    font-size: 20px;
+    font-weight: 700;
+    color: #c97a63;
+}
+
+/* 💬 傳送官方客服文字複製框 */
+.share-modes-box {
+    background: var(--card-bg);
+    border: 1.5px dashed var(--accent-tan);
+    border-radius: 16px;
+    padding: 22px 20px;
+    text-align: center;
+    box-shadow: 0 4px 20px rgba(212, 163, 115, 0.04);
+    margin-bottom: 25px;
+}
+
+.share-modes-box h3 {
+    margin: 0 0 8px 0;
+    font-size: 16px;
+    color: var(--accent-tan);
+}
+
+.share-tip {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin: 0 0 16px 0;
+    line-height: 1.5;
+}
+
+.textarea-wrapper {
+    width: 100%;
+}
+
+#order-summary-text {
+    width: 100%;
+    height: 135px;
+    padding: 12px;
+    border: 1px solid var(--border-soft);
+    border-radius: 10px;
+    font-family: inherit;
+    font-size: 13px;
+    color: #555;
+    background: #fdfdfd;
+    resize: none;
+    line-height: 1.6;
+    outline: none;
+}
+
+.btn-copy {
+    width: 100%;
+    padding: 12px;
+    margin-top: 10px;
+    background-color: var(--accent-tan);
+    color: #ffffff;
+    border: none;
+    border-radius: 10px;
+    font-family: inherit;
+    font-weight: 700;
+    font-size: 15px;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.1s;
+}
+.btn-copy:hover {
+    background-color: #bd8f62;
+}
+.btn-copy:active {
+    transform: scale(0.99);
+}
+
+/* 返回首頁連結 */
+.home-btn {
+    display: block;
+    text-align: center;
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 14px;
+    margin-top: 25px;
+    transition: color 0.2s;
+}
+.home-btn:hover {
+    color: var(--accent-tan);
+}
+
+/* ==========================================================================
+   手機響應式微調 (RWD Mobile)
+   ========================================================================== */
+@media (max-width: 480px) {
+    .success-container {
+        padding: 12px 12px 40px 12px;
+    }
+    .order-card {
+        padding: 20px 15px;
+    }
+    .success-title {
+        font-size: 16px;
+        margin: 15px 0;
+    }
+    .item-name-text {
+        font-size: 13px;
+    }
+    #order-summary-text {
+        font-size: 12px;
+    }
+}

@@ -24,7 +24,8 @@
 }
 
 body { 
-    font-family: 'NotoSansKR', 'Noto Sans TC', sans-serif; 
+    font-family: 'NotoSansKR-Light';
+    src: url('../fonts/NotoSansKR-Light.ttf') format('truetype');
     background-color: var(--bg-cream); 
     color: var(--text-main); 
     -webkit-font-smoothing: antialiased;

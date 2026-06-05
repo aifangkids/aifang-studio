@@ -3,83 +3,77 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Order Success | AiFang Kids</title>
-    
-    <link rel="icon" href="./favicon.ico" type="image/x-icon">
-    
-    <link rel="stylesheet" href="./assets/css/order-success.css">
-    
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-5XTC9J1E5P"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-        gtag('config', 'G-5XTC9J1E5P');
-    </script>
+    <title>Success | AiFang Kids</title>
+    <link rel="stylesheet" href="./assets/css/ordersuccess.css">
 </head>
 <body>
 
-    <header class="top-header">
-        <img src="images/ui/logo.png" class="main-logo" alt="AIFANG" onclick="location.href='index.html'">
-    </header>
-
-    <div class="success-container">
+    <main class="success-container">
+        <!-- 滿版 Banner 區塊 -->
         <div class="success-hero">
-            <img id="success-icon-img" src="./images/ui/success01.png" alt="Success">
-            <h1 class="success-title">Thank You!</h1>
-            <p class="success-subtitle">訂單已成功提交，請通知 LINE 完成最後確認</p>
+            <img id="success-icon-img" src="./images/ui/success.jpg">
+            <h2 id="success-title-text" class="success-title"></h2>
         </div>
 
+        <!-- 訂單內容卡片 -->
         <div class="order-card">
             <div class="section-title">訂單資訊</div>
-            
             <div class="info-grid">
                 <div class="info-row">
                     <span class="label">訂單編號</span>
-                    <span id="display-order-id" class="value">--</span>
+                    <span class="value highlighted" id="display-order-id">-</span>
                 </div>
                 <div class="info-row">
-                    <span class="label">訂購人</span>
-                    <span id="display-name" class="value">--</span>
+                    <span class="label">LINE名稱</span>
+                    <span class="value" id="display-name">-</span>
                 </div>
                 <div class="info-row">
-                    <span class="label">Email</span>
-                    <span id="display-email" class="value">--</span>
+                    <span class="label">電子信箱</span>
+                    <span class="value" id="display-email">-</span>
+                </div>
+                <div class="info-row">
+                    <span class="label">配送方式</span>
+                    <span class="value" id="display-shipping">-</span>
                 </div>
             </div>
 
             <hr class="divider">
 
-            <div class="section-title">商品明細</div>
-            <div id="display-item-list" class="item-list-container">
-                </div>
+            <div class="section-title">預購商品明細</div>
+            <!-- 動態商品列表容器 -->
+            <div id="display-item-list" class="item-list-container"></div>
 
+            <hr class="divider">
+
+            <!-- 金額統計 -->
             <div class="summary-box">
                 <div class="summary-row">
-                    <span>小計 Subtotal</span>
-                    <span id="display-subtotal">NT$ 0</span>
-
-                <div id="display-coupon-remark" class="coupon-remark"></div>
-                
+                    <span class="label">商品小計</span>
+                    <span class="value" id="display-subtotal">NT$ 0</span>
+                </div>
                 <div class="summary-row total">
-                    <span>總計 Total</span>
-                    <span id="display-total">NT$ 0</span>
+                    <span class="label">應付總額</span>
+                    <span class="value" id="display-total">NT$ 0</span>
                 </div>
             </div>
         </div>
 
-<div class="action-section">
-    <a href="#" id="line-link" class="line-btn">
-        <img src="./images/ui/line_icon.png" alt="line" class="btn-icon"> 
-        <span>通知 LINE 官方(請複製訂單內容)</span>
-    </a>
-</div>
-            <a href="index.html" class="home-btn">返回首頁繼續購物</a>
+        <!-- 傳送至 LINE 客服區塊 -->
+        <div class="share-modes-box">
+            <h3>傳送訂單至 LINE 官方</h3>
+            <p class="share-tip">點擊按鈕複製，傳送至LINE官方，加速處理流程</p>
+            
+            <div class="textarea-wrapper">
+                <textarea id="order-summary-text" readonly></textarea>
+                <button id="btn-copy-text" class="btn-copy">📋 複製訂單訊息</button>
+            </div>
         </div>
-    </div>
 
-    <textarea id="copy-helper" readonly style="position:fixed; top:-9999px;"></textarea>
+        <a href="index.html" class="home-btn">← 返回首頁繼續逛逛</a>
+    </main>
 
-    <script src="js/order_success.js"></script>
+    <!-- 核心控制邏輯 -->
+    <script src="./js/api.js"></script>
+    <script src="./js/order_success.js"></script>    
 </body>
 </html>

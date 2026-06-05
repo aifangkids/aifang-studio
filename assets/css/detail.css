@@ -31,7 +31,6 @@
 }
 
 body { 
-    font-family: 'NotoSansKR-Light', 'Noto Sans TC', sans-serif; 
     background-color: var(--bg-cream); 
     color: var(--text-main); 
     overflow-x: hidden; 
@@ -148,7 +147,8 @@ body {
 
 /* DETAILS 與 JS 生成的 SELECT SIZE 專用標籤 -> (大)(粗) */
 .detail-large-label, .group-label {
-    font-family: 'NotoSansKR-Regular', sans-serif;
+    font-family: 'NotoSansKR-Light';
+    src: url('../fonts/NotoSansKR-Light.ttf') format('truetype');
     font-size: 16px;
     font-weight: bold;
     color: var(--text-main);
@@ -159,7 +159,8 @@ body {
 
 /* 商品編號: momoann01 -> (小)(細) */
 .p-id { 
-    font-family: 'NotoSansKR-Light', sans-serif;
+    font-family: 'NotoSansKR-Light';
+    src: url('../fonts/NotoSansKR-Light.ttf') format('truetype');
     font-size: 12px; 
     color: var(--text-muted); 
     margin: 0;
@@ -167,7 +168,8 @@ body {
 
 /* MOMOANN 品牌標籤 -> (小)(細) */
 .brand-tag { 
-    font-family: 'NotoSansKR-Light', sans-serif;
+    font-family: 'NotoSansKR-Light';
+    src: url('../fonts/NotoSansKR-Light.ttf') format('truetype');
     font-size: 12px; 
     color: var(--text-muted); 
     display: block; 
@@ -177,7 +179,8 @@ body {
 
 /* 細肩帶連身裙 商品名稱 -> (大)(粗) */
 .p-title { 
-    font-family: 'NotoSansKR-Regular', sans-serif;
+    font-family: 'NotoSansKR-Regular';
+    src: url('../fonts/NotoSansKR-Regular.ttf') format('truetype');
     font-size: 22px; 
     font-weight: bold;
     line-height: 1.4; 
@@ -188,7 +191,8 @@ body {
 
 /* NT$ 690 價格顯示 -> (大)(粗) */
 .p-price { 
-    font-family: 'NotoSansKR-Regular', sans-serif;
+    font-family: 'NotoSansKR-Regular';
+    src: url('../fonts/NotoSansKR-Regular.ttf') format('truetype');
     font-size: 20px; 
     font-weight: bold;
     color: var(--text-main); 
@@ -196,7 +200,8 @@ body {
 
 /* 聚酯纖維 詳細介紹內文 -> (小)(細) */
 .info-value {
-    font-family: 'NotoSansKR-Light', sans-serif;
+    font-family: 'NotoSansKR-Light';
+    src: url('../fonts/NotoSansKR-Light.ttf') format('truetype');
     font-size: 13px;
     color: var(--text-main);
     line-height: 1.6;
@@ -216,7 +221,8 @@ body {
 
 /* 通用按鈕基底：強制 (小)(細) 視覺 */
 .color-btn, .size-btn, .s-btn { 
-    font-family: 'NotoSansKR-Light', sans-serif;
+    font-family: 'NotoSansKR-Light';
+    src: url('../fonts/NotoSansKR-Light.ttf') format('truetype');
     font-size: 13px;              /* (小) */
     font-weight: 300 !important;  /* (細) */
     border: 1px solid var(--border-light); 
@@ -236,7 +242,7 @@ body {
 /* 按鈕選取選中狀態 */
 .color-btn.active, .size-btn.active, .s-btn.active { 
     border-color: var(--text-main) !important;
-    background-color: #fcfaf7 !important;
+    background-color: #8C7B70 !important;
     font-weight: 400 !important; /* 保持舒適不突兀 */
 }
 
@@ -244,7 +250,8 @@ body {
    5. 購物車大按鈕與預覽盒
    ========================================================================== */
 .add-cart-btn { 
-    font-family: 'NotoSansKR-Regular', sans-serif;
+    font-family: 'NotoSansKR-Regular';
+    src: url('../fonts/NotoSansKR-Regular.ttf') format('truetype');
     width: 100%; 
     padding: 16px; 
     background-color: var(--text-main); 

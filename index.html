@@ -14,13 +14,13 @@
     </script>
 
     <link rel="icon" href="./favicon.ico" type="image/x-icon">
-    
     <link rel="stylesheet" href="./assets/css/indexstyle.css">
 </head>
+
 <body>
 
     <div class="hero-banner">
-        <button class="start-shopping-btn" onclick="enterShop()">🌈ᴡᴇʟᴄᴏᴍᴇ</button>
+        <button class="start-shopping-btn" onclick="enterShop()">🌈wᴇʟᴄᴏᴍᴇ</button>
     </div>
 
     <header class="top-header" id="main-header">
@@ -57,16 +57,53 @@
         <div class="category-group">
             <h3 class="category-title">BRANDS</h3>
             <ul class="category-list brand-list" id="brand-list">
-                </ul>
+            </ul>
         </div>
     </aside>
 
     <main id="main-content" class="main-content">
         <div id="product-list" class="product-grid">
-            </div>
+        </div>
     </main>
 
     <script src="js/api.js"></script>
     <script src="js/index.js"></script>
+
+<script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const heroBanner = document.querySelector('.hero-banner');
+            
+            if (heroBanner) {
+                // 📱 偵測是否為手機版（螢幕寬度小於或等於 768 像素）
+                const isMobile = window.innerWidth <= 768;
+                
+                let bannerImages = [];
+                
+                if (isMobile) {
+                    // 1. 手機直式專用圖片清單
+                    bannerImages = [
+                        './images/banner/hero1_m.jpg',
+                        './images/banner/hero2_m.jpg',
+                        './images/banner/hero3_m.jpg'
+                    ];
+                    console.log("📱 偵測為手機裝置，載入直式 Banner");
+                } else {
+                    // 2. 電腦橫式專用圖片清單
+                    bannerImages = [
+                        './images/banner/hero1.jpg',
+                        './images/banner/hero2.jpg',
+                        './images/banner/hero3.jpg'
+                    ];
+                    console.log("💻 偵測為電腦裝置，載入橫式 Banner");
+                }
+                
+                // 隨機抽選一張
+                const randomIndex = Math.floor(Math.random() * bannerImages.length);
+                
+                // 將對應的圖片寫入背景
+                heroBanner.style.backgroundImage = `url('${bannerImages[randomIndex]}')`;
+            }
+        });
+    </script>
 </body>
 </html>
