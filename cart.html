@@ -3,12 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Checkout | AiFang Kids</title>
-    
+    <title>Cart | AiFang Kids</title>
     <link rel="icon" href="./favicon.ico" type="image/x-icon">
-    
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="./assets/css/cart-one-page.css">
+    <link rel="stylesheet" href="./assets/css/cart.css">
     
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-5XTC9J1E5P"></script>
     <script>
@@ -21,84 +18,71 @@
 <body>
 
     <header class="top-header">
-        <a href="index.html" class="back-btn">CONTINUE SHOPPING</a>
-        <img src="images/ui/logo.png" class="main-logo" alt="AIFANG" onclick="location.href='index.html'" style="cursor: pointer;">
+        <a href="index.html" class="back-to-shop">
+            CONTINUE SHOPPING
+        </a>
+        <img src="images/ui/logo.png" class="main-logo" alt="AIFANG" onclick="location.href='index.html'">
     </header>
 
-    <div class="checkout-wrapper">
-        <h1 class="page-title">Checkout</h1>
-
-        <div class="checkout-form-section">
-            <div style="border-bottom: 1px solid #eee; padding-bottom: 10px;">
-                <h2 style="font-size: 16px; margin: 0;">1. 訂購資訊</h2>
-            </div>
+    <div class="cart-main-wrapper">
+        
+        <div class="cart-left-section">
             
-            <div class="form-group" style="margin-top: 20px;">
-                <label>訂購人名字 (LINE 名字)</label>
-                <input type="text" id="cust-name" placeholder="請輸入您的 LINE 顯示名稱">
+            <div class="cart-block">
+                <h2 class="block-title">1. 訂購資訊</h2>
+                <div class="form-group">
+                    <label>訂購人名字 (LINE 名字)</label>
+                    <input type="text" id="cust-name" class="form-control" placeholder="請輸入您的 LINE 顯示名稱">
+                </div>
+                <div class="form-group">
+                    <label>Email (寄送訂單通知用)</label>
+                    <input type="email" id="cust-email" class="form-control" placeholder="example@mail.com">
+                </div>
             </div>
 
-            <div class="form-group">
-                <label>Email (寄送訂單通知用)</label>
-                <input type="email" id="cust-email" placeholder="example@mail.com">
+            <div class="cart-block">
+                <h2 class="block-title">2. 配送方式</h2>
+                <div class="form-group">
+                    <label>選擇取貨方式</label>
+                    <select id="shipping-method" class="form-control">
+                        <option value="7-11">7-11</option>
+                        <option value="全家">全家</option>
+                    </select>
+                    <div id="shipping-notice"></div>
+                </div>
             </div>
 
-            <div style="border-bottom: 1px solid #eee; padding-bottom: 10px; margin-top: 30px;">
-                <h2 style="font-size: 16px; margin: 0;">2. 配送方式</h2>
-            </div>
-
-            <div class="form-group" style="margin-top: 20px;">
-                <label>選擇取貨方式</label>
-                <select id="shipping-method">
-                    <option value="7-11賣貨便">7-11 賣貨便</option>
-                    <option value="面交">面交</option>
-                </select>
-                <div id="shipping-notice"></div>
-            </div>
-
-            <button class="submit-btn" id="submit-order-btn" style="margin-top: 20px;">提交訂單並結帳</button>
         </div>
 
-        <div class="cart-summary-section">
-            <h2 class="summary-title">Order Summary 訂單摘要</h2>
+        <div class="summary-sticky-box cart-block">
+            <h2 class="block-title">訂單資訊</h2>
             
             <div id="cart-items-preview"></div>
 
-            <div class="coupon-wrap" style="margin-top: 20px; margin-bottom: 10px;">
-                <input type="text" id="coupon-code" placeholder="請輸入優惠代碼">
-                <button id="apply-coupon">套用</button>
-            </div>
-
-            <div id="applied-coupons-list" style="margin-bottom: 15px;"></div>
-
-            <div class="summary-details" style="margin-top: 20px;">
+            <div class="summary-details">
                 <div class="summary-row">
-                    <span>Subtotal 小計</span>
-                    <span id="cart-subtotal">NT$ 0</span>
+                    <span class="summary-label">商品小計</span>
+                    <span id="cart-subtotal" class="summary-value">NT$ 0</span>
                 </div>
-                <div class="summary-row">
-                    <span>Discount 優惠折扣 (含1+1)</span>
-                    <span id="discount-amount" style="color: #d9534f;">NT$ 0</span>
-                </div>
-                <div class="summary-row">
-                    <span>Shipping 運費</span>
-                    <span id="cart-shipping-text" style="font-weight: 500;">依賣場規定</span>
-                </div>
-                
-                <div class="summary-row total-row" style="border-top: 1px solid #eee; padding-top: 15px; margin-top: 15px;">
-                    <span style="font-weight: 700;">Total 總計</span>
-                    <span id="cart-total" style="color: #d9534f; font-size: 20px; font-weight: 700;">NT$ 0</span>
+                <hr class="summary-divider">
+                <div class="summary-row total-row">
+                    <span class="total-label">總計金額</span>
+                    <span id="cart-total" class="total-value">NT$ 0</span>
                 </div>
             </div>
 
-            <div style="margin-top: 20px; font-size: 11px; color: #999; line-height: 1.4;">
-                * 提交訂單後，我們將依照您填寫的 Email 發送明細。<br>
-                * 若為 7-11 賣貨便，請於收到通知後前往專屬賣場下單。
+            <button id="submit-order-btn">提交訂單並結帳</button>
+
+            <div class="cart-notes">
+                * 商品金額已含營業稅<br>
+                * 預購商品等待天數約 7~25 天，不接急單<br>
+                * 成立訂單後請通知LINE官方，並完成付款
             </div>
         </div>
+        
     </div>
 
-    <div id="custom-toast" class="toast"></div>
+    <div id="custom-toast"></div>
 
     <script src="js/api.js"></script> 
     <script src="js/cart.js"></script>

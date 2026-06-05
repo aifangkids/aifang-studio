@@ -12,14 +12,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Product Detail | AiFang Kids</title>
     <link rel="icon" href="./favicon.ico" type="image/x-icon">
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&family=Inter:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="./assets/css/detail.css">
 </head>
 <body>
 
     <header class="top-header">
         <a href="javascript:history.back()" class="header-icon">BACK</a>
-        <img src="images/ui/logo.png" class="main-logo" alt="AIFANG" onclick="location.href='index.html'">
+        <img src="images/ui/logo.png" class="main-logo" alt="AIFANG" onclick="location.href='bellot_index.html'">
         <a href="cart.html" class="header-icon">CART (<span id="cart-count">0</span>)</a>
     </header>
 
@@ -31,35 +30,31 @@
 
         <aside class="fixed-aside" id="product-info">
             
-            <div class="info-row">
-                <span class="info-label">PRODUCT CODE / 商品編號</span>
-                <p id="p-id" class="p-id">CODE: -</p>
+            <div class="info-row" style="border-bottom: none; padding-bottom: 0;">
+                <p id="p-id" class="p-id"></p>
             </div>
 
-            <div class="info-row">
+            <div class="info-row" style="padding-top: 0;">
                 <span id="p-brand" class="brand-tag">-</span>
                 <h1 id="p-title" class="p-title">LOADING...</h1>
             </div>
 
             <div class="info-row">
-                <span class="info-label">COLOR / 花色選取</span>
+                <span class="info-label">COLOR</span>
                 <div id="swatch-group" class="swatch-group"></div>
-                <div id="mobile-preview-area" style="display:none;"><span id="mobile-color-preview-name">請選擇</span></div>
             </div>
 
             <div class="info-row">
-                <span class="info-label">PRICE / 價格</span>
-                <div id="p-price" class="p-price">NT$ -</div>
+                <div id="p-price" class="p-price"></div>
             </div>
 
             <div class="info-row">
-                <span class="info-label">SIZE / 尺寸選擇</span>
                 <div id="size-area" class="size-group"></div>
             </div>
 
             <div class="info-row" style="border-bottom: none; margin-bottom: 10px;">
-                <span class="info-label">DETAILS / 詳細介紹</span>
-                <p id="styling-note" class="info-value">正在載入商品詳細說明...</p>
+                <span class="detail-large-label">DETAILS</span>
+                <p id="p-desc" class="info-value">正在載入商品詳細說明...</p>
             </div>
 
             <div id="selected-list" class="selected-list"></div>
@@ -68,45 +63,10 @@
         </aside>
     </div>
 
-    <button class="mobile-order-trigger" id="scroll-trigger" onclick="scrollToOptions()">SELECT OPTIONS</button>
-
-    <div class="tool-btns">
-        <div class="tool-btn" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">TOP</div>
-    </div>
-
     <div id="custom-toast"></div>
 
     <script src="js/api.js"></script>
     <script src="js/detail.js"></script>
 
-    <script>
-        /**
-         * 畫面滾動邏輯：讓使用者點擊手機版按鈕後直接滑到選項區
-         */
-        function scrollToOptions() {
-            const aside = document.getElementById('product-info');
-            if (aside) {
-                const offset = aside.offsetTop - 70;
-                window.scrollTo({ top: offset, behavior: 'smooth' });
-            }
-        }
-
-        /**
-         * 監聽滾動：手機版下方浮動按鈕的顯示/隱藏切換
-         */
-        window.addEventListener('scroll', () => {
-            const trigger = document.getElementById('scroll-trigger');
-            const aside = document.getElementById('product-info');
-            if (window.innerWidth <= 900 && trigger && aside) {
-                if (window.pageYOffset > (aside.offsetTop - 200)) {
-                    trigger.style.opacity = '0';
-                    trigger.style.pointerEvents = 'none';
-                } else {
-                    trigger.style.opacity = '1';
-                    trigger.style.pointerEvents = 'auto';
-                }
-            }
-        });
-    </script>
 </body>
 </html>

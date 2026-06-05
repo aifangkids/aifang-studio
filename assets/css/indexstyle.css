@@ -1,63 +1,106 @@
-/* --- 1. 字體與基礎設定 --- */
-/* 修正路徑：從 assets/css/ 退一層到 assets/ 進入 fonts/ */
-@font-face { font-family: 'NotoSansKR'; src: url('../fonts/NotoSansKR-Light.ttf') format('truetype'); font-weight: 100; }
-@font-face { font-family: 'NotoSansKR'; src: url('../fonts/NotoSansKR-Medium.ttf') format('truetype'); font-weight: 300; }
-@font-face { font-family: 'NotoSansKR'; src: url('../fonts/NotoSansKR-Regular.ttf') format('truetype'); font-weight: 400; }
-@font-face { font-family: 'NotoSansKR'; src: url('../fonts/NotoSansKR-Thin.ttf') format('truetype'); font-weight: 500; }
+/* ==========================================================================
+   1. 字體與基礎設定
+   ========================================================================== */
+@font-face { 
+    font-family: 'NotoSansKR'; 
+    src: url('../fonts/NotoSansKR-Regular.ttf') format('truetype'); 
+    font-weight: 400; 
+}
 
 :root { 
     --sidebar-width: 260px; 
-    --accent: #d9534f; /* 折扣紅 */
-    --new-color: #a29bfe; 
     --header-h: 70px; 
     --cart-w: 380px;
-    --gray-light: #bbb;
+
+    /* 奶油粉色系變數 */
+    --bg-cream: #FFFDF9;       /* 溫暖的奶油白背景 */
+    --bg-sidebar: #FDF5F2;     /* 次要區塊或側邊欄的淡粉奶油色 */
+    --primary-pink: #F4D3D3;   /* 主色：優雅的粉撲色 */
+    --accent-pink: #E6B3B3;    /* 深一點的粉：用於 Hover 或重點 */
+    --text-main: #5A4B41;      /* 溫暖的深咖啡色文字 */
+    --text-muted: #8C7B70;     /* 輔助文字顏色 */
 }
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
+* { 
+    box-sizing: border-box; 
+    margin: 0; 
+    padding: 0; 
+}
+
 body { 
     font-family: 'NotoSansKR', 'Noto Sans TC', sans-serif; 
-    background: #fff; 
-    color: #333; 
+    background-color: var(--bg-cream); 
+    color: var(--text-main); 
     overflow-x: hidden; 
     -webkit-font-smoothing: antialiased;
 }
 
-/* --- 1.5 首頁滿版大圖 Banner (新增部分) --- */
+/* ==========================================================================
+   2. 滿版螢幕 Banner 佈局
+   ========================================================================== */
 .hero-banner {
     width: 100%;
-    height: 100vh; /* 滿版全螢幕高度 */
-    /* 從 assets/css/ 退兩層回到根目錄，再進入 images/ui/ */
-    background: url('../../images/ui/banner.jpg') no-repeat center center/cover;
+    height: 100vh; 
+    background: url('../../images/banner/hero.jpg') no-repeat center center/cover;
     display: flex;
     justify-content: center;
     align-items: center;
     position: relative;
+    z-index: 2000; /* 確保絕對覆蓋前台 */
 }
+
 .start-shopping-btn {
-    background-color: #333; /* 質感深色極簡按鈕 */
+    background-color: var(--text-main); 
     color: #fff;
     border: none;
     padding: 15px 40px;
-    font-size: 12px;
+    font-size: 13px;
     letter-spacing: 3px;
     cursor: pointer;
-    transition: all 0.3s ease;
     font-family: inherit;
     font-weight: 500;
-}
-.start-shopping-btn:hover {
-    background-color: #f2b9b2; /* 懸停時轉為溫馨韓國風奶油粉 */
-    color: #fff;
-    transform: translateY(-1px);
+    border-radius: 4px;
 }
 
-/* --- 2. 頂部導覽 --- */
+.start-shopping-btn:hover {
+    background-color: var(--primary-pink); 
+    color: var(--text-main);
+}
+
+/* 狀態控制：當 body 沒有 .shop-active 類別時（即首頁 Banner 顯示中）
+   直接隱藏頂部導覽、側欄與遮罩，主內容區不留白 */
+body:not(.shop-active) .top-header,
+body:not(.shop-active) .sidebar,
+body:not(.shop-active) .sidebar-overlay,
+body:not(.shop-active) .fixed-tools {
+    display: none !important;
+}
+
+body:not(.shop-active) .main-content {
+    display: none !important;
+}
+
+/* 當點擊按鈕進入商店 (.shop-active) 時，隱藏滿版 Banner */
+body.shop-active .hero-banner {
+    display: none !important;
+}
+
+/* ==========================================================================
+   3. 頂部導覽 
+   ========================================================================== */
 .top-header {
-    width: 100%; height: var(--header-h); background: #fff;
-    position: fixed; top: 0; left: 0; z-index: 1200;
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 0 20px; border-bottom: 1px solid #f2f2f2;
+    width: 100%; 
+    height: var(--header-h); 
+    background: var(--bg-cream);
+    position: fixed; 
+    top: 0; 
+    left: 0; 
+    z-index: 1200;
+    display: flex; 
+    align-items: center; 
+    justify-content: space-between;
+    padding: 0 20px; 
+    border-bottom: 1px solid #EFE6E1;
 }
 
 .header-left, .header-right { display: flex; align-items: center; flex: 1; }
@@ -66,138 +109,156 @@ body {
 
 .search-wrap { position: relative; display: flex; align-items: center; }
 #search-input {
-    border: 1px solid #eee; padding: 6px 10px; font-size: 11px;
-    width: 150px; outline: none; transition: 0.3s;
-    font-family: 'NotoSansKR'; letter-spacing: 1px;
+    border: 1px solid #EFE6E1; 
+    padding: 6px 10px; 
+    font-size: 12px;
+    width: 150px; 
+    outline: none; 
+    background: #fff;
+    color: var(--text-main);
 }
-#search-input:focus { width: 200px; border-color: #ccc; }
+#search-input:focus { width: 200px; border-color: var(--accent-pink); }
 
 .header-icon { width: 22px; height: 22px; cursor: pointer; object-fit: contain; }
 .main-logo { height: 32px; cursor: pointer; position: absolute; left: 50%; transform: translateX(-50%); }
 
-/* --- 3. 側欄佈局與遮罩 --- */
+/* ==========================================================================
+   4. 側欄佈局 
+   ========================================================================== */
 .sidebar {
-    width: var(--sidebar-width); height: 100vh; position: fixed;
-    left: 0; top: 0; border-right: 1px solid #eee;
-    padding: calc(var(--header-h) + 40px) 30px 50px; background: #fff; z-index: 1100; overflow-y: auto;
-    transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    width: var(--sidebar-width); 
+    height: 100vh; 
+    position: fixed;
+    left: 0; 
+    top: 0; 
+    border-right: 1px solid #EFE6E1;
+    padding: calc(var(--header-h) + 40px) 30px 50px; 
+    background: var(--bg-sidebar); 
+    z-index: 1100; 
+    overflow-y: auto;
 }
+
 .sidebar-overlay { 
     position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-    background: rgba(0,0,0,0.3); z-index: 1050; display: none; 
+    background: rgba(90,75,65,0.15); z-index: 1050; display: none; 
 }
 .sidebar-overlay.active { display: block; }
 
-.filter-title { 
-    font-size: 11px; font-weight: 700; letter-spacing: 2px; 
-    margin-bottom: 20px; text-transform: uppercase; 
-    border-bottom: 1px solid #f0f0f0; padding-bottom: 8px; color: #111;
+.category-title {
+    font-size: 14px;
+    letter-spacing: 2px;
+    color: var(--text-main);
+    font-weight: 600;
+    margin-bottom: 15px;
+    text-transform: uppercase;
 }
-.category-menu { list-style: none; }
-.category-menu li { font-size: 13px; font-weight: 400; margin-bottom: 15px; color: #888; cursor: pointer; transition: 0.3s; }
-.category-menu li:hover, .category-menu li.active { color: #000; font-weight: 500; text-decoration: underline; }
 
-.brand-panel { max-height: 0; overflow: hidden; transition: max-height 0.5s ease; background: #fafafa; border-radius: 4px; }
-.brand-panel.open { max-height: 500px; padding: 15px 10px; margin-bottom: 20px; }
-.brand-item { display: block; font-size: 11px; font-weight: 300; color: #999; margin-bottom: 10px; cursor: pointer; transition: 0.2s; }
-.brand-item.selected { color: #000; font-weight: 700; }
+.category-list {
+    list-style: none;
+}
 
-/* --- 4. 主內容區與商品卡 --- */
+.category-list li a {
+    display: block;
+    padding: 8px 0;
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 14px;
+}
+
+.category-list li a:hover, 
+.category-list li a.active {
+    color: var(--accent-pink);
+    font-weight: 500;
+}
+
+.sidebar-divider {
+    border: 0;
+    height: 1px;
+    background: #EFE6E1;
+    margin: 25px 0;
+}
+
+/* ==========================================================================
+   5. 主內容區與 1:1 精緻商品卡片布局
+   ========================================================================== */
 .main-content { 
     width: 100%; 
     padding: calc(var(--header-h) + 40px) 40px 80px calc(var(--sidebar-width) + 40px); 
-    transition: opacity 0.8s ease; opacity: 0; 
+    /* 移除舊版不透明度漸變，改為直接出現（非平滑） */
 }
-.main-content.loaded { opacity: 1; }
 
-.product-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 40px 20px; }
-.product-card { cursor: pointer; text-align: left; } 
+.product-grid { 
+    display: grid; 
+    grid-template-columns: repeat(4, 1fr); 
+    gap: 40px 20px; 
+}
 
+.product-card { 
+    cursor: pointer; 
+    text-align: center; /* 改為置中更顯得優雅優美 */
+} 
+
+/* 嚴格控制 1:1 正方形相框 */
 .img-wrap { 
-    width: 100%; aspect-ratio: 3/4; background-size: cover; background-position: center; 
-    background-color: #f9f9f9; margin-bottom: 15px; position: relative; overflow: hidden;
-    border-radius: 4px;
-}
-.status-badge { 
-    position: absolute; top: 10px; left: 10px; padding: 3px 8px; 
-    font-size: 10px; font-weight: 700; color: #fff; z-index: 10;
-    border-radius: 2px; letter-spacing: 1px;
-}
-.badge-NEW { background: var(--new-color); }
-.badge-SALE { background: var(--accent); }
-
-.p-name { font-size: 12px; font-weight: 400; color: #333; margin-bottom: 6px; height: 36px; overflow: hidden; line-height: 1.5; }
-
-.color-row { display: flex; justify-content: flex-start; gap: 4px; margin: 8px 0; flex-wrap: wrap; min-height: 14px; }
-.color-dot { width: 12px; height: 12px; border: 1px solid #eee; border-radius: 2px; background-size: cover; cursor: help; }
-
-/* --- 價格樣式：對齊您要求的數值 --- */
-.p-price-wrapper { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
-.p-price-original { color: #999; text-decoration: line-through; font-size: 13px; font-weight: 400; }
-.p-price-final { color: #d9534f; font-weight: 700; font-size: 16px; }
-
-/* --- 5. 工具組 --- */
-.fixed-tools { position: fixed; bottom: 30px; right: 20px; z-index: 2000; display: flex; flex-direction: column; }
-.tool-btn { 
-    width: 45px; height: 45px; background: #fff; border: 1px solid #333; 
-    display: flex; align-items: center; justify-content: center; 
-    font-size: 11px; font-weight: bold; cursor: pointer; transition: 0.3s;
-    margin-bottom: -1px; 
-}
-.tool-btn:hover { background: #333; color: #fff; }
-.line-btn { color: #06C755; }
-
-/* --- 6. SHOPPING BAG 側欄還原優化 --- */
-#cart-overlay { 
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-    background: rgba(0,0,0,0.4); z-index: 2999; display: none; 
-}
-.cart-sidebar {
-    position: fixed; top: 0; right: calc(var(--cart-w) * -1); 
-    width: var(--cart-w); height: 100vh; background: #fff;
-    z-index: 3000; display: flex; flex-direction: column; 
-    transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    box-shadow: -5px 0 15px rgba(0,0,0,0.05);
-}
-.cart-sidebar.open { transform: translateX(calc(var(--cart-w) * -1)); }
-
-.cart-header { 
-    padding: 30px 25px; border-bottom: 1px solid #f2f2f2; 
-    display: flex; justify-content: space-between; align-items: center; 
-}
-.cart-title { font-size: 13px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; }
-.cart-close { font-size: 11px; color: #111; cursor: pointer; text-decoration: underline; font-weight: bold; }
-
-.cart-body { flex: 1; padding: 25px; overflow-y: auto; }
-.cart-footer { padding: 25px; border-top: 1px solid #f2f2f2; background: #fff; }
-.cart-total-wrap { 
-    display:flex; justify-content:space-between; margin-bottom:20px; 
-    font-weight:700; font-size:14px; letter-spacing: 1px;
-}
-.checkout-btn { 
-    width: 100%; padding: 18px; background: #111; color: #fff; border: none; 
-    cursor: pointer; font-size: 12px; font-weight: 700; letter-spacing: 2px; transition: 0.3s; 
-}
-.checkout-btn:hover { background: #333; }
-
-/* --- 7. POPUP 彈窗修正 --- */
-#popup-overlay { 
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-    background: rgba(0,0,0,0.7); z-index: 9999; 
-    display: none; justify-content: center; align-items: center; 
-}
-.popup-box { position: relative; background: #fff; max-width: 380px; width: 85%; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
-.popup-close { 
-    position: absolute; bottom: -40px; left: 50%; transform: translateX(-50%); 
-    color: #fff; cursor: pointer; font-size: 12px; border: 1px solid #fff; 
-    padding: 5px 20px; white-space: nowrap; 
+    width: 100%; 
+    aspect-ratio: 1 / 1; 
+    overflow: hidden;
+    border-radius: 12px;      
+    background-color: #F7F7F7;
+    position: relative;
+    margin-bottom: 15px;
 }
 
-/* --- 8. 手機版響應式 --- */
+.img-wrap img { 
+    width: 100%; 
+    height: 100%; 
+    object-fit: cover; 
+}
+
+/* 商品資訊 (name | color | price) */
+.product-info {
+    padding: 12px 5px;
+}
+
+.p-name { 
+    font-size: 14px; 
+    color: var(--text-main); 
+    margin-bottom: 6px; 
+    font-weight: 400; 
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    height: auto; 
+    line-height: 1.4;
+}
+
+.color-row { 
+    display: flex; 
+    justify-content: center; 
+    gap: 6px; 
+    margin: 6px 0; 
+    flex-wrap: wrap; 
+}
+.color-text {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.p-price-final { 
+    color: var(--text-main); 
+    font-weight: 600; 
+    font-size: 15px; 
+    margin-top: 6px;
+}
+
+/* ==========================================================================
+   6. 手機版響應式設定
+   ========================================================================== */
 @media (max-width: 900px) {
-    :root { --cart-w: 100%; } /* 手機版購物車全滿 */
+    :root { --cart-w: 100%; }
     .sidebar { transform: translateX(-100%); width: 280px; }
-    .sidebar.open { transform: translateX(0); box-shadow: 5px 0 15px rgba(0,0,0,0.1); }
+    .sidebar.open { transform: translateX(0); }
     .main-content { padding: calc(var(--header-h) + 30px) 15px 80px 15px; }
     .product-grid { grid-template-columns: repeat(2, 1fr); gap: 25px 12px; }
     .main-logo { height: 28px; }

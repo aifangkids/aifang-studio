@@ -1,77 +1,69 @@
-/**
- * AiFang Kids - detail.js 2026 最終修正版
- * 配合：左側純圖展示、右側指定六大欄位順序排版
- */
-
-// 確保這些變數在最上方正確宣告
 const urlParams = new URLSearchParams(window.location.search);
 const productCode = urlParams.get('code');
 
 let currentProduct = null;
-let selectedColor = { name: "", hex: "", krColor: "", image: "" };
-let selectedItems = [];
-let colorImageMap = {}; 
+let selectedColor = { name: "", krColor: "" };
+let selectedSize = "";
+let selectedItems = []; 
 
-/**
- * 1. 初始化頁面
- */
-async function init() {
+function init() {
     updateCartCount();
     
-    // 自動綁定按鈕事件
     const addBtn = document.getElementById('add-cart-btn');
     if (addBtn) {
         addBtn.onclick = addAllToCart;
     }
 
     if (!productCode) {
-        console.error("缺少產品代碼");
+        console.error("【錯誤】網址列缺少產品代碼 code");
         return;
     }
     
     try {
-        // 確保 ApiService 已由 api.js 載入
         if (typeof ApiService === 'undefined') {
-            throw new Error("ApiService 未定義，請檢查 api.js 是否正確載入");
+            throw new Error("ApiService 未定義，請檢查 HTML 中 api.js 是否已正確載入");
         }
 
-        const product = await ApiService.getProductByCode(productCode);
-        if (!product) throw new Error("找不到商品");
-        
-        currentProduct = product;
-        render(currentProduct);
+        ApiService.getProductByCode(productCode).then(product => {
+            if (!product) throw new Error("試算表中找不到該商品代碼");
+            
+            currentProduct = product;
+            renderProductPage(currentProduct);
+        }).catch(e => {
+            console.error("載入失敗:", e);
+            const titleEl = document.getElementById('p-title');
+            if (titleEl) titleEl.innerText = "商品選品載入失敗";
+        });
     } catch (e) {
-        console.error("載入失敗:", e);
-        const titleEl = document.getElementById('p-title');
-        if (titleEl) titleEl.innerText = "商品載入失敗";
+        console.error("系統初始化異常:", e);
     }
 }
 
-/**
- * 2. 渲染商品資料
- */
-function render(p) {
-    // 填充指定右側欄位資訊 (ID、名稱、價格、詳細介紹)
-    if (document.getElementById('p-id')) {
-        document.getElementById('p-id').innerText = `CODE: ${p.code || 'N/A'}`;
+function renderProductPage(p) {
+    if (document.getElementById('p-brand')) {
+        document.getElementById('p-brand').innerText = p.brand || "AIFANG SELECT";
     }
     if (document.getElementById('p-title')) {
         document.getElementById('p-title').innerText = p.name || "未命名商品";
     }
-    if (document.getElementById('p-brand')) {
-        document.getElementById('p-brand').innerText = p.brand || "AIFANG SELECT";
+    if (document.getElementById('p-id')) {
+        document.getElementById('p-id').innerText = `商品編號: ${p.code || 'N/A'}`;
     }
     
-    const noteEl = document.getElementById('styling-note');
-    if (noteEl) noteEl.innerText = p.styling_note || "暫無商品詳細介紹。";
+    const priceVal = Number(p.price || 0);
+    if (document.getElementById('p-price')) {
+        document.getElementById('p-price').innerText = `NT$ ${priceVal.toLocaleString()}`;
+    }
 
-    // --- 渲染左側欄位：只顯示圖片 (image_extra 多圖展示) ---
+    const descEl = document.getElementById('p-desc');
+    if (descEl) {
+        descEl.innerText = p.stylingnote || "親膚舒適正韓選品。";
+    }
+
     const imgArea = document.getElementById('image-main-area');
     if (imgArea) {
         imgArea.innerHTML = ""; 
-
-        // 優先讀取 image_extra，若無則讀取 image_main
-        const imageSource = p.image_extra || p.image_main;
+        const imageSource = p.imageextra || p.image_extra || p.imagemain || p.image_main;
         
         if (imageSource) {
             String(imageSource).split(/[\n,]+/).forEach(url => {
@@ -87,134 +79,74 @@ function render(p) {
         }
     }
 
-    // 解析顏色圖片映射
-    if (p.images_by_color) {
-        try { 
-            colorImageMap = typeof p.images_by_color === 'string' ? JSON.parse(p.images_by_color) : p.images_by_color;
-        } catch (e) { 
-            colorImageMap = {};
-        }
-    }
-
     renderColorSwatches(p);
-    renderSizeGroups(p);
+    renderSizeGroup(p);
 }
 
-/**
- * 3. 渲染尺寸與價格
- */
-function renderSizeGroups(p) {
-    const sizeArea = document.getElementById('size-area');
-    if (!sizeArea) return;
-    sizeArea.innerHTML = "";
-
-    const status = (String(p.status || "")).toUpperCase();
-    const isSale = status === 'SALE';
-    
-    const groups = [
-        { key: 'baby', label: 'BABY', colorClass: 'btn-baby' }, 
-        { key: 'kid', label: 'KIDS', colorClass: 'btn-kid' }, 
-        { key: 'junior', label: 'JUNIOR', colorClass: 'btn-junior' }, 
-        { key: 'adult', label: 'ADULT', colorClass: 'btn-adult' }
-    ];
-
-    groups.forEach(group => {
-        const rawSizes = p[`sizes_${group.key}`];
-        const originalPrice = Number(p[`price_${group.key}`] || 0);
-        
-        if (rawSizes && originalPrice > 0) {
-            const finalPrice = isSale ? originalPrice : Math.round(originalPrice * 0.9);
-            
-            // 同步將首個有效價格渲染至主要價格顯示區
-            const priceEl = document.getElementById('p-price');
-            if (priceEl && priceEl.innerText === 'NT$ -') {
-                priceEl.innerText = `NT$ ${finalPrice.toLocaleString()}`;
-            }
-
-            const box = document.createElement('div');
-            box.className = 'size-group-container';
-            box.style.marginBottom = "15px";
-            
-            box.innerHTML = `
-                <div class="group-header" style="display:flex; justify-content:space-between; margin-bottom:8px; font-size:12px;">
-                    <span class="group-label" style="font-weight:700; color:#666;">${group.label} SIZE</span>
-                </div>
-                <div class="s-btn-wrap" style="display:flex; flex-wrap:wrap; gap:8px;">
-                    ${String(rawSizes).split(',').map(s => `
-                        <button class="size-btn ${group.colorClass}" onclick="addToList('${s.trim()}', ${finalPrice}, this)">${s.trim()}</button>
-                    `).join('')}
-                </div>`;
-            sizeArea.appendChild(box);
-        }
-    });
-}
-
-/**
- * 4. 顏色選取與渲染
- */
 function renderColorSwatches(p) {
     const swatchGroup = document.getElementById('swatch-group');
     if (!swatchGroup) return;
     swatchGroup.innerHTML = "";
 
     const colorNames = String(p.color || "").split(',').map(s => s.trim());
-    const colorCodes = String(p.color_code || "").split(',').map(s => s.trim());
-    const colorPatterns = String(p.color_pattern || "").split(',').map(s => s.trim());
-    const krColors = String(p.korean_color || "").split(',').map(s => s.trim());
+    const krColors = String(p.koreancolor || p.korean_color || "").split(',').map(s => s.trim());
 
     colorNames.forEach((name, i) => {
         if (!name) return;
-        const hex = colorCodes[i] || '#eeeeee';
-        const pattern = colorPatterns[i] || "";
         const krColor = krColors[i] || ""; 
 
-        const item = document.createElement('div');
-        item.className = "color-dot-btn";
-        
-        // 直角底色或圖樣背景設定
-        if (pattern) {
-            item.style.backgroundImage = `url('${pattern}')`;
-        } else {
-            item.style.backgroundColor = hex;
-        }
-        item.title = name;
+        const btn = document.createElement('button');
+        btn.className = "color-btn"; // 靠 CSS 控制外觀與大小
+        btn.innerText = name;
 
-        item.onclick = () => {
-            const targetImg = colorImageMap[name] || p.image_main;
-            selectedColor = { name, hex, krColor, image: targetImg };
-            
-            document.querySelectorAll('.color-dot-btn').forEach(el => el.classList.remove('active'));
-            item.classList.add('active');
-            
-            // 安全防錯：僅在元件存在時更新（適配全新極簡結構）
-            const mobileText = document.getElementById('mobile-color-preview-name');
-            if (mobileText) mobileText.innerText = name;
+        btn.onclick = () => {
+            selectedColor = { name, krColor };
+            swatchGroup.querySelectorAll('.color-btn').forEach(el => el.classList.remove('active'));
+            btn.classList.add('active');
         };
 
-        swatchGroup.appendChild(item);
-        if (i === 0) item.click(); // 預設選取第一個顏色
+        swatchGroup.appendChild(btn);
+        if (i === 0) btn.click(); 
     });
 }
 
-/**
- * 5. 購物清單與購物車邏輯
- */
-function addToList(sizeName, price, btnElement) {
+function renderSizeGroup(p) {
+    const sizeWrap = document.getElementById('size-area'); 
+    if (!sizeWrap) return;
+    sizeWrap.innerHTML = "";
+
+    const rawSizes = p.size;
+    if (!rawSizes) return;
+
+    const box = document.createElement('div');
+    box.className = 'size-container-box';
+    
+    // 乾淨的結構，標題採用 group-label，按鈕採用 size-btn，完美給 CSS 控制
+    box.innerHTML = `
+        <div class="group-header">
+            <span class="group-label">SELECT SIZE</span>
+        </div>
+        <div class="size-group">
+            ${String(rawSizes).split(',').map(s => `
+                <button class="size-btn" onclick="selectSizeSize('${s.trim()}', this)">${s.trim()}</button>
+            `).join('')}
+        </div>`;
+        
+    sizeWrap.appendChild(box);
+}
+
+function selectSizeSize(sizeName, btnElement) {
     if (!selectedColor.name) {
-        showToast("請先選擇顏色");
+        showToast("請先選取心儀的花色");
         return;
     }
 
-    // 視覺上切換點擊的尺寸按鈕高亮狀態
     document.querySelectorAll('.size-btn').forEach(el => el.classList.remove('active'));
-    if (btnElement) btnElement.classList.add('active');
-
-    // 即時連動更新右側的價格欄位
-    const priceEl = document.getElementById('p-price');
-    if (priceEl) {
-        priceEl.innerText = `NT$ ${price.toLocaleString()}`;
+    if (btnElement) {
+        btnElement.classList.add('active');
     }
 
+    const priceVal = Number(currentProduct.price || 0);
     const key = `${selectedColor.name}-${sizeName}`;
     const existing = selectedItems.find(i => i.key === key);
     
@@ -226,9 +158,9 @@ function addToList(sizeName, price, btnElement) {
             color: selectedColor.name, 
             krColor: selectedColor.krColor,
             size: sizeName, 
-            price: price, 
+            price: priceVal, 
             quantity: 1,
-            image: selectedColor.image 
+            image: currentProduct.imagemain || currentProduct.image_main || ""
         });
     }
     renderSelectedList();
@@ -238,35 +170,36 @@ function renderSelectedList() {
     const listArea = document.getElementById('selected-list');
     if (!listArea) return;
     
-    // 平時隱藏，有選取品項時才打開顯示（作為加入購物車前的預覽）
     if (selectedItems.length > 0) {
         listArea.style.display = "block";
     } else {
         listArea.style.display = "none";
+        return;
     }
 
     listArea.innerHTML = selectedItems.map((item, index) => `
-        <div class="selected-item" style="background:#fafafa; padding:12px; margin-top:8px; border:1px solid #eee; font-size:13px; position:relative;">
-            <span style="position:absolute; top:8px; right:12px; cursor:pointer; color:#999;" onclick="removeFromList(${index})">✕</span>
-            <div><strong>${item.color} / ${item.size}</strong></div>
-            <div style="display:flex; justify-content:between; align-items:center; margin-top:8px;">
-                <div class="qty-box" style="display:inline-flex; border:1px solid #000;">
-                    <button class="qty-btn" style="width:28px; height:28px; border:none; background:none; cursor:pointer;" onclick="updateListQty(${index}, -1)">-</button>
-                    <input type="text" class="qty-input" style="width:35px; text-align:center; border:none; font-weight:bold;" value="${item.quantity}" readonly>
-                    <button class="qty-btn" style="width:28px; height:28px; border:none; background:none; cursor:pointer;" onclick="updateListQty(${index}, 1)">+</button>
+        <div class="selected-item" style="background:#fcfaf7; padding:12px; margin-top:10px; border:1px solid #e0e0e0; border-radius:4px; font-size:13px; position:relative;">
+            <span style="position:absolute; top:8px; right:12px; cursor:pointer; color:#888;" onclick="removeFromList(${index})">✕</span>
+            <div style="color:#333; font-weight:400;"><strong>${item.color} / ${item.size}</strong></div>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px;">
+                <div class="qty-box" style="display:inline-flex; border:1px solid #5a4b41; background:#fff; border-radius:4px; overflow:hidden;">
+                    <button class="qty-btn" style="width:26px; height:26px; border:none; background:none; cursor:pointer;" onclick="updateListQty(${index}, -1)">-</button>
+                    <input type="text" class="qty-input" style="width:30px; text-align:center; border:none; font-weight:bold; background:transparent;" value="${item.quantity}" readonly>
+                    <button class="qty-btn" style="width:26px; height:26px; border:none; background:none; cursor:pointer;" onclick="updateListQty(${index}, 1)">+</button>
                 </div>
-                <div style="margin-left:auto; font-weight:700;">NT$ ${(item.price * item.quantity).toLocaleString()}</div>
+                <div style="font-weight:700; color:#5a4b41;">NT$ ${(item.price * item.quantity).toLocaleString()}</div>
             </div>
         </div>`).join('');
 }
 
 function addAllToCart() {
     if (selectedItems.length === 0) { 
-        showToast("請先選擇顏色與尺寸規格");
+        showToast("請先選取心儀的花色與尺寸規格");
         return; 
     }
     
     let cart = JSON.parse(localStorage.getItem('cart')) || [];
+    
     selectedItems.forEach(item => {
         const cartItem = { 
             code: currentProduct.code, 
@@ -275,18 +208,16 @@ function addAllToCart() {
             color: item.color, 
             size: item.size, 
             price: Number(item.price), 
+            unitprice: Number(item.price), 
             quantity: Number(item.quantity), 
             image: item.image,
-            status: (currentProduct.status || "").toUpperCase(),
-            korean_name: currentProduct.korean_name || "", 
-            korean_color: item.krColor || "" 
+            koreanname: currentProduct.koreanname || "", 
+            koreancolor: item.krColor || "" 
         };
        
         const idx = cart.findIndex(i => i.code === cartItem.code && i.size === cartItem.size && i.color === cartItem.color);
         if (idx > -1) {
             cart[idx].quantity += cartItem.quantity;
-            cart[idx].korean_name = cartItem.korean_name;
-            cart[idx].korean_color = cartItem.korean_color;
         } else {
             cart.push(cartItem);
         }
@@ -294,9 +225,10 @@ function addAllToCart() {
     
     localStorage.setItem('cart', JSON.stringify(cart));
     updateCartCount();
+    
     selectedItems = [];
     renderSelectedList();
-    showToast("商品已成功加入購物車");
+    showToast("✨ 商品已成功加入購物車");
 }
 
 function updateListQty(index, delta) {
@@ -306,9 +238,6 @@ function updateListQty(index, delta) {
     }
 }
 
-/**
- * 從臨時選擇清單中移除
- */
 function removeFromList(index) {
     selectedItems.splice(index, 1);
     renderSelectedList();
@@ -318,10 +247,10 @@ function showToast(msg) {
     const toast = document.getElementById('custom-toast');
     if (toast) {
         toast.innerText = msg;
-        toast.className = 'show'; // 搭配舊有 toast 顯示邏輯
+        toast.className = 'show'; 
         setTimeout(() => toast.className = '', 2000);
     } else {
-        alert(msg); // 備用防錯機制
+        alert(msg); 
     }
 }
 
@@ -334,5 +263,4 @@ function updateCartCount() {
     }
 }
 
-// 綁定最後載入啟動
-window.onload = init;
+document.addEventListener('DOMContentLoaded', init);

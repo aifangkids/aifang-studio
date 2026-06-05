@@ -1,4 +1,6 @@
-/* --- 1. 字體與基礎設定 (保持不動) --- */
+/* ==========================================================================
+   1. 雙字體宣告與基礎設定
+   ========================================================================== */
 @font-face {
     font-family: 'NotoSansKR-Light';
     src: url('../fonts/NotoSansKR-Light.ttf') format('truetype');
@@ -11,54 +13,68 @@
 :root { 
     --header-h: 70px; 
     --side-w: 420px; 
-    --accent: #000000;          /* 依照品牌檢核表：回歸純黑極簡 */
-    --accent-red: #d9534f;      /* 用於折扣或特別標記 */
-    --color-baby: #F2A6B2;      /* 修正為 2.0 乾燥粉 */
-    --color-kid: #8DA9C4;       /* 修正為 2.0 灰藍 */
-    --color-junior: #9DB5A2;    /* 修正為 2.0 鼠尾草綠 */
-    --border-light: #eeeeee;
+
+    /* 核心奶油粉色系變數同步 */
+    --bg-cream: #FFFDF9;       /* 溫暖的奶油白背景 */
+    --bg-sidebar: #FDF5F2;     /* 次要區塊的淡粉奶油色 */
+    --primary-pink: #F4D3D3;   /* 主色：優雅的粉撲色 */
+    --accent-pink: #E6B3B3;    /* 深一點的粉：用於 Hover 或重點 */
+    --text-main: #5A4B41;      /* 溫暖的深咖啡色文字 */
+    --text-muted: #8C7B70;     /* 輔助文字顏色 */
+    --border-light: #EFE6E1;   /* 溫柔的邊框線條 */
 }
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
+* { 
+    box-sizing: border-box; 
+    margin: 0; 
+    padding: 0; 
+}
 
-body {
-    font-family: 'NotoSansKR-Light', 'Noto Sans TC', sans-serif;
-    background: #ffffff;
-    color: #000000;
-    overflow-x: hidden;
+body { 
+    font-family: 'NotoSansKR-Light', 'Noto Sans TC', sans-serif; 
+    background-color: var(--bg-cream); 
+    color: var(--text-main); 
+    overflow-x: hidden; 
+    -webkit-font-smoothing: antialiased;
+    letter-spacing: 0.5px;
 }
 
 /* 頂部導覽 */
 .top-header {
     width: 100%; 
     height: var(--header-h); 
-    background: #ffffff;
+    background: var(--bg-cream);
     position: fixed; 
     top: 0; 
     left: 0; 
-    z-index: 3000;
+    z-index: 3000; 
     display: flex; 
     align-items: center; 
     justify-content: space-between;
-    padding: 0 25px; 
+    padding: 0 20px; 
     border-bottom: 1px solid var(--border-light);
 }
+
+.header-icon { 
+    font-family: 'NotoSansKR-Regular', sans-serif;
+    font-size: 13px; 
+    font-weight: bold; 
+    color: var(--text-main); 
+    text-decoration: none; 
+    letter-spacing: 1px; 
+}
+
 .main-logo { 
-    height: 30px; 
+    height: 32px; 
     cursor: pointer; 
     position: absolute; 
     left: 50%; 
     transform: translateX(-50%); 
 }
-.header-icon { 
-    font-size: 13px; 
-    font-weight: bold; 
-    color: #000000; 
-    text-decoration: none; 
-    letter-spacing: 1px; 
-}
 
-/* --- 2. 佈局設定 (優化：左側純圖、右側資訊) --- */
+/* ==========================================================================
+   2. 佈局設定 (左側純圖圓角化、右側資訊)
+   ========================================================================== */
 .detail-wrapper { 
     display: flex; 
     max-width: 1300px; 
@@ -66,25 +82,29 @@ body {
     padding: 30px 20px;
 }
 
-/* 【左邊欄位】：只顯示圖片 */
+/* 【左邊欄位】：純圖片展示 */
 .scroll-content { 
     flex: 1; 
     display: flex;
     flex-direction: column;
-    gap: 15px; /* 圖片與圖片之間的乾淨間距 */
+    gap: 15px; 
 }
+
 .scroll-content img, .extra-img {
     width: 100%;
     height: auto;
     display: block;
     object-fit: cover;
+    border-radius: 12px; 
 }
+
 #loading-spinner {
     font-size: 13px;
     letter-spacing: 1px;
+    color: var(--text-muted);
 }
 
-/* 【右邊欄位】：固定位置 (Sticky) 極簡排版 */
+/* 【右邊欄位】：固定位置 (Sticky) */
 .fixed-aside { 
     width: var(--side-w); 
     position: sticky; 
@@ -92,149 +112,194 @@ body {
     height: calc(100vh - var(--header-h) - 60px); 
     overflow-y: auto; 
     padding: 0 0 0 40px; 
-    background: #ffffff;
+    background: var(--bg-cream);
     border-left: 1px solid var(--border-light);
     display: flex;
     flex-direction: column;
     
     /* 隱藏捲軸 */
-    scrollbar-width: none; /* Firefox */
-    -ms-overflow-style: none; /* IE/Edge */
-}
-.fixed-aside::-webkit-scrollbar { 
-    display: none; /* Chrome/Safari */
+    scrollbar-width: none; 
+    -ms-overflow-style: none; 
 }
 
-/* --- 3. 六大指定欄位專用統一樣式 (Info Row) --- */
+.fixed-aside::-webkit-scrollbar { 
+    display: none; 
+}
+
+/* ==========================================================================
+   3. 六大指定欄位專用統一樣式 (Info Row) 與字體大小粗細精準規範
+   ========================================================================== */
 .info-row {
-    margin-bottom: 25px;
+    margin-bottom: 22px;
     border-bottom: 1px solid var(--border-light);
     padding-bottom: 15px;
 }
+
+/* 預設的小標籤 (如 COLOR) -> (粗) */
 .info-label { 
-    font-size: 10px; 
-    font-weight: 900; 
-    color: #999999; 
+    font-family: 'NotoSansKR-Regular', sans-serif;
+    font-size: 13px; 
+    font-weight: bold;
+    color: var(--text-main); 
     display: block; 
-    margin-bottom: 8px;
-    letter-spacing: 1.5px; 
-    text-transform: uppercase;
+    margin-bottom: 10px;
+    letter-spacing: 1px; 
 }
-.info-value {
-    font-size: 14px;
-    color: #000000;
-    line-height: 1.6;
+
+/* DETAILS 與 JS 生成的 SELECT SIZE 專用標籤 -> (大)(粗) */
+.detail-large-label, .group-label {
+    font-family: 'NotoSansKR-Regular', sans-serif;
+    font-size: 16px;
+    font-weight: bold;
+    color: var(--text-main);
+    display: block;
+    margin-bottom: 10px;
+    letter-spacing: 1px;
+}
+
+/* 商品編號: momoann01 -> (小)(細) */
+.p-id { 
+    font-family: 'NotoSansKR-Light', sans-serif;
+    font-size: 12px; 
+    color: var(--text-muted); 
     margin: 0;
 }
 
-/* 各別精細控制 */
+/* MOMOANN 品牌標籤 -> (小)(細) */
 .brand-tag { 
-    font-size: 11px; 
-    font-weight: 700; 
-    color: #000000; 
-    border: 1px solid #000000; 
-    display: inline-block; 
-    padding: 2px 8px; 
-    margin-bottom: 8px; 
-    border-radius: 0;
-}
-.p-title { 
-    font-size: 22px; 
-    font-weight: 700; 
-    line-height: 1.4; 
-    letter-spacing: 0.5px;
-}
-.p-id { 
+    font-family: 'NotoSansKR-Light', sans-serif;
     font-size: 12px; 
-    color: #666666; 
-}
-.p-price { 
-    font-size: 20px; 
-    font-weight: 700; 
-    color: #000000; 
+    color: var(--text-muted); 
+    display: block; 
+    margin-bottom: 6px;
+    letter-spacing: 1px;
 }
 
-/* --- 4. 選擇器群組 (全直角、無圓角) --- */
+/* 細肩帶連身裙 商品名稱 -> (大)(粗) */
+.p-title { 
+    font-family: 'NotoSansKR-Regular', sans-serif;
+    font-size: 22px; 
+    font-weight: bold;
+    line-height: 1.4; 
+    letter-spacing: 0.5px;
+    color: var(--text-main);
+    margin: 0;
+}
+
+/* NT$ 690 價格顯示 -> (大)(粗) */
+.p-price { 
+    font-family: 'NotoSansKR-Regular', sans-serif;
+    font-size: 20px; 
+    font-weight: bold;
+    color: var(--text-main); 
+}
+
+/* 聚酯纖維 詳細介紹內文 -> (小)(細) */
+.info-value {
+    font-family: 'NotoSansKR-Light', sans-serif;
+    font-size: 13px;
+    color: var(--text-main);
+    line-height: 1.6;
+    margin: 0;
+    white-space: pre-line;
+}
+
+/* ==========================================================================
+   4. 互動選取器群組 (花色與尺寸按鈕：全部嚴格鎖定 小 ＋ 細)
+   ========================================================================== */
 .swatch-group, .size-group { 
     display: flex; 
     flex-wrap: wrap; 
-    gap: 10px; 
+    gap: 8px; 
     margin-top: 5px;
 }
 
-/* 色票按鈕自訂 (保持原始 detail.html 串接) */
-.color-dot-btn, .swatch-item { 
+/* 通用按鈕基底：強制 (小)(細) 視覺 */
+.color-btn, .size-btn, .s-btn { 
+    font-family: 'NotoSansKR-Light', sans-serif;
+    font-size: 13px;              /* (小) */
+    font-weight: 300 !important;  /* (細) */
+    border: 1px solid var(--border-light); 
+    padding: 6px 14px; 
     cursor: pointer; 
-    border: 1px solid #dddddd; 
-    width: 35px; 
-    height: 35px; 
-    border-radius: 0 !important; /* 強制全直角 */
-    background-size: cover;
-    background-position: center;
-    transition: border 0.2s;
-}
-.color-dot-btn.active, .swatch-item.active { 
-    border: 2px solid #000000; 
-}
-
-/* 尺寸按鈕 */
-.size-btn, .s-btn { 
-    border: 1px solid #000000; 
-    padding: 10px 18px; 
-    cursor: pointer; 
-    font-size: 12px; 
     background: #ffffff; 
-    color: #000000;
-    border-radius: 0 !important; 
-    font-weight: 500;
+    color: var(--text-main);
+    border-radius: 4px; 
     transition: all 0.2s;
 }
-/* 三色系統對應 */
-.size-btn.btn-baby:hover { background-color: var(--color-baby); color: #000; }
-.size-btn.btn-kid:hover { background-color: var(--color-kid); color: #000; }
-.size-btn.btn-junior:hover { background-color: var(--color-junior); color: #000; }
-.size-btn.active, .s-btn.active { 
-    background-color: #000000 !important; 
-    color: #ffffff !important; 
-    font-weight: bold; 
+
+.color-btn:hover, .size-btn:hover, .s-btn:hover {
+    border-color: var(--text-main);
+    background-color: var(--bg-cream);
 }
 
-/* 購物車大按鈕 */
+/* 按鈕選取選中狀態 */
+.color-btn.active, .size-btn.active, .s-btn.active { 
+    border-color: var(--text-main) !important;
+    background-color: #fcfaf7 !important;
+    font-weight: 400 !important; /* 保持舒適不突兀 */
+}
+
+/* ==========================================================================
+   5. 購物車大按鈕與預覽盒
+   ========================================================================== */
 .add-cart-btn { 
+    font-family: 'NotoSansKR-Regular', sans-serif;
     width: 100%; 
-    padding: 20px; 
-    background: #000000; 
+    padding: 16px; 
+    background-color: var(--text-main); 
     color: #ffffff; 
     border: none; 
-    font-weight: 700; 
     cursor: pointer; 
-    margin-top: 10px; 
-    font-size: 13px; 
-    border-radius: 0; 
+    margin-top: 20px; 
+    font-size: 14px; 
+    font-weight: bold;
+    border-radius: 4px; 
     letter-spacing: 2px;
+    transition: all 0.2s ease;
 }
+
 .add-cart-btn:hover {
-    opacity: 0.85;
+    background-color: var(--primary-pink);
+    color: var(--text-main);
 }
 
-/* --- 5. 工具與浮動按鈕 --- */
-.tool-btns { position: fixed; bottom: 30px; right: 30px; z-index: 3500; }
-.tool-btn {
-    width: 45px; height: 45px; 
-    border: 1px solid #000000; 
-    background: #ffffff; 
-    cursor: pointer; 
-    font-size: 10px; 
-    font-weight: 900;
-    display: flex; 
-    align-items: center; 
-    justify-content: center;
-    border-radius: 0; 
+/* ==========================================================================
+   5.1 訊息提示元件 (Toast) - 預設隱藏與彈出動畫
+   ========================================================================== */
+#custom-toast {
+    position: fixed;
+    bottom: 40px;               /* 浮空在螢幕下方 40px */
+    left: 50%;
+    transform: translateX(-50%) translateY(20px); /* 預設位置稍微往下偏 */
+    background-color: var(--text-main); /* 使用妳精選的深咖啡色，極具質感 */
+    color: #ffffff;
+    padding: 12px 24px;
+    font-size: 13px;
+    font-family: 'NotoSansKR-Light', 'Noto Sans TC', sans-serif;
+    border-radius: 4px;
+    z-index: 9999;              /* 確保疊在最上層，不會被其他元件擋住 */
+    
+    /* 核心：預設完全透明且不可點擊 */
+    opacity: 0;
+    visibility: hidden;
+    
+    /* 讓淡入淡出、微微往上彈的動態非常滑順 (0.4秒) */
+    transition: opacity 0.4s ease, transform 0.4s ease, visibility 0.4s;
+    box-shadow: 0 4px 15px rgba(90, 75, 65, 0.15); /* 溫柔的深色微陰影 */
+    letter-spacing: 1px;
 }
 
-/* --- 6. RWD 響應式佈局 (手機版適配) --- */
-.mobile-order-trigger { display: none !important; }
+/* 當 JS 動態加上 .show 時，啟動登場動畫 */
+#custom-toast.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0); /* 完美回到原位 */
+}
 
+/* ==========================================================================
+   6. 手機版響應式設定 (RWD)
+   ========================================================================== */
 @media (max-width: 900px) {
     .detail-wrapper { 
         display: block; 
@@ -246,37 +311,17 @@ body {
         margin-bottom: 30px; 
     }
     
+    .scroll-content img, .extra-img {
+        border-radius: 8px; 
+    }
+    
     .fixed-aside { 
         width: 100%; 
         height: auto; 
-        padding: 20px 0 100px; /* 下方留白給浮動按鈕 */
+        padding: 20px 0 40px; 
         border-left: none;
         position: relative;
         top: 0;
+        background: transparent; 
     }
-
-    /* 手機版專屬底端浮動按鈕 */
-    .mobile-order-trigger { 
-        display: block !important; 
-        position: fixed; 
-        bottom: 20px; 
-        left: 50%; 
-        transform: translateX(-50%); 
-        background: #000000; 
-        color: #ffffff; 
-        padding: 18px 0; 
-        width: 90%; 
-        text-align: center;
-        font-weight: bold; 
-        font-size: 13px;
-        z-index: 4000; 
-        border-radius: 0;
-        letter-spacing: 1px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.15);
-        border: none;
-        cursor: pointer;
-        transition: opacity 0.2s;
-    }
-
-    .tool-btns { right: 15px; bottom: 95px; }
 }
