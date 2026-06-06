@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Lookup</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root { 
+            --accent: #d9534f;
+            --gray-bg: #fafafa; 
+            --border: #e0e0e0;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { 
+            font-family: 'Inter', 'Noto Sans TC', sans-serif;
+            background: #fff; 
+            color: #333;
+            line-height: 1.6; 
+            padding: 30px 0;
+        }
+
+        /* --- 主版面佈局 --- */
+        .container { 
+            max-width: 600px;
+            margin: 0 auto; 
+            padding: 0 20px; 
+        }
+        .page-title { 
+            font-size: 22px;
+            font-weight: 900; 
+            letter-spacing: 4px; 
+            text-align: center; 
+            margin-bottom: 25px; 
+            color: #111;
+        }
+
+        /* --- 搜尋區塊 --- */
+        .search-section { 
+            background: var(--gray-bg);
+            padding: 20px; 
+            border-radius: 8px; 
+            margin-bottom: 25px; 
+            border: 1px solid #eee;
+        }
+        .search-group { 
+            display: flex;
+            border-radius: 4px;
+            overflow: hidden; 
+            background: #fff;
+            border: 1px solid #ddd;
+        }
+        .query-input { 
+            flex: 1;
+            padding: 12px 15px;
+            border: none;
+            outline: none; 
+            font-size: 15px;
+        }
+        .query-btn { 
+            padding: 0 25px;
+            background: #111; 
+            color: #fff; 
+            border: none;
+            cursor: pointer; 
+            font-weight: 700; 
+            letter-spacing: 1px;
+            white-space: nowrap;
+        }
+        .query-btn:disabled { background: #ccc; cursor: not-allowed; }
+
+        /* --- 付款倒數與警告橫幅 --- */
+        .countdown-banner {
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            font-weight: bold;
+            display: none;
+            text-align: center;
+        }
+        .banner-warning { background-color: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
+        .banner-expired { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .banner-normal { background-color: #e2e3e5; color: #383d41; border: 1px solid #d6d8db; }
+
+        /* --- 智能合併通知 --- */
+        .merge-alert {
+            background-color: #e2f0d9;
+            color: #385723;
+            border: 1px solid #c5e0b4;
+            padding: 10px 15px;
+            border-radius: 6px;
+            font-size: 13px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        /* --- 訂單與顧客資訊 --- */
+        #result-area { display: none; }
+        .order-meta { border-bottom: 2px solid #333; padding-bottom: 5px; margin-bottom: 20px; }
+        .meta-row { display: flex; justify-content: space-between; font-size: 14px; padding: 10px 0; border-bottom: 1px solid #f9f9f9; }
+        .meta-label { color: #777; }
+        .meta-value { color: #111; font-weight: 700; text-align: right; word-break: break-all; max-width: 70%; }
+
+        /* --- 商品明細列表 --- */
+        .detail-title { font-size: 15px; font-weight: bold; margin-bottom: 15px; color: #111; letter-spacing: 1px; }
+        .order-item { padding: 12px 0; border-bottom: 1px dashed #eee; display: flex; justify-content: space-between; align-items: center; }
+        .item-left { flex: 1; padding-right: 15px; text-align: left; }
+        .item-name { font-size: 14px; font-weight: 700; color: #111; text-align: left; }
+        .item-spec { font-size: 12px; color: #666; margin-top: 3px; text-align: left; }
+        .item-price-qty { text-align: right; font-size: 14px; font-weight: 700; white-space: nowrap; }
+        .item-qty-label { font-size: 11px; color: #999; font-weight: normal; margin-top: 2px; }
+
+        /* --- 多筆訂單分段外框容器 --- */
+        .order-segment {
+            margin-bottom: 18px;
+            border: 1px solid #e8e8e8;
+            border-radius: 8px;
+            padding: 15px;
+            background: #fff;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+        }
+        .segment-header {
+            font-size: 13px;
+            font-weight: bold;
+            color: #444;
+            border-bottom: 1px solid #f0f0f0;
+            padding-bottom: 8px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .segment-tag {
+            background: #eee;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            color: #333;
+        }
+
+        /* --- 金額彙整 --- */
+        .summary-box { margin-top: 20px; background: var(--gray-bg); border: 1px solid #eee; padding: 20px; border-radius: 6px; }
+        .summary-line { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 14px; }
+        .summary-line.total { border-top: 1px solid #ddd; padding-top: 15px; margin-top: 12px; font-size: 19px; font-weight: 900; color: var(--accent); }
+
+        /* --- 貨物狀態快捷查詢區 --- */
+        .shipping-query-section { margin-top: 40px; border-top: 1px dashed var(--border); padding-top: 25px; }
+        .shipping-title { font-size: 15px; font-weight: bold; margin-bottom: 15px; text-align: center; color: #444; }
+        .shipping-form { background: #fff; border: 1px solid var(--border); padding: 20px; border-radius: 6px; }
+        .radio-group { display: flex; justify-content: center; gap: 30px; margin-bottom: 15px; font-size: 14px; font-weight: bold; }
+        .radio-group label { cursor: pointer; display: flex; align-items: center; gap: 6px; }
+        .shipping-btn { width: 100%; background: #333; color: #fff; border: none; padding: 12px; cursor: pointer; font-size: 14px; font-weight: bold; border-radius: 4px; transition: 0.2s; }
+        .shipping-btn:hover { background: #000; }
+
+        #error-msg { display: none; color: var(--accent); text-align: center; margin-top: 15px; padding: 12px; background: #fff5f5; border-radius: 4px; font-weight: 700; font-size: 14px; }
+
+        /* 手機響應式微調 (RWD Mobile) */
+        @media (max-width: 480px) {
+            body { padding: 15px 0; }
+            .container { padding: 0 12px 30px 12px; }
+            .page-title { font-size: 18px; margin-bottom: 15px; }
+            .search-section { padding: 15px 12px; margin-bottom: 15px; }
+            .query-input { padding: 10px; font-size: 14px; }
+            .query-btn { padding: 0 15px; font-size: 14px; }
+            .countdown-banner { font-size: 12px; padding: 10px; margin-bottom: 15px; }
+            .merge-alert { font-size: 12px; padding: 10px; }
+            .meta-row { font-size: 13px; padding: 8px 0; }
+            .item-name { font-size: 13px; }
+            .item-spec { font-size: 11px; }
+            .item-price-qty { font-size: 13px; }
+            .summary-box { padding: 15px 12px; }
+            .summary-line { font-size: 13px; }
+            .summary-line.total { font-size: 17px; }
+            .shipping-query-section { margin-top: 30px; padding-top: 20px; }
+            .shipping-title { font-size: 14px; margin-bottom: 12px; }
+            .shipping-form { padding: 15px 12px; }
+            .radio-group { gap: 25px; font-size: 13px; margin-bottom: 12px; }
+            .shipping-btn { padding: 10px; font-size: 13px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1 class="page-title">訂單狀態查詢</h1>
+
+        <div class="search-section">
+            <div class="search-group">
+                <input type="text" id="order-id-input" class="query-input" placeholder="輸入您的訂單編號 或 手機號碼">
+                <button class="query-btn" id="q-btn" onclick="handleQuery()">查詢</button>
+            </div>
+        </div>
+
+        <div id="error-msg"></div>
+
+        <div id="result-area">
+            
+            <div id="countdown-banner" class="countdown-banner"></div>
+
+            <div id="merge-alert" class="merge-alert"></div>
+
+            <div class="order-meta">
+                <div class="meta-row"><span class="meta-label">訂單編號</span><span class="meta-value" id="res-id">-</span></div>
+                <div class="meta-row"><span class="meta-label">訂單日期</span><span class="meta-value" id="res-date">-</span></div>
+                <div class="meta-row"><span class="meta-label">收件人姓名</span><span class="meta-value" id="res-name">-</span></div>
+                <div class="meta-row"><span class="meta-label">手機號碼</span><span class="meta-value" id="res-phone">-</span></div>
+                <div class="meta-row"><span class="meta-label">配送方式</span><span class="meta-value" id="res-shipping">-</span></div>
+            </div>
+
+            <div class="detail-title">📦 預購明細</div>
+            <div id="order-items-container"></div>
+
+            <div class="summary-box">
+                <div class="summary-line"><span>商品合併小計</span><span id="res-subtotal">NT$ 0</span></div>
+                <div class="summary-line total"><span>應付總額金額</span><span id="res-total">NT$ 0</span></div>
+            </div>
+        </div>
+
+        <div class="shipping-query-section">
+            <div class="shipping-title">🚚 貨物狀態查詢</div>
+            <div class="shipping-form">
+                <div class="radio-group">
+                    <label><input type="radio" name="logistics" value="7-11" checked>7-11</label>
+                    <label><input type="radio" name="logistics" value="全家">全家</label>
+                </div>
+                <button class="shipping-btn" onclick="trackShipping()">線上查單</button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const API_URL = "https://script.google.com/macros/s/AKfycbwgwzu96gbL1s2b7ZPVOiPJZDaBRHrx2K0zXYT5fblENjKJBYDa6v9O2gnkBuIEuXcMyQ/exec";
+        let countdownInterval = null; 
+
+        // 金額數字格式化 (含千分位)
+        const fmt = (v) => `NT$ ${Math.floor(Number(v)||0).toLocaleString()}`;
+
+        // ✨ 核心升級：強效洗淨金額字串防呆，移除所有千分位逗號與符號
+        function parsePrice(val) {
+            if (!val) return 0;
+            const clean = String(val).replace(/[^\d.]/g, '');
+            const num = parseFloat(clean);
+            return isNaN(num) ? 0 : num;
+        }
+
+        // ✨ 核心升級：智慧型手機號碼清洗校正，將 +886 自動轉為 0 進行精準相認
+        function normalizePhone(phoneStr) {
+            if (!phoneStr) return "";
+            let clean = String(phoneStr).replace(/[^0-9]/g, '');
+            if (clean.startsWith('886')) {
+                clean = '0' + clean.substring(3);
+            }
+            return clean;
+        }
+
+        async function handleQuery() {
+            const idInput = document.getElementById('order-id-input').value.trim().toLowerCase();
+            if (!idInput) return;
+
+            const btn = document.getElementById('q-btn');
+            const resArea = document.getElementById('result-area');
+            const errBox = document.getElementById('error-msg');
+            const mergeAlert = document.getElementById('merge-alert');
+
+            btn.disabled = true; btn.innerText = "...";
+            resArea.style.display = 'none';
+            errBox.style.display = 'none';
+            if (mergeAlert) mergeAlert.style.display = 'none';
+            if (countdownInterval) clearInterval(countdownInterval);
+
+            try {
+                const response = await fetch(`${API_URL}?mode=getOrders&nocache=1`);
+                const data = await response.json();
+                
+                const allOrders = data.orders || [];
+                const allItems = data.items || data.orderitems || [];
+
+                let matchedCustomerOrders = [];
+
+                // 1. 先嘗試用「訂單編號」精準比對 (不分大小寫、去前後空白)
+                const matchedOrder = allOrders.find(o => String(o.orderid || "").toLowerCase().trim() === idInput);
+
+                if (matchedOrder) {
+                    const customerPhone = normalizePhone(matchedOrder.phone);
+                    if (customerPhone) {
+                        // ✨ 有手機號碼：規格化後撈出所有相同手機的訂單
+                        matchedCustomerOrders = allOrders.filter(o => normalizePhone(o.phone) === customerPhone);
+                    } else {
+                        // 🔒 沒填手機號碼：單獨安全顯示這筆訂單
+                        matchedCustomerOrders = [matchedOrder];
+                    }
+                } else {
+                    // 2. 如果不是訂單編號，則直接將輸入內容當成「手機號碼」規格化查詢
+                    const searchPhone = normalizePhone(idInput);
+                    if (searchPhone && searchPhone.length >= 6) {
+                        matchedCustomerOrders = allOrders.filter(o => normalizePhone(o.phone) === searchPhone);
+                    }
+                }
+
+                if (matchedCustomerOrders.length === 0) {
+                    errBox.innerText = "找不到該訂單，請核對編號或手機號碼是否輸入正確";
+                    errBox.style.display = 'block';
+                    return;
+                }
+
+                // 執行渲染與加總
+                renderMergedOrder(matchedCustomerOrders, allItems);
+                resArea.style.display = 'block';
+
+            } catch (e) {
+                console.error(e);
+                errBox.innerText = "連線失敗，請稍後再試。";
+                errBox.style.display = 'block';
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "查詢";
+            }
+        }
+
+        function renderMergedOrder(ordersList, allItems) {
+            const mergeAlert = document.getElementById('merge-alert');
+            const itemsContainer = document.getElementById('order-items-container');
+            
+            // 串接所有被合併的單號
+            const combinedOrderIds = ordersList.map(o => o.orderid).join(', ');
+            document.getElementById('res-id').innerText = combinedOrderIds;
+            document.getElementById('res-name').innerText = ordersList[0].customername;
+
+            const phoneEl = document.getElementById('res-phone');
+            if (phoneEl) {
+                phoneEl.innerText = ordersList[0].phone || "（建檔處理中）";
+            }
+
+            // 找出最新的一筆日期做為基準顯示
+            let latestOrder = ordersList[0];
+            let maxTimestamp = 0;
+            ordersList.forEach(o => {
+                const ts = new Date(o.orderdate).getTime();
+                if (!isNaN(ts) && ts > maxTimestamp) {
+                    maxTimestamp = ts;
+                    latestOrder = o;
+                }
+            });
+
+            document.getElementById('res-date').innerText = formatTimeStr(latestOrder.orderdate);
+            
+            const shippingEl = document.getElementById('res-shipping');
+            if (shippingEl) {
+                shippingEl.innerText = latestOrder.shipping || "7-11 賣貨便";
+            }
+
+            // 手機偵測自動加總提示
+            if (ordersList.length > 1 && mergeAlert) {
+                mergeAlert.innerHTML = `✨ 系統偵測相同手機號碼共有 <strong>${ordersList.length}</strong> 筆訂單，依訂單分別明細與總額！`;
+                mergeAlert.style.display = 'block';
+            } else if (mergeAlert) {
+                mergeAlert.style.display = 'none';
+            }
+
+            // --- ✨ 核心渲染升級：依據「訂單編號」逐一分段輸出 ---
+            let grandSubtotal = 0;
+            let htmlContent = '';
+
+            ordersList.forEach(order => {
+                // 找出屬於這筆單號的全部服飾商品
+                const currentOrderItems = allItems.filter(item => 
+                    String(item.orderid).trim() === String(order.orderid).trim()
+                );
+
+                let orderItemsHtml = '';
+                let orderSubtotal = 0;
+
+                if (currentOrderItems.length === 0) {
+                    orderItemsHtml = `
+                        <div style="padding: 10px 0; color: #999; font-size: 13px; text-align: center;">
+                            此筆訂單明細追加建檔中 🛠️
+                        </div>
+                    `;
+                } else {
+                    orderItemsHtml = currentOrderItems.map(item => {
+                        const q = Number(item.quantity) || 0;
+                        const p = parsePrice(item.unitprice);
+                        const itemSubtotal = q * p;
+                        orderSubtotal += itemSubtotal;
+
+                        return `
+                            <div class="order-item">
+                                <div class="item-left">
+                                    <div class="item-name">${item.name || "預購商品"}</div>
+                                    <div class="item-spec">款號：${item.code} | 規格：${item.color} / ${item.size}</div>
+                                </div>
+                                <div class="item-price-qty">
+                                    <div>${fmt(itemSubtotal)}</div>
+                                    <div class="item-qty-label">單價 ${fmt(p)} × ${q} 件</div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                }
+
+                grandSubtotal += orderSubtotal;
+
+                // 👉 如果有多筆訂單，就用精緻的卡片框架（Segment）進行排版分段
+                if (ordersList.length > 1) {
+                    htmlContent += `
+                        <div class="order-segment">
+                            <div class="segment-header">
+                                <span class="segment-tag">📌 單號：${order.orderid}</span>
+                                <span style="color: var(--accent); font-weight: 700;">該單金額：${fmt(parsePrice(order.total))}</span>
+                            </div>
+                            ${orderItemsHtml}
+                        </div>
+                    `;
+                } else {
+                    htmlContent += orderItemsHtml;
+                }
+            });
+
+            itemsContainer.innerHTML = htmlContent;
+
+            // --- ✨ 核心升級：精準加總所有訂單金額，完美支援千分位符號 ---
+            let finalTotal = 0;
+            ordersList.forEach(o => {
+                finalTotal += parsePrice(o.total);
+            });
+
+            // 安全機制：若後台總額加總是 0，則自動採用明細小計作為總和
+            if (finalTotal === 0) {
+                finalTotal = grandSubtotal;
+            }
+            
+            if(document.getElementById('res-subtotal')) document.getElementById('res-subtotal').innerText = fmt(grandSubtotal);
+            if(document.getElementById('res-total')) document.getElementById('res-total').innerText = fmt(finalTotal);
+
+            startPaymentCountdown(latestOrder.orderdate);
+        }
+
+        function startPaymentCountdown(orderDateStr) {
+            const banner = document.getElementById('countdown-banner');
+            if (!orderDateStr) { banner.style.display = 'none'; return; }
+
+            const orderTime = new Date(orderDateStr).getTime();
+            if (isNaN(orderTime)) { banner.style.display = 'none'; return; }
+
+            const expireTime = orderTime + (48 * 60 * 60 * 1000);
+            async function updateTimer() {
+                const now = new Date().getTime();
+                const timeLeft = expireTime - now;
+
+                if (timeLeft <= 0) {
+                    banner.className = "countdown-banner banner-expired";
+                    banner.innerHTML = "❌ 訂單逾時付款，視同放棄";
+                    banner.style.display = 'block';
+                    clearInterval(countdownInterval);
+                    setTimeout(() => { alert("訂單逾時付款，視同放棄。"); }, 100);
+                    return;
+                }
+
+                const hours = Math.floor(timeLeft / (1000 * 60 * 60));
+                const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+                if (hours < 24) {
+                    banner.className = "countdown-banner banner-warning";
+                    banner.innerHTML = `⚠️ 請務必盡快完成付款，否則視為放棄訂單 (剩餘時間：${hours}小時${minutes}分${seconds}秒)`;
+                    banner.style.display = 'block';
+                } else {
+                    banner.className = "countdown-banner banner-normal";
+                    banner.innerHTML = `⏳ 付款完成剩餘時間：${hours} 小時 ${minutes} 分 ${seconds} 秒`;
+                    banner.style.display = 'block';
+                }
+            }
+
+            updateTimer();
+            countdownInterval = setInterval(updateTimer, 1000);
+        }
+
+        function trackShipping() {
+            const logisticsType = document.querySelector('input[name="logistics"]:checked').value;
+            if (logisticsType === "7-11") {
+                window.open(`https://eservice.7-11.com.tw/e-tracking/search.aspx`, '_blank');
+            } else if (logisticsType === "全家") {
+                window.open(`https://fmec.famiport.com.tw/FP_Entrance/QueryBox`, '_blank');
+            }
+        }
+
+        function formatTimeStr(dateStr) {
+            if (!dateStr) return "--";
+            try {
+                const date = new Date(dateStr);
+                if (isNaN(date.getTime())) return dateStr;
+                return `${date.getFullYear()}/${String(date.getMonth() + 1).padStart(2, '0')}/${String(date.getDate()).padStart(2, '0')}`;
+            } catch(e) {
+                return dateStr;
+            }
+        }
+    </script>
+</body>
+</html>
