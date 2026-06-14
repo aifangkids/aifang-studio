@@ -332,3 +332,125 @@ body {
         background: transparent; 
     }
 }
+
+/* ==========================================================================
+   7. SIZE GUIDE 尺寸指南按鈕與彈窗樣式 (已完美同步購物車視覺)
+   ========================================================================== */
+
+/* 尺寸表按鈕外框容器 */
+.sizeguide-btn-wrap {
+    margin-top: 15px; 
+    margin-bottom: 5px;
+}
+
+/* 尺寸指南按鈕本體：完美融入品牌字體與深咖啡主色 */
+.sizeguide-btn {
+    background-color: #ffffff; 
+    border: 1px solid var(--text-main); /* 使用妳精選的深咖啡色變數 */
+    color: var(--text-main); 
+    padding: 10px 18px; 
+    font-size: 13px; 
+    font-weight: bold;
+    letter-spacing: 1.5px; /* 優雅的字距 */
+    cursor: pointer; 
+    border-radius: 4px;    /* 與購物車完全一樣的 4px 圓角 */
+    font-family: 'NotoSansKR-Regular', 'Noto Sans TC', sans-serif; /* 同步購物車字體 */
+    display: inline-flex; 
+    align-items: center; 
+    gap: 6px; 
+    transition: all 0.2s ease; /* 滑順變色動畫 */
+}
+
+/* 滑鼠滑過按鈕變色效果：完美呼應購物車的奶油粉（--primary-pink）與深咖啡（--text-main） */
+.sizeguide-btn:hover {
+    background-color: var(--primary-pink);
+    color: var(--text-main);
+    border-color: var(--primary-pink);
+}
+
+/* 全螢幕滿版黑色半透明遮罩 */
+#sizeguide-popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.6); /* 清透的半透明黑 */
+    backdrop-filter: blur(5px);     /* 精緻的磨砂玻璃模糊濾鏡 */
+    z-index: 99999;                 /* 超高層級，絕對不會被商品圖擋住 */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;                     /* 配合 JS 做淡入動畫 */
+    transition: opacity 0.3s ease;
+}
+
+/* 彈窗白色內容框 */
+.sizeguide-popup-content {
+    position: relative; 
+    max-width: 90%; 
+    max-height: 85vh; 
+    background: #ffffff; 
+    padding: 12px; 
+    border-radius: 6px; 
+    /* 使用帶有品牌深咖啡色調（var(--text-main)）的溫柔微陰影，呼應 Toast 盒子的質感 */
+    box-shadow: 0 10px 30px rgba(90, 75, 65, 0.2); 
+    display: flex; 
+    justify-content: center; 
+    align-items: center;
+}
+
+/* 右上角小圈圈關閉按鈕 */
+#sizeguide-close-x {
+    position: absolute; 
+    top: -12px; 
+    right: -12px; 
+    width: 28px; 
+    height: 28px; 
+    background-color: var(--text-main); /* 預設為品牌深咖啡色 */
+    color: #ffffff; 
+    border-radius: 50%; 
+    display: flex; 
+    justify-content: center; 
+    align-items: center; 
+    cursor: pointer; 
+    font-size: 12px; 
+    font-weight: bold; 
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15); 
+    z-index: 10;
+    transition: all 0.2s ease;
+}
+
+/* 叉叉滑過也同步變奶油粉 */
+#sizeguide-close-x:hover {
+    background-color: var(--primary-pink);
+    color: var(--text-main);
+}
+
+/* 尺寸表圖片響應式設定 */
+.sizeguide-popup-img {
+    max-width: 100%; 
+    max-height: 80vh; 
+    object-fit: contain; 
+    display: block; 
+    border-radius: 4px;
+}
+
+/* ==========================================================================
+   7.1 SIZE GUIDE 手機版響應式設定 (RWD @900px 完美融合)
+   ========================================================================== */
+@media (max-width: 900px) {
+    /* 當螢幕小於 900px 時，尺寸指南按鈕自動變為滿版大按鈕，與購物車大按鈕並駕齊驅 */
+    .sizeguide-btn {
+        width: 100%;
+        justify-content: center; /* 讓文字與圖標完美居中 */
+        padding: 15px;           /* 增高厚度，與購物車按鈕的 16px 完美視覺對齊 */
+        font-size: 14px;         /* 字體放大到 14px，提升閱讀舒適度 */
+    }
+    
+    /* 手機版彈窗微調：縮小左右留白，把寶貴的手機螢幕空間留給尺寸表圖片 */
+    .sizeguide-popup-content {
+        max-width: 95%; 
+        padding: 8px;
+    }
+}

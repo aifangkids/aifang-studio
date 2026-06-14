@@ -96,7 +96,7 @@ function renderColorSwatches(p) {
         const krColor = krColors[i] || ""; 
 
         const btn = document.createElement('button');
-        btn.className = "color-btn"; // 靠 CSS 控制外觀與大小
+        btn.className = "color-btn"; 
         btn.innerText = name;
 
         btn.onclick = () => {
@@ -110,6 +110,7 @@ function renderColorSwatches(p) {
     });
 }
 
+// 📐 渲染尺寸區塊與 SIZE GUIDE 按鈕（已套用 CSS Class 分離）
 function renderSizeGroup(p) {
     const sizeWrap = document.getElementById('size-area'); 
     if (!sizeWrap) return;
@@ -121,7 +122,19 @@ function renderSizeGroup(p) {
     const box = document.createElement('div');
     box.className = 'size-container-box';
     
-    // 乾淨的結構，標題採用 group-label，按鈕採用 size-btn，完美給 CSS 控制
+    const sizeGuideUrl = p.sizeguide || "";
+    let sizeGuideBtnHtml = "";
+    
+    if (sizeGuideUrl && sizeGuideUrl.trim() !== "") {
+        sizeGuideBtnHtml = `
+            <div class="sizeguide-btn-wrap">
+                <button type="button" class="sizeguide-btn" onclick="openSizeGuidePopup('${sizeGuideUrl.trim()}')">
+                    📐 SIZE GUIDE 尺寸指南
+                </button>
+            </div>
+        `;
+    }
+    
     box.innerHTML = `
         <div class="group-header">
             <span class="group-label">SELECT SIZE</span>
@@ -130,9 +143,52 @@ function renderSizeGroup(p) {
             ${String(rawSizes).split(',').map(s => `
                 <button class="size-btn" onclick="selectSizeSize('${s.trim()}', this)">${s.trim()}</button>
             `).join('')}
-        </div>`;
+        </div>
+        ${sizeGuideBtnHtml}
+    `;
         
     sizeWrap.appendChild(box);
+}
+
+// 📱 POPUP 全螢幕彈窗邏輯（已套用 CSS Class 分離）
+window.openSizeGuidePopup = function(imgUrl) {
+    const oldPopup = document.getElementById('sizeguide-popup-overlay');
+    if (oldPopup) oldPopup.remove();
+
+    // 建立外層遮罩
+    const overlay = document.createElement('div');
+    overlay.id = 'sizeguide-popup-overlay';
+
+    // 填入乾淨的 HTML 結構，所有長相通通交給細節 CSS 控制
+    overlay.innerHTML = `
+        <div class="sizeguide-popup-content">
+            <span id="sizeguide-close-x">✕</span>
+            <img class="sizeguide-popup-img" src="${imgUrl}" onerror="this.onerror=null; this.src='./images/ui/no-image.jpg'; alert('無法順利讀取尺寸指南圖片，請確認後台試算表的圖片連結是否正確喔！');">
+        </div>
+    `;
+
+    document.body.appendChild(overlay);
+
+    // 觸發 CSS 的淡入效果
+    setTimeout(() => { overlay.style.opacity = '1'; }, 20);
+
+    const closePopup = () => {
+        overlay.style.opacity = '0';
+        setTimeout(() => { overlay.remove(); }, 300);
+    };
+
+    // 點擊圈圈叉叉關閉
+    overlay.querySelector('#sizeguide-close-x').onclick = (e) => {
+        e.stopPropagation();
+        closePopup();
+    };
+
+    // 點擊任何黑色半透明空白處均可關閉
+    overlay.onclick = (e) => {
+        if (e.target === overlay) {
+            closePopup();
+        }
+    };
 }
 
 function selectSizeSize(sizeName, btnElement) {
