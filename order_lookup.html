@@ -82,6 +82,10 @@
         .banner-warning { background-color: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
         .banner-expired { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
         .banner-normal { background-color: #e2e3e5; color: #383d41; border: 1px solid #d6d8db; }
+        
+        /* ✨ 新增：已付款與已出貨的精美溫馨橫幅樣式 */
+        .banner-success { background-color: #e2f0d9; color: #385723; border: 1px solid #c5e0b4; } /* 溫馨粉綠色 */
+        .banner-shipped { background-color: #e8f4fd; color: #1e6bb8; border: 1px solid #d2e9fb; } /* 清爽粉藍色 */
 
         /* --- 智能合併通知 --- */
         .merge-alert {
@@ -434,17 +438,44 @@
             if(document.getElementById('res-subtotal')) document.getElementById('res-subtotal').innerText = fmt(grandSubtotal);
             if(document.getElementById('res-total')) document.getElementById('res-total').innerText = fmt(finalTotal);
 
-            startPaymentCountdown(latestOrder.orderdate);
+            // ✨ 關鍵修正：改傳入整個最新訂單物件，以便同時讀取時間與狀態
+            startPaymentCountdown(latestOrder);
         }
 
-        function startPaymentCountdown(orderDateStr) {
+        // ✨ 核心功能升級：完美支援試算表 orderstatus 狀態切換
+        function startPaymentCountdown(orderObj) {
             const banner = document.getElementById('countdown-banner');
+            if (countdownInterval) clearInterval(countdownInterval); // 清除先前留下的計時器
+            if (!orderObj) { banner.style.display = 'none'; return; }
+
+            // 讀取狀態並轉為小寫去空白防呆
+            const status = String(orderObj.orderstatus || "").toLowerCase().trim();
+            const orderDateStr = orderObj.orderdate;
+
+            // 1. 當狀態為 "paid"（已付款）
+            if (status === "paid") {
+                banner.className = "countdown-banner banner-success";
+                banner.innerHTML = "✨ 完成付款，追加商品中";
+                banner.style.display = 'block';
+                return;
+            }
+
+            // 2. 當狀態為 "shipped"（已出貨）
+            if (status === "shipped") {
+                banner.className = "countdown-banner banner-shipped";
+                banner.innerHTML = "🚚 已出貨，請查詢超商貨態";
+                banner.style.display = 'block';
+                return;
+            }
+
+            // 3. 當狀態為 "new"（或沒填寫狀態時），執行預設的 48 小時倒數
             if (!orderDateStr) { banner.style.display = 'none'; return; }
 
             const orderTime = new Date(orderDateStr).getTime();
             if (isNaN(orderTime)) { banner.style.display = 'none'; return; }
 
-            const expireTime = orderTime + (48 * 60 * 60 * 1000);
+            const expireTime = orderTime + (48 * 60 * 60 * 1000); // 成立日期 + 48 小時
+
             async function updateTimer() {
                 const now = new Date().getTime();
                 const timeLeft = expireTime - now;
@@ -454,22 +485,21 @@
                     banner.innerHTML = "❌ 訂單逾時付款，視同放棄";
                     banner.style.display = 'block';
                     clearInterval(countdownInterval);
-                    setTimeout(() => { alert("訂單逾時付款，視同放棄。"); }, 100);
                     return;
                 }
 
                 const hours = Math.floor(timeLeft / (1000 * 60 * 60));
                 const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
                 const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+
                 if (hours < 24) {
                     banner.className = "countdown-banner banner-warning";
                     banner.innerHTML = `⚠️ 請務必盡快完成付款，否則視為放棄訂單 (剩餘時間：${hours}小時${minutes}分${seconds}秒)`;
-                    banner.style.display = 'block';
                 } else {
                     banner.className = "countdown-banner banner-normal";
                     banner.innerHTML = `⏳ 付款完成剩餘時間：${hours} 小時 ${minutes} 分 ${seconds} 秒`;
-                    banner.style.display = 'block';
                 }
+                banner.style.display = 'block';
             }
 
             updateTimer();
