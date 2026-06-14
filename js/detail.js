@@ -129,7 +129,7 @@ function renderSizeGroup(p) {
         sizeGuideBtnHtml = `
             <div class="sizeguide-btn-wrap">
                 <button type="button" class="sizeguide-btn" onclick="openSizeGuidePopup('${sizeGuideUrl.trim()}')">
-                    📐 SIZE GUIDE 尺寸指南
+                    SIZE GUIDE
                 </button>
             </div>
         `;
