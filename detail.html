@@ -13,25 +13,6 @@
     <title>Product Detail | AiFang Kids</title>
     <link rel="icon" href="./favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="./assets/css/detail.css">
-
-    <!-- ✨ 新增這段：自動監聽商品名稱，載入後立刻變更網頁標題，完美抓到品名 -->
-    <script>
-        (function() {
-            const titleElement = document.getElementById('p-title');
-            if (titleElement) {
-                const observer = new MutationObserver(() => {
-                    // 當標題文字從 LOADING... 變成真正的商品名稱時
-                    if (titleElement.innerText !== 'LOADING...' && titleElement.innerText.trim() !== '') {
-                        document.title = `${titleElement.innerText} | Aifang Kids`;
-                        observer.disconnect(); // 成功改名後就收工，不再耗費效能
-                    }
-                });
-                // 開始監聽文字變化
-                observer.observe(titleElement, { childList: true, subtree: true });
-            }
-        })();
-    </script>
-
 </head>
 <body>
 
@@ -86,6 +67,36 @@
 
     <script src="js/api.js"></script>
     <script src="js/detail.js"></script>
+
+    <!-- ✨ GA4 追蹤外掛 -->
+    <script>
+        (function() {
+            const titleElement = document.getElementById('p-title');
+            if (titleElement) {
+                const observer = new MutationObserver(() => {
+                    // 當衣服品名成功從 Google 試算表載入，文字不再是 LOADING... 時
+                    if (titleElement.innerText !== 'LOADING...' && titleElement.innerText.trim() !== '') {
+                        const beautifulTitle = `${titleElement.innerText} | Aifangkids`;
+                        
+                        // 1. 同步變更手機與電腦瀏覽器的分頁標題名稱
+                        document.title = beautifulTitle;
+                        
+                        // 2. 📢呼叫 GA4 重新「中文商品品名」記錄這一次的瀏覽！
+                        if (typeof gtag === 'function') {
+                            gtag('event', 'page_view', {
+                                page_title: beautifulTitle,
+                                page_location: window.location.href
+                            });
+                        }
+                        
+                        observer.disconnect(); // 任務完成，自動關閉盯盤機制以節省手機效能
+                    }
+                });
+                // 啟動隱形小幫手，開始盯著標題變化
+                observer.observe(titleElement, { childList: true, subtree: true });
+            }
+        })();
+    </script>
 
 </body>
 </html>
