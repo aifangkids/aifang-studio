@@ -1,44 +1,4 @@
-/* ==========================================================================
-   1. 字體與基礎設定
-   ========================================================================== */
-@font-face { 
-    font-family: 'NotoSansKR'; 
-    src: url('../fonts/NotoSansKR-Regular.ttf') format('truetype'); 
-    font-weight: 400; 
-}
-
-:root { 
-    --sidebar-width: 260px; 
-    --header-h: 70px; 
-    --cart-w: 380px;
-
-    /* 奶油粉色系變數 */
-    --bg-cream: #FFFDF9;       /* 溫暖的奶油白背景 */
-    --bg-sidebar: #FDF5F2;     /* 次要區塊或側邊欄的淡粉奶油色 */
-    --primary-pink: #F4D3D3;   /* 主色：優雅的粉撲色 */
-    --accent-pink: #E6B3B3;    /* 深一點的粉：用於 Hover 或重點 */
-    --text-main: #5A4B41;      /* 溫暖的深咖啡色文字 */
-    --text-muted: #8C7B70;     /* 輔助文字顏色 */
-}
-
-* { 
-    box-sizing: border-box; 
-    margin: 0; 
-    padding: 0; 
-}
-
-body { 
-    font-family: 'NotoSansKR-Light';
-    src: url('../fonts/NotoSansKR-Light.ttf') format('truetype');
-    background-color: var(--bg-cream); 
-    color: var(--text-main); 
-    overflow-x: hidden; 
-    -webkit-font-smoothing: antialiased;
-}
-
-/* ==========================================================================
-   2. 滿版螢幕 Banner 佈局
-   ========================================================================== */
+/* 2. 滿版螢幕 Banner 佈局 */
 .hero-banner {
     width: 100%;
     height: 100vh; /* 滿版全螢幕高度 */
@@ -96,21 +56,6 @@ body.shop-active .hero-banner {
 /* ==========================================================================
    3. 頂部導覽 
    ========================================================================== */
-.top-header {
-    width: 100%; 
-    height: var(--header-h); 
-    background: var(--bg-cream);
-    position: fixed; 
-    top: 0; 
-    left: 0; 
-    z-index: 1200;
-    display: flex; 
-    align-items: center; 
-    justify-content: space-between;
-    padding: 0 20px; 
-    border-bottom: 1px solid #EFE6E1;
-}
-
 .header-left, .header-right { display: flex; align-items: center; flex: 1; }
 .header-right { gap: 20px; justify-content: flex-end; }
 .header-left { gap: 15px; }
@@ -187,34 +132,43 @@ body.shop-active .hero-banner {
 }
 
 /* ==========================================================================
-   5. 主內容區與 1:1 精緻商品卡片布局
+   5. 主內容區與 3:4 精緻商品卡片網格布局 (標準整齊版)
    ========================================================================== */
 .main-content { 
     width: 100%; 
     padding: calc(var(--header-h) + 40px) 40px 80px calc(var(--sidebar-width) + 40px); 
-    /* 移除舊版不透明度漸變，改為直接出現（非平滑） */
 }
 
+/* 🌸 回歸標準網格：整齊排成 4 欄，間距寬鬆舒適 */
 .product-grid { 
     display: grid; 
     grid-template-columns: repeat(4, 1fr); 
     gap: 40px 20px; 
 }
 
+/* 🌸 商品卡片：移除絕對定位，回歸常規排列，保留置中優雅感 */
 .product-card { 
     cursor: pointer; 
-    text-align: center; /* 改為置中更顯得優雅優美 */
+    text-align: center; /* 置中更顯得優雅優美 */
+    transition: transform 0.3s ease;
+    background-color: transparent;
 } 
 
-/* 嚴格控制 1:1 正方形相框 */
+/* 滑鼠移上去時：卡片溫柔地微微放大，增加互動質感 */
+.product-card:hover {
+    transform: scale(1.03); 
+}
+
+/* 🌸 嚴格控制 3:4 質感長方形相框 (韓系童裝雜誌感比例) */
 .img-wrap { 
     width: 100%; 
-    aspect-ratio: 1 / 1; 
+    aspect-ratio: 3 / 4; /* 完美控制 3:4 比例 */
     overflow: hidden;
     border-radius: 12px;      
     background-color: #F7F7F7;
     position: relative;
-    margin-bottom: 15px;
+    margin-bottom: 12px;
+    box-shadow: 0 4px 12px rgba(90, 75, 65, 0.05); /* 淡淡的柔和陰影，提升卡片立體層次 */
 }
 
 .img-wrap img { 
@@ -225,7 +179,7 @@ body.shop-active .hero-banner {
 
 /* 商品資訊 (name | color | price) */
 .product-info {
-    padding: 12px 5px;
+    padding: 8px 5px;
 }
 
 .p-name { 
@@ -234,7 +188,7 @@ body.shop-active .hero-banner {
     margin-bottom: 6px; 
     font-weight: 400; 
     display: -webkit-box;
-    -webkit-line-clamp: 2;
+    -webkit-line-clamp: 2; /* 最多顯示兩行品名 */
     -webkit-box-orient: vertical;
     overflow: hidden;
     height: auto; 
@@ -259,7 +213,6 @@ body.shop-active .hero-banner {
     font-size: 15px; 
     margin-top: 6px;
 }
-
 /* ==========================================================================
    6. 手機版響應式設定
    ========================================================================== */

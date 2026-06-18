@@ -1,0 +1,80 @@
+/* 1. 雙字體全域宣告 */
+@font-face {
+    font-family: 'NotoSansKR-Light';
+    src: url('../fonts/NotoSansKR-Light.ttf') format('truetype');
+    font-weight: 300;
+}
+@font-face {
+    font-family: 'NotoSansKR-Regular';
+    src: url('../fonts/NotoSansKR-Regular.ttf') format('truetype');
+    font-weight: 400;
+}
+@font-face { 
+    font-family: 'NotoSansKR'; 
+    src: url('../fonts/NotoSansKR-Regular.ttf') format('truetype'); 
+    font-weight: 400; 
+}
+
+/* 2. 核心品牌奶油粉色系與通用佈局變數 */
+:root { 
+    --header-h: 70px; 
+    --sidebar-width: 260px; 
+    --cart-w: 380px;
+    --side-w: 420px; 
+
+    /* 溫馨品牌色彩定義 */
+    --bg-cream: #FFFDF9;       /* 溫暖的奶油白背景 */
+    --bg-sidebar: #FDF5F2;     /* 次要區塊或側邊欄的淡粉奶油色 */
+    --primary-pink: #F4D3D3;   /* 主色：優雅的粉撲色 */
+    --accent-pink: #E6B3B3;    /* 深一點的粉：用於 Hover 或重點 */
+    --accent-tan: #E6B3B3;     /* 精緻奶茶色 (與 accent-pink 相同色值，全域相容) */
+    --text-main: #5A4B41;      /* 溫暖的深咖啡色文字 */
+    --text-muted: #8C7B70;     /* 輔助文字顏色 */
+    --border-light: #EFE6E1;   /* 溫柔的邊框線條 */
+    --border-soft: #FDF5F2;    /* 細緻淺色邊框 */
+    --card-bg: #ffffff;        /* 純白卡片 */
+    --success-green: #e2f0d9;  /* 複製成功提示淺綠 */
+}
+
+/* 3. 全域基礎重設 */
+* { 
+    box-sizing: border-box; 
+    margin: 0; 
+    padding: 0; 
+}
+
+body { 
+    font-family: 'NotoSansKR-Light', 'NotoSansKR', sans-serif;
+    background-color: var(--bg-cream); 
+    color: var(--text-main); 
+    -webkit-font-smoothing: antialiased;
+    letter-spacing: 0.5px;
+}
+
+/* 4. 共用頂部導覽固定基底 (適用於首頁、商品內頁、購物車) */
+.top-header {
+    width: 100%; 
+    height: var(--header-h); 
+    background: var(--bg-cream);
+    position: fixed; 
+    top: 0; 
+    left: 0; 
+    z-index: 1200; 
+    display: flex; 
+    align-items: center; 
+    justify-content: space-between;
+    padding: 0 20px; 
+    border-bottom: 1px solid var(--border-light);
+}
+
+.main-logo { 
+    height: 32px; 
+    cursor: pointer; 
+    position: absolute; 
+    left: 50%; 
+    transform: translateX(-50%); 
+    transition: opacity 0.2s;
+}
+.main-logo:hover {
+    opacity: 0.8;
+}
