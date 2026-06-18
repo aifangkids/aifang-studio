@@ -305,27 +305,31 @@ body {
 }
 
 /* ==========================================================================
-   6. 手機版響應式設定 (RWD)
+   6. 手機版響應式設定 (RWD) - 已調整為：資訊在上、圖片在下
    ========================================================================== */
 @media (max-width: 900px) {
     .detail-wrapper { 
-        display: block; 
+        display: flex;              /* 保持 Flex 佈局 */
+        flex-direction: column-reverse; /* 核心魔法：將順序上下顛倒（右側資訊變到最上方） */
         padding: calc(var(--header-h) + 15px) 15px 40px; 
     }
     
+    /* 現在圖片在下方了，我們把間距改到圖片上方 */
     .scroll-content { 
         width: 100%; 
-        margin-bottom: 30px; 
+        margin-top: 30px;           /* 讓圖片與上方的購物車按鈕保持舒適的距離 */
+        margin-bottom: 0; 
     }
     
     .scroll-content img, .extra-img {
         border-radius: 8px; 
     }
     
+    /* 這裡原本是右邊欄位，現在在手機版會跑到最頂端 */
     .fixed-aside { 
         width: 100%; 
         height: auto; 
-        padding: 20px 0 40px; 
+        padding: 10px 0 10px;       /* 微調內距，讓畫面更緊湊精緻 */
         border-left: none;
         position: relative;
         top: 0;
